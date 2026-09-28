@@ -1,4 +1,4 @@
-﻿# Environment & Secrets (NEVER COMMIT SENSITIVE KEYS)
+# Environment & Secrets (NEVER COMMIT SENSITIVE KEYS)
 .env
 .env.local
 .env.*.local
@@ -40,3 +40,15 @@ yarn-error.log*
 *.swo
 .DS_Store
 Thumbs.db
+
+# MOSDAC Data & Downloads (Never commit satellite binaries or temporary downloads)
+data/
+backend/data/
+MOSDAC Data Download/
+MOSDAC_Downloads/
+*.nc
+*.hdf
+*.h5
+*.part
+*.zip
+config.json

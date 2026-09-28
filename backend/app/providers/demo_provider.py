@@ -171,7 +171,32 @@ class DemoDataProvider(MarineDataProvider):
 
         lat, lon = coords.latitude, coords.longitude
 
-        # 1. Check for Live StormGlass Marine API credentials
+        # Base calculations for physical fallback
+        sst_base = round(28.4 + 0.8 * math.sin(lat * 0.5) - 0.4 * math.cos(lon * 0.3), 1)
+        coast_proximity = min(abs(lon - 72.8), abs(lon - 80.2), abs(lat - 8.1))
+        chl_base = round(max(0.4, min(4.2, 2.4 / (1.0 + coast_proximity * 0.8))), 2)
+        wave_h = round(1.3 + 0.4 * math.sin(lat * 0.6), 1)
+        wave_dir = round(235.0, 1)
+        wind_s = round(19.5 + 4.0 * math.cos(lon * 0.2), 1)
+        wind_dir = round(240.0, 1)
+
+        tide_states = ["Rising Tide (Flood)", "High Tide (Slack)", "Falling Tide (Ebb)", "Low Tide"]
+        tide_idx = int((lat * 10 + lon * 5) % 4)
+        tide_status = tide_states[tide_idx]
+        tide_height = round(1.4 + 0.6 * math.sin(lat * 1.5), 2)
+
+        # 1. PRIMARY: Check for Real ISRO MOSDAC Spaceborne Observations (EOS-06 OCM / INSAT-3DR SST / EOS-06 SCAT)
+        mosdac_vars = {}
+        mosdac_meta = None
+        try:
+            from app.providers.mosdac_provider import MosdacDataProvider
+            mosdac = MosdacDataProvider()
+            mosdac_meta = mosdac.get_normalized_marine_data(coords)
+            mosdac_vars = mosdac_meta.get("variables", {})
+        except Exception:
+            pass
+
+        # 2. Check for Live StormGlass Marine API (for wave spectrum and currents)
         sg_key = settings.STORMGLASS_API_KEY or settings.OCEAN_API_KEY
         if sg_key:
             try:
@@ -181,7 +206,7 @@ class DemoDataProvider(MarineDataProvider):
                     "lng": coords.longitude,
                     "params": "waterTemperature,waveHeight,waveDirection,currentSpeed,currentDirection"
                 }
-                async with httpx.AsyncClient(timeout=6.0) as client:
+                async with httpx.AsyncClient(timeout=4.0) as client:
                     resp = await client.get("https://api.stormglass.io/v2/weather/point", headers=headers, params=params)
                     if resp.status_code == 200:
                         data = resp.json()
@@ -200,37 +225,43 @@ class DemoDataProvider(MarineDataProvider):
                                     return float(d)
                                 return default_val
 
-                            live_sst = round(_val(h0.get("waterTemperature"), 28.2), 1)
-                            live_wave_h = round(_val(h0.get("waveHeight"), 1.1), 1)
-                            live_wave_dir = round(_val(h0.get("waveDirection"), 225.0), 1)
-                            live_current_speed = round(_val(h0.get("currentSpeed"), 0.2) * 3.6, 2)
-
-                            coast_proximity = min(abs(lon - 72.8), abs(lon - 80.2), abs(lat - 8.1))
-                            chlorophyll = round(max(0.4, min(4.2, 2.4 / (1.0 + coast_proximity * 0.8))), 2)
-                            tide_states = ["Rising Tide (Flood)", "High Tide (Slack)", "Falling Tide (Ebb)", "Low Tide"]
-                            tide_idx = int((lat * 10 + lon * 5) % 4)
-
-                            sea_state = "Calm to Slight (< 1.25m)" if live_wave_h < 1.25 else "Moderate (1.25m - 2.5m)" if live_wave_h < 2.5 else "Rough (> 2.5m)"
-
-                            return MarineObservation(
-                                location=coords,
-                                timestamp=self._get_utc_now(),
-                                sst=live_sst,
-                                chlorophyll=chlorophyll,
-                                wave_height=live_wave_h,
-                                wave_direction=live_wave_dir,
-                                wind_speed=18.0,
-                                wind_direction=round((live_wave_dir + 10) % 360, 1),
-                                rainfall=0.0,
-                                tide=tide_states[tide_idx],
-                                tide_height_m=round(1.4 + 0.6 * math.sin(lat * 1.5), 2),
-                                sea_state=sea_state,
-                                source="StormGlass.io Marine & Satellite Feed (Live NOAA/ECMWF)",
-                                data_type="satellite_marine_live",
-                                is_demo=False
-                            )
+                            wave_h = round(_val(h0.get("waveHeight"), wave_h), 1)
+                            wave_dir = round(_val(h0.get("waveDirection"), wave_dir), 1)
+                            if not mosdac_vars:
+                                sst_base = round(_val(h0.get("waterTemperature"), sst_base), 1)
             except Exception:
                 pass
+
+        sea_state = "Slight (Wave 0.5m-1.25m)" if wave_h < 1.5 else "Moderate (Wave 1.25m-2.5m)" if wave_h < 2.5 else "Rough (Wave > 2.5m)"
+
+        # If MOSDAC spaceborne data is available, return verified ISRO satellite observation
+        if mosdac_vars:
+            live_sst = mosdac_vars.get("sst", sst_base)
+            live_chl = mosdac_vars.get("chlorophyll", chl_base)
+            live_wind = mosdac_vars.get("wind_speed", wind_s)
+            live_wind_dir = mosdac_vars.get("wind_direction", wind_dir)
+
+            provenance_products = mosdac_meta.get("provenance", {}).get("verified_satellite_products", []) if mosdac_meta else []
+            sensors_used = [p.get("sensor", "") for p in provenance_products if p.get("sensor")]
+            sensor_label = " & ".join(sensors_used) if sensors_used else "EOS-06 / INSAT-3DR"
+
+            return MarineObservation(
+                location=coords,
+                timestamp=mosdac_meta.get("timestamp", self._get_utc_now()) if mosdac_meta else self._get_utc_now(),
+                sst=live_sst,
+                chlorophyll=live_chl,
+                wave_height=wave_h,
+                wave_direction=wave_dir,
+                wind_speed=live_wind,
+                wind_direction=live_wind_dir,
+                rainfall=0.8,
+                tide=tide_status,
+                tide_height_m=tide_height,
+                sea_state=sea_state,
+                source=f"ISRO MOSDAC ({sensor_label}) - Spaceborne Telemetry",
+                data_type="MOSDAC_LIVE_SATELLITE",
+                is_demo=False
+            )
 
         # Sea Surface Temperature (SST) in Indian waters: typically 27.5 - 30.2 C
         sst = round(28.4 + 0.8 * math.sin(lat * 0.5) - 0.4 * math.cos(lon * 0.3), 1)
@@ -242,6 +273,7 @@ class DemoDataProvider(MarineDataProvider):
 
         wave_h = round(1.3 + 0.4 * math.sin(lat * 0.6), 1)
         wind_s = round(19.5 + 4.0 * math.cos(lon * 0.2), 1)
+        wind_dir = round(240.0, 1)
 
         tide_states = ["Rising Tide (Flood)", "High Tide (Slack)", "Falling Tide (Ebb)", "Low Tide"]
         tide_idx = int((lat * 10 + lon * 5) % 4)
@@ -249,6 +281,42 @@ class DemoDataProvider(MarineDataProvider):
         tide_height = round(1.4 + 0.6 * math.sin(lat * 1.5), 2)
 
         sea_state = "Slight (Wave 0.5m-1.25m)" if wave_h < 1.5 else "Moderate (Wave 1.25m-2.5m)" if wave_h < 2.5 else "Rough (Wave > 2.5m)"
+
+        # 3. Check for Real ISRO MOSDAC Spaceborne Observations (INSAT-3DR / EOS-06 OCM / EOS-06 SCAT)
+        try:
+            from app.providers.mosdac_provider import MosdacDataProvider
+            mosdac = MosdacDataProvider()
+            mosdac_data = mosdac.get_normalized_marine_data(coords)
+            vars_dict = mosdac_data.get("variables", {})
+            if vars_dict:
+                live_sst = vars_dict.get("sst", sst)
+                live_chl = vars_dict.get("chlorophyll", chlorophyll)
+                live_wind = vars_dict.get("wind_speed", wind_s)
+                live_wind_dir = vars_dict.get("wind_direction", wind_dir)
+
+                provenance_products = mosdac_data.get("provenance", {}).get("verified_satellite_products", [])
+                sensors_used = [p.get("sensor", "") for p in provenance_products if p.get("sensor")]
+                sensor_label = " & ".join(sensors_used) if sensors_used else "EOS-06 / INSAT-3DR"
+
+                return MarineObservation(
+                    location=coords,
+                    timestamp=mosdac_data.get("timestamp", self._get_utc_now()),
+                    sst=live_sst,
+                    chlorophyll=live_chl,
+                    wave_height=wave_h,
+                    wave_direction=round(235.0, 1),
+                    wind_speed=live_wind,
+                    wind_direction=live_wind_dir,
+                    rainfall=0.8,
+                    tide=tide_status,
+                    tide_height_m=tide_height,
+                    sea_state=sea_state,
+                    source=f"ISRO MOSDAC ({sensor_label}) - Spaceborne Telemetry",
+                    data_type="MOSDAC_LIVE_SATELLITE",
+                    is_demo=False
+                )
+        except Exception:
+            pass
 
         return MarineObservation(
             location=coords,
@@ -267,6 +335,38 @@ class DemoDataProvider(MarineDataProvider):
             data_type="demo",
             is_demo=True
         )
+
+    async def get_marine_conditions(self, coords: Coordinates, timestamp: Optional[str] = None) -> Dict[str, Any]:
+        ocean = await self.get_ocean_conditions(coords)
+        weather = await self.get_weather(coords, target_time=timestamp)
+        return {
+            "source": ocean.source,
+            "dataset_id": "SYNTHETIC_DEMO",
+            "timestamp": ocean.timestamp,
+            "latitude": coords.latitude,
+            "longitude": coords.longitude,
+            "variables": {
+                "sst": ocean.sst,
+                "sst_unit": "°C",
+                "chlorophyll": ocean.chlorophyll,
+                "chlorophyll_unit": "mg/m3",
+                "wind_speed": weather.wind_speed_kmh,
+                "wind_speed_unit": "km/h",
+                "wind_direction": weather.wind_direction_deg,
+                "wind_direction_unit": "deg",
+                "wave_height": ocean.wave_height or weather.wave_height_m,
+                "wave_height_unit": "m",
+            },
+            "file": "DEMO_SIMULATED",
+            "processing_status": "SYNTHETIC_SIMULATION",
+            "provenance": {
+                "source_authority": "SamudraAI Demo Simulator",
+                "observation_time": ocean.timestamp,
+                "processing_time": self._get_utc_now(),
+                "is_synthetic": True,
+                "verified_satellite_products": []
+            }
+        }
 
     async def get_pfz_advisories(self, coords: Coordinates, radius_km: float = 120.0) -> List[PFZZone]:
         # Generate 4 distinct, realistic PFZs displaced around the user's sea coordinates
@@ -494,8 +594,73 @@ class DemoDataProvider(MarineDataProvider):
 
     def get_source_metadata(self) -> List[DataSourceInfo]:
         now_str = self._get_utc_now()
-        return [
-            DataSourceInfo(
+        sources = []
+
+        # Check real ISRO MOSDAC provider status
+        mosdac_status = None
+        try:
+            from app.providers.mosdac_provider import MosdacDataProvider
+            mosdac = MosdacDataProvider()
+            mosdac_status = mosdac.get_technical_dashboard_status()
+        except Exception:
+            pass
+
+        if mosdac_status and mosdac_status.get("connection_status") == "ONLINE":
+            # Map the 3 live MOSDAC products
+            prod_map = {p["product_key"]: p for p in mosdac_status.get("products", [])}
+
+            # 1. EOS-06 OCM Chlorophyll
+            chl = prod_map.get("chlorophyll", {})
+            sources.append(DataSourceInfo(
+                id="isro_eos06_ocm",
+                name="ISRO EOS-06 (Oceansat-3) OCM-3",
+                organization="ISRO Space Applications Centre (SAC), Ahmedabad",
+                dataset_name="Analysed Chlorophyll-a (E06OCM_L4_AC)",
+                parameters="Chlorophyll-a concentration (mg/m³), diffuse attenuation coefficient",
+                status="LIVE" if chl.get("processing_status") == "INGESTED" else "ONLINE",
+                is_demo=False if chl.get("processing_status") == "INGESTED" else True,
+                last_update=chl.get("last_data_update", now_str),
+                update_frequency="Daily Orbital Swath",
+                description=f"Spaceborne ocean color radiometry downloaded from MOSDAC standing order (File: {chl.get('data_file', 'N/A')}).",
+                official_portal="https://mosdac.gov.in",
+                config_env_var="MOSDAC_USERNAME"
+            ))
+
+            # 2. INSAT-3DR SST
+            sst = prod_map.get("sst", {})
+            sources.append(DataSourceInfo(
+                id="isro_insat3dr_sst",
+                name="ISRO INSAT-3DR Imager (1DVAR)",
+                organization="ISRO Space Applications Centre (SAC), Ahmedabad",
+                dataset_name="Sea Surface Temperature (3RIMG_L2B_SST)",
+                parameters="Sea Surface Temperature (°C), Kelvin conversion, cloud mask",
+                status="LIVE" if sst.get("processing_status") == "INGESTED" else "ONLINE",
+                is_demo=False if sst.get("processing_status") == "INGESTED" else True,
+                last_update=sst.get("last_data_update", now_str),
+                update_frequency="Half-Hourly Geostationary",
+                description=f"Geostationary thermal infrared SST raster retrieved from MOSDAC standing order (File: {sst.get('data_file', 'N/A')}).",
+                official_portal="https://mosdac.gov.in",
+                config_env_var="MOSDAC_PASSWORD"
+            ))
+
+            # 3. EOS-06 SCAT Ocean Winds
+            wind = prod_map.get("wind", {})
+            sources.append(DataSourceInfo(
+                id="isro_eos06_scat",
+                name="ISRO EOS-06 SCAT-3",
+                organization="ISRO Space Applications Centre (SAC), Ahmedabad",
+                dataset_name="Ocean Surface Wind Vector (E06SCT_L2B_WV12)",
+                parameters="Ocean surface wind speed (km/h), wind direction (deg)",
+                status="LIVE" if wind.get("processing_status") == "INGESTED" else "ONLINE",
+                is_demo=False if wind.get("processing_status") == "INGESTED" else True,
+                last_update=wind.get("last_data_update", now_str),
+                update_frequency="Daily Orbital Revisit",
+                description=f"Spaceborne Ku-band Scatterometer surface wind vectors from MOSDAC (File: {wind.get('data_file', 'N/A')}).",
+                official_portal="https://mosdac.gov.in",
+                config_env_var="MOSDAC_USERNAME"
+            ))
+        else:
+            sources.append(DataSourceInfo(
                 id="isro_oceansat3",
                 name="ISRO Oceansat-3 (EOS-06)",
                 organization="Indian Space Research Organisation",
@@ -508,7 +673,9 @@ class DemoDataProvider(MarineDataProvider):
                 description="Spaceborne thermal infrared and multi-spectral ocean color radiometry providing high-resolution oceanic fronts for PFZ generation.",
                 official_portal="https://mosdac.gov.in",
                 config_env_var="SATELLITE_API_KEY"
-            ),
+            ))
+
+        sources.extend([
             DataSourceInfo(
                 id="incois_pfz",
                 name="INCOIS Potential Fishing Zones Advisory",
@@ -551,4 +718,6 @@ class DemoDataProvider(MarineDataProvider):
                 official_portal="https://indiancoastguard.gov.in",
                 config_env_var="MAP_API_KEY"
             )
-        ]
+        ])
+
+        return sources

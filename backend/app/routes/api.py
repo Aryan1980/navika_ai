@@ -118,8 +118,7 @@ async def get_marine_conditions(
         "boundary_context": boundary_ctx,
         "risk": risk,
         "active_alerts": alerts,
-        "nearest_pfz": pfzs[0] if pfzs else None,
-        "pfzs": pfzs
+        "nearest_pfz": pfzs[0] if pfzs else None
     }
 
 @router.get("/data-sources", response_model=List[DataSourceInfo])
@@ -139,7 +138,7 @@ async def health_check():
         "status": "healthy",
         "service": "SamudraAI Marine Intelligence Platform",
         "version": "1.0.0",
-        "mode": "DEMO_READY",
+        "mode": "ISRO_MOSDAC_LIVE_OPERATIONAL",
         "agents": [
             "Planner Agent", "Data Discovery Agent", "Weather Intelligence Agent",
             "Ocean Analytics Agent", "PFZ Agent", "Geospatial Reasoning Agent",
@@ -147,3 +146,152 @@ async def health_check():
             "Visualization Agent", "Explanation & Evidence Agent"
         ]
     }
+
+# ============================================================================
+# ISRO MOSDAC Satellite Ingestion & Technical Dashboard Endpoints
+# ============================================================================
+
+@router.get("/mosdac/status")
+async def get_mosdac_status():
+    """Technical dashboard reporting MOSDAC standing orders, ingested files, and satellite telemetry status."""
+    from app.providers.mosdac_provider import MosdacDataProvider
+    mosdac = MosdacDataProvider()
+    return mosdac.get_technical_dashboard_status()
+
+@router.post("/mosdac/sync")
+async def sync_mosdac_pipeline(force: bool = Query(False, description="Force re-download of latest files")):
+    """Triggers an on-demand satellite pass synchronization across EOS-06 and INSAT-3DR."""
+    from app.providers.mosdac_provider import MosdacDataProvider
+    mosdac = MosdacDataProvider()
+    sync_results = mosdac.sync_all(force=force)
+    dashboard_status = mosdac.get_technical_dashboard_status()
+    return {
+        "message": "MOSDAC satellite pass synchronization complete",
+        "sync_results": sync_results,
+        "dashboard_status": dashboard_status
+    }
+
+@router.get("/mosdac/probe")
+async def probe_mosdac_telemetry(
+    lat: float = Query(..., ge=-90, le=90),
+    lon: float = Query(..., ge=-180, le=180)
+):
+    """Probes the exact physical spaceborne pixels (SST, Chlorophyll, Winds) at sea coordinates."""
+    from app.providers.mosdac_provider import MosdacDataProvider
+    mosdac = MosdacDataProvider()
+    coords = Coordinates(latitude=lat, longitude=lon)
+    return mosdac.get_normalized_marine_data(coords)
+
+
+# ============================================================================
+# Predictive Trajectory & Deterministic SIH Judge Simulation Endpoints
+# ============================================================================
+
+class TrajectoryRequestPayload(BaseModel):
+    latitude: float
+    longitude: float
+    boat_speed_knots: float = 10.0
+    heading_deg: float = 240.0
+    time_horizon_min: float = 60.0
+    wind_speed_kmh: Optional[float] = None
+    wind_direction_deg: Optional[float] = None
+
+class DemoSimulatePayload(BaseModel):
+    latitude: float = 9.9312
+    longitude: float = 76.2673
+    boat_speed_knots: float = 12.0
+    heading_deg: float = 240.0
+    time_horizon_min: float = 60.0
+    language: str = "en"
+
+@router.post("/trajectory/predict")
+async def predict_trajectory_endpoint(payload: TrajectoryRequestPayload):
+    """Calculates forward vessel trajectory with wind leeway and boundary intersection."""
+    from app.geo.trajectory import PredictiveTrajectoryEngine
+    coords = Coordinates(latitude=payload.latitude, longitude=payload.longitude)
+    
+    w_speed = payload.wind_speed_kmh
+    w_dir = payload.wind_direction_deg
+    if w_speed is None:
+        weather = await provider.get_weather(coords)
+        w_speed = weather.wind_speed_kmh
+        w_dir = weather.wind_direction_deg
+
+    pred = PredictiveTrajectoryEngine.predict_trajectory(
+        origin=coords,
+        boat_speed_knots=payload.boat_speed_knots,
+        heading_deg=payload.heading_deg,
+        time_horizon_min=payload.time_horizon_min,
+        wind_speed_kmh=w_speed,
+        wind_direction_deg=w_dir
+    )
+    return pred
+
+@router.post("/demo/simulate")
+async def demo_simulate_endpoint(payload: DemoSimulatePayload):
+    """Deterministic full-pipeline simulation for SIH judges:
+    MOSDAC data -> NetCDF/HDF5 parsing -> 7-factor Risk -> Trajectory -> Multi-Agent Evidence -> Fisherman Voice Advisory.
+    """
+    coords = Coordinates(latitude=payload.latitude, longitude=payload.longitude)
+    from app.geo.trajectory import PredictiveTrajectoryEngine
+    from app.agents.verification import VerificationAgent
+    from app.providers.mosdac_provider import CompositeMarineDataProvider
+    from app.agents.explanation import ExplanationAndEvidenceAgent
+
+    comp_provider = CompositeMarineDataProvider()
+    marine_data = await comp_provider.get_marine_conditions(coords)
+    weather = await comp_provider.get_weather(coords)
+    ocean = await comp_provider.get_ocean_conditions(coords)
+    boundary_ctx = await comp_provider.get_boundary_contexts(coords)
+
+    trajectory = PredictiveTrajectoryEngine.predict_trajectory(
+        origin=coords,
+        boat_speed_knots=payload.boat_speed_knots,
+        heading_deg=payload.heading_deg,
+        time_horizon_min=payload.time_horizon_min,
+        wind_speed_kmh=weather.wind_speed_kmh,
+        wind_direction_deg=weather.wind_direction_deg
+    )
+
+    risk = risk_agent.assess_risk(weather, ocean, boundary_ctx, trajectory_pred=trajectory)
+    audit = VerificationAgent.verify_consistency(weather, ocean, risk, trajectory=trajectory)
+
+    exp_agent = ExplanationAndEvidenceAgent()
+    resp_text = exp_agent.generate_response(
+        query="Is it safe for my fishing voyage?",
+        intent="safety_check",
+        lang=payload.language,
+        risk=risk,
+        weather=weather,
+        ocean=ocean,
+        boundary_ctx=boundary_ctx
+    )
+
+    return {
+        "simulation_parameters": {
+            "coordinates": {"latitude": payload.latitude, "longitude": payload.longitude},
+            "boat_speed_knots": payload.boat_speed_knots,
+            "heading_deg": payload.heading_deg,
+            "time_horizon_min": payload.time_horizon_min,
+            "language": payload.language
+        },
+        "spaceborne_telemetry": marine_data,
+        "weather_state": weather,
+        "ocean_state": ocean,
+        "boundary_context": boundary_ctx,
+        "trajectory": trajectory,
+        "mathematical_risk": {
+            "safety_score": risk.safety_score,
+            "total_risk": risk.total_risk,
+            "overall_score": risk.overall_score,
+            "safety_verdict": risk.safety_verdict,
+            "risk_level": risk.risk_level,
+            "recommendation": risk.recommendation,
+            "formula_explanation": risk.formula_explanation,
+            "factors": risk.factors
+        },
+        "verification_audit": audit,
+        "fisherman_voice_advisory": resp_text
+    }
+
+

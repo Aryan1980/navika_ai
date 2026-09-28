@@ -71,18 +71,25 @@ export interface FactorScore {
   weighted_score: number;
   severity: 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME';
   explanation: string;
+  normalized_risk?: number;
+  contribution?: number;
+  is_missing?: boolean;
 }
 
 export interface RiskAssessment {
   overall_score: number;
+  safety_score?: number;
+  total_risk?: number;
+  formula_explanation?: string;
+  is_missing_data_penalized?: boolean;
   risk_level: 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME';
   safety_verdict: 'SAFE' | 'SAFE_WITH_CAUTION' | 'UNSAFE' | 'HAZARDOUS';
   recommendation: string;
   factors: FactorScore[];
   summary_reasons: string[];
   timestamp: string;
-  calculation_method: string;
-  disclaimer: string;
+  calculation_method?: string;
+  disclaimer?: string;
 }
 
 export interface Waypoint {
@@ -143,6 +150,72 @@ export interface EvidenceDetails {
   observed_vs_forecast: string;
   demo_vs_live: string;
   agent_reasoning_flow: string[];
+  multi_agent_evidence?: Record<string, string[]>;
+  provenance?: Record<string, any>;
+}
+
+export interface MosdacProductStatus {
+  product_key: string;
+  product_name: string;
+  parameter: string;
+  dataset_id: string;
+  last_data_update: string;
+  data_file: string;
+  file_size: string;
+  processing_status: string;
+  format: string;
+  dimensions?: Record<string, number>;
+  variables_extracted?: string[];
+  xarray_supported?: boolean;
+  hdf5_supported?: boolean;
+}
+
+export interface MosdacTechnicalStatus {
+  data_source: string;
+  data_source_full_name: string;
+  authority: string;
+  standing_order_account: string;
+  connection_status: string;
+  last_pipeline_sync: string;
+  products: MosdacProductStatus[];
+  pipeline_checklist?: Record<string, boolean>;
+  compliance?: Record<string, boolean>;
+}
+
+export interface MosdacProbeResult {
+  source: string;
+  dataset_id: string;
+  timestamp: string;
+  latitude: number;
+  longitude: number;
+  variables: {
+    sst?: number;
+    sst_unit?: string;
+    chlorophyll?: number;
+    chlorophyll_unit?: string;
+    wind_speed?: number;
+    wind_speed_unit?: string;
+    wind_direction?: number;
+    wind_direction_unit?: string;
+    wave_height?: number | null;
+  };
+  file: string;
+  processing_status: string;
+  provenance: {
+    source_authority: string;
+    observation_time: string;
+    processing_time: string;
+    is_synthetic: boolean;
+    verified_satellite_products?: Array<{
+      parameter: string;
+      dataset_id: string;
+      sensor: string;
+      observation_time: string;
+      file: string;
+      pixel_distance_km: number;
+      engine?: string;
+    }>;
+  };
 }
 
 export interface ChatMessage {

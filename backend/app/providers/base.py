@@ -41,3 +41,9 @@ class MarineDataProvider(WeatherProvider, OceanProvider, PFZProvider, GISProvide
     def get_source_metadata(self) -> List[DataSourceInfo]:
         """Return data provenance, dataset description, and live/demo status."""
         pass
+
+    @abstractmethod
+    async def get_marine_conditions(self, coords: Coordinates, timestamp: Optional[str] = None) -> Dict[str, Any]:
+        """Retrieve unified normalized spaceborne and oceanographic observations."""
+        pass
+

@@ -22,6 +22,9 @@ class EvidenceDetails(BaseModel):
     observed_vs_forecast: str
     demo_vs_live: str
     agent_reasoning_flow: List[str]
+    multi_agent_evidence: Optional[Dict[str, List[str]]] = Field(default_factory=dict)
+    provenance: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
 
 class ChatRequest(BaseModel):
     query: str

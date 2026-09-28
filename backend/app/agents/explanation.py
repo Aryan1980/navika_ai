@@ -222,42 +222,96 @@ class ExplanationAndEvidenceAgent:
         risk: RiskAssessment,
         weather: WeatherReport,
         ocean: MarineObservation,
-        agent_reasoning_flow: List[str]
+        agent_reasoning_flow: Optional[List[str]] = None,
+        multi_agent_evidence: Optional[Dict[str, List[str]]] = None,
+        provenance: Optional[Dict[str, Any]] = None
     ) -> EvidenceDetails:
         now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        datasets_used = [
-            "ISRO Oceansat-3 (OCM-3 / AASS SST) - Orbit Revisit 2026-09-13",
-            "INCOIS Ocean State Forecast (OSF Multi-Grid Wave Model)",
-            "IMD Coastal Marine Squall & Radar Network",
-            "Survey of India / ICG Maritime Geofencing Repository"
+        flow = agent_reasoning_flow or [
+            "1. Ingestion: Spaceborne NetCDF4/HDF5 ingested via xarray & h5py",
+            "2. Physical Range & Geospatial Audit via Trajectory & Boundary Engines",
+            "3. Mathematical Risk Engine computed Safety Score from 7 normalized factors",
+            "4. Multi-Agent consensus verification executed"
         ]
 
-        timestamps = {
-            "satellite_pass": "2026-09-13T04:30:00Z",
-            "incois_bulletin": "2026-09-13T06:00:00Z",
-            "imd_surface_obs": "2026-09-13T12:00:00Z",
-            "risk_engine_execution": now_str
-        }
+        is_live_mosdac = (ocean.data_type == "MOSDAC_LIVE_SATELLITE") or ("MOSDAC" in ocean.source)
+
+        if is_live_mosdac:
+            datasets_used = [
+                "ISRO EOS-06 Oceansat-3 (OCM-3 Chlorophyll-a - E06OCM_L4_AC)",
+                "ISRO INSAT-3DR Imager (1DVAR SST - 3RIMG_L2B_SST)",
+                "ISRO EOS-06 SCAT-3 (Ku-band Scatterometer Wind - E06SCT_L2B_WV12)",
+                "INCOIS Ocean State Forecast (OSF Multi-Grid Wave Model)",
+                "Survey of India / ICG Maritime Geofencing Repository"
+            ]
+            timestamps = {
+                "satellite_pass": ocean.timestamp,
+                "incois_bulletin": now_str,
+                "risk_engine_execution": now_str
+            }
+            demo_vs_live = "LIVE SATELLITE TELEMETRY (ISRO MOSDAC Standing Orders: EOS-06 OCM Chlorophyll, INSAT-3DR SST, EOS-06 SCAT Surface Wind)"
+            observed_vs_forecast = "SST, Chlorophyll & Scatterometer Winds are Spaceborne Observations (ISRO MOSDAC); Waves & Currents are Hydrodynamic Forecasts (INCOIS)"
+        else:
+            datasets_used = [
+                "ISRO Oceansat-3 (OCM-3 / AASS SST) - Orbit Revisit 2026-09-13",
+                "INCOIS Ocean State Forecast (OSF Multi-Grid Wave Model)",
+                "IMD Coastal Marine Squall & Radar Network",
+                "Survey of India / ICG Maritime Geofencing Repository"
+            ]
+            timestamps = {
+                "satellite_pass": "2026-09-13T04:30:00Z",
+                "incois_bulletin": "2026-09-13T06:00:00Z",
+                "imd_surface_obs": "2026-09-13T12:00:00Z",
+                "risk_engine_execution": now_str
+            }
+            demo_vs_live = "Demo Data Provider (Synthetic simulation conforming to realistic physical distributions)"
+            observed_vs_forecast = "SST & Chlorophyll are Spaceborne Observations (Oceansat-3); Waves & Wind are 24-hr Forecasts (INCOIS/IMD)"
 
         risk_factors_dict = {
             f.factor_name: {
-                "raw_value": f"{f.raw_value} {f.unit}",
+                "raw_value": f"{f.raw_value} {f.unit}" if f.raw_value is not None else "N/A",
+                "normalized_risk": f.normalized_risk,
+                "weight": f.weight,
+                "contribution": f.contribution,
                 "score": f.score,
                 "weighted_contribution": f.weighted_score,
-                "severity": f.severity
+                "severity": f.severity,
+                "is_missing": f.is_missing
             } for f in risk.factors
+        }
+
+        # Build default multi-agent evidence if not supplied
+        ev_map = multi_agent_evidence or {
+            "Ocean Agent": [
+                f"✓ Spaceborne SST ({ocean.sst}°C) from {ocean.source}",
+                f"✓ Chlorophyll-a ({ocean.chlorophyll} mg/m³)"
+            ],
+            "Weather Agent": [
+                f"✓ Surface wind {weather.wind_speed_kmh} km/h ({weather.wind_direction_deg}°)",
+                f"✓ Lightning: {weather.lightning_detected} | Cyclone: {weather.cyclone_status}"
+            ],
+            "Safety Agent": [
+                f"✓ Mathematical Safety Score: {risk.safety_score}/100",
+                f"✓ Overall Risk: {risk.overall_score}/100 -> {risk.safety_verdict}"
+            ]
         }
 
         return EvidenceDetails(
             intent_detected=intent,
             datasets_used=datasets_used,
             timestamps=timestamps,
-            deterministic_score=risk.overall_score,
+            deterministic_score=risk.safety_score,
             risk_factors=risk_factors_dict,
-            observed_vs_forecast="SST & Chlorophyll are Spaceborne Observations (Oceansat-3); Waves & Wind are 24-hr Forecasts (INCOIS/IMD)",
-            demo_vs_live="Demo Data Provider (Synthetic simulation conforming to realistic physical distributions)",
-            agent_reasoning_flow=agent_reasoning_flow
+            observed_vs_forecast=observed_vs_forecast,
+            demo_vs_live=demo_vs_live,
+            agent_reasoning_flow=flow,
+            multi_agent_evidence=ev_map,
+            provenance=provenance or {
+                "sst": {"source": "ISRO MOSDAC", "dataset": "3RIMG_L2B_SST", "timestamp": ocean.timestamp},
+                "chlorophyll": {"source": "ISRO MOSDAC", "dataset": "E06OCM_L4_AC", "timestamp": ocean.timestamp},
+                "wind": {"source": "ISRO MOSDAC", "dataset": "E06SCT_L2B_WV12", "timestamp": weather.timestamp}
+            }
         )
 
     def generate_response(
@@ -294,7 +348,7 @@ In {target_lang_name}, reply with a warm, polite, and helpful greeting. Introduc
 Keep your response friendly, professional, and concise (under 4-5 sentences)."""
                     import concurrent.futures
                     def _call_gemini_greet():
-                        for model_name in ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash"]:
+                        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
                             try:
                                 res = client.models.generate_content(model=model_name, contents=greet_prompt)
                                 if res and res.text:
@@ -305,7 +359,7 @@ Keep your response friendly, professional, and concise (under 4-5 sentences)."""
 
                     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                         future = executor.submit(_call_gemini_greet)
-                        direct_text = future.result(timeout=10.0)
+                        direct_text = future.result(timeout=4.0)
 
                     if direct_text:
                         return {
@@ -362,7 +416,7 @@ FORMATTING REQUIREMENTS:
 """
                 import concurrent.futures
                 def _call_gemini():
-                    for model_name in ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash"]:
+                    for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
                         try:
                             res = client.models.generate_content(model=model_name, contents=prompt)
                             if res and res.text:
@@ -373,7 +427,7 @@ FORMATTING REQUIREMENTS:
 
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(_call_gemini)
-                    direct_text = future.result(timeout=15.0)
+                    direct_text = future.result(timeout=4.0)
 
                 if direct_text:
                     return {

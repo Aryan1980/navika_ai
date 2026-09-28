@@ -1,162 +1,132 @@
-# SamudraAI ? Agentic Marine Intelligence Platform
+# SamudraAI — ISRO Agentic Marine Intelligence Platform
 
-[![ISRO Problem Statement Prototype](https://img.shields.io/badge/ISRO-Marine%20Intelligence-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
-[![Multi-Agent Architecture](https://img.shields.io/badge/Architecture-Agentic%20AI%20Pipeline-0284c7?style=for-the-badge)](./ARCHITECTURE.md)
-[![Deterministic Safety Matrix](https://img.shields.io/badge/Safety-Deterministic%20Zero--Hallucination-10b981?style=for-the-badge)](./ARCHITECTURE.md#deterministic-risk-engine)
-[![Offline Ready](https://img.shields.io/badge/Demo%20Mode-100%25%20Offline%20Ready-f59e0b?style=for-the-badge)](./DEMO.md)
+[![ISRO Problem Statement Prototype](https://img.shields.io/badge/ISRO-MOSDAC%20Live%20Telemetry-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
+[![Multi-Agent Architecture](https://img.shields.io/badge/Architecture-Autonomous%20Swarm-0284c7?style=for-the-badge)](./docs/architecture.md)
+[![Deterministic Safety Matrix](https://img.shields.io/badge/Safety-Deterministic%20Zero--Hallucination-10b981?style=for-the-badge)](./docs/safety-score.md)
+[![Scientific Pipeline](https://img.shields.io/badge/Pipeline-xarray%20%2B%20HDF5%20%2B%20NetCDF4-purple?style=for-the-badge)](./docs/data-pipeline.md)
+[![Predictive Trajectory](https://img.shields.io/badge/Kinematics-Dead%20Reckoning%20%2B%20Leeway-orange?style=for-the-badge)](./docs/trajectory.md)
 
-**SamudraAI** is a production-style Agentic AI Marine Intelligence Platform developed in response to the ISRO problem statement. Built for traditional fishermen, maritime researchers, port authorities, and coastal security agencies, SamudraAI provides natural-language conversation and voice interaction in **10 Indian languages** (English, Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Marathi, Gujarati, and Odia).
+**SamudraAI (ORCA)** is an operational Agentic AI Marine Intelligence Platform developed in response to the ISRO Smart India Hackathon (SIH) Round 2 problem statement. Built for traditional coastal fishermen, maritime researchers, port authorities, and coast guard personnel, SamudraAI provides natural-language conversation and voice interaction in **10 Indian languages** (English, Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Marathi, Gujarati, and Odia).
 
-Departing fundamentally from naive chatbots or static dashboards, SamudraAI demonstrates **genuine Agentic AI behaviors**: intent understanding, autonomous subtask decomposition, multi-agent dispatch, heterogeneous satellite & oceanographic data fusion, spatial-temporal reasoning, deterministic physical risk scoring, and explainable evidence generation.
-
----
-
-## ?? Key Features
-
-1. **Autonomous Multi-Agent Architecture**:
-   - **Planner Agent**: Interprets complex user queries, extracts spatio-temporal parameters, and formulates subtask plans.
-   - **Marine Data Discovery Agent**: Identifies required satellite and oceanographic datasets and normalizes schemas.
-   - **Weather Intelligence Agent**: Ingests wind speed/direction, gusts, swell period, thunderstorm cells, and IMD cyclone watches.
-   - **Ocean Analytics Agent**: Evaluates spaceborne Sea Surface Temperature (SST) gradients, Chlorophyll-a plumes, and tidal cycles.
-   - **PFZ Intelligence Agent**: Discovers, evaluates, and ranks Potential Fishing Zones based on environmental suitability and transit safety.
-   - **Geospatial Reasoning Agent**: Performs pure-python Haversine distance, bearing calculations, Ray-Casting point-in-polygon containment, and cross-track IMBL proximity.
-   - **Deterministic Risk Assessment Engine**: Computes transparent mathematical safety scores (0?100) using configurable physical threshold penalties. **Zero LLM hallucination of safety scores.**
-   - **Route Optimization Agent**: Compares direct shortest lines against risk-mitigated safe detour nautical corridors avoiding marine protected areas (MPAs) and hazard cells.
-   - **Marine Alert Agent**: Dispatches multi-tier navigational and severe weather advisories (Extreme, High, Moderate, Informational).
-   - **Visualization Agent**: Dynamically activates relevant map layers, markers, and vector charts.
-   - **Explanation & Evidence Agent**: Produces localized recommendations with an expandable "Why am I seeing this?" audit trail.
-
-2. **Interactive Marine Command Center**:
-   - Leaflet interactive map with custom dark oceanographic basemap tiles.
-   - Toggleable layers: PFZs, SST Isotherms, Chlorophyll-a blooms, Wave swell vectors, Surface wind, IMBL borders, Marine Protected Areas (MPAs), Naval restricted zones, and Safe Detour routes.
-   - Click anywhere on the sea to relocate analysis instantly.
-   - One-click coastal hub jump (Kochi, Mumbai, Porbandar, Chennai, Vizag, Paradip, Digha, Port Blair, Goa, Kanyakumari).
-
-3. **Multilingual & Voice Interaction**:
-   - Automatic script detection and language selector for 10 Indian languages.
-   - Web Speech API integration for microphone Speech-to-Text and browser SpeechSynthesis voice readback.
-   - Preserves strict scientific SI units (`km/h`, `m`, `?C`, `mg/m?`) across translations.
-
-4. **100% Offline Hackathon Demo Mode Guarantee**:
-   - Out of the box, SamudraAI operates seamlessly without external API keys or paid accounts.
-   - Realistic synthetic data generated for the Indian coastline (Arabian Sea, Bay of Bengal, Andaman Sea).
-   - Real APIs (ISRO MOSDAC, INCOIS, IMD, Gemini) connect effortlessly through modular provider adapters via `.env`.
+Departing fundamentally from naive chatbots or static dashboards, SamudraAI demonstrates **genuine Agentic AI behaviors**: intent understanding, autonomous subtask decomposition, multi-agent dispatch, heterogeneous satellite & oceanographic data fusion, spatial-temporal kinematic reasoning, deterministic physical risk scoring, cross-agent consensus verification, and explainable evidence provenance.
 
 ---
 
-## ??? Technology Stack
+## 🛰️ Technical Chain Demonstration
 
-- **Backend**:
-  - Python 3.11+
-  - FastAPI (Asynchronous high-performance REST API)
-  - Pydantic v2 (Strict typing and schema validation)
-  - SQLite (Persistent conversation memory & session history)
-  - Pure Python Geospatial Engine (Zero fragile C++ GIS dependencies on Windows)
-  - Uvicorn (ASGI production server)
-  - Pytest & Pytest-Asyncio (Comprehensive automated test suite)
-
-- **Frontend**:
-  - React 19 + TypeScript
-  - Vite v8 (Lightning-fast HMR and bundling)
-  - Tailwind CSS v4 (Modern responsive slate-cyan theme)
-  - Leaflet (Interactive marine cartography)
-  - Lucide React (Marine & navigational iconography)
-  - Web Speech API (Browser Speech-to-Text & Text-to-Speech)
+```
+ISRO MOSDAC Satellite Passes
+  ├─ EOS-06 OCM-3: Analysed Chlorophyll-a (E06OCM_L4_AC, NetCDF4)
+  ├─ INSAT-3DR Imager: Sea Surface Temperature (3RIMG_L2B_SST, HDF5)
+  └─ EOS-06 SCAT-3: Ku-band Surface Winds (E06SCT_L2B_WV12, HDF5)
+               │
+               ▼
+Scientific Ingestion Engine (xarray, netCDF4, h5py, SI Units: °C, mg/m³, km/h)
+               │
+               ▼
+Kinematic Predictive Trajectory Engine (Dead Reckoning + 2.5% Wind Leeway Drift)
+               │
+               ▼
+Deterministic Mathematical Safety Score: Safety Score = 100 × (1 - Total Risk)
+               │
+               ▼
+Multi-Agent Swarm (Planner, Ocean, Weather, Geospatial, Trajectory, Safety)
+               │
+               ▼
+Verification Agent (Physical Range & Cross-Agent Consensus Audit)
+               │
+               ▼
+Fisherman Voice UX (Tamil, Malayalam, Hindi, English STT + Auto-Speak Readback)
+               │
+               ▼
+SIH Requirement 15 Judge Dashboard (File Inspection, Sync, Live Coordinate Probe)
+```
 
 ---
 
-## ?? Quick Start (Works Locally Out of the Box)
+## 📚 Technical Documentation
+
+- **[System Architecture (docs/architecture.md)](./docs/architecture.md)**: Multi-agent coordination, subtask dispatch, and consensus audit.
+- **[MOSDAC Scientific Data Pipeline (docs/data-pipeline.md)](./docs/data-pipeline.md)**: Standing orders ingestion, `xarray` NetCDF4 parsing, `h5py` array squeezing, and Level-2B vs Level-3 scatterometer specification.
+- **[Mathematical Safety Score Model (docs/safety-score.md)](./docs/safety-score.md)**: 7 normalized factor weights, non-negotiable critical overrides, and uncertainty penalties.
+- **[Predictive Trajectory Engine (docs/trajectory.md)](./docs/trajectory.md)**: Kinematic dead reckoning, downwind aerodynamic leeway, and spherical segment intersection algorithms.
+- **[Offline & Edge Resilient Mode (docs/offline-mode.md)](./docs/offline-mode.md)**: Atomic local disk cache, explicit staleness warnings, and pure-Python local fallback.
+
+---
+
+## 🚀 Active MOSDAC Standing Orders
+
+| Category | Satellite & Sensor | Dataset ID | Format | Parameters Extracted | Scientific Engine |
+|---|---|---|---|---|---|
+| **Chlorophyll-a** | EOS-06 (Oceansat-3) OCM-3 | `E06OCM_L4_AC` | NetCDF4 | Analysed Chlorophyll-a ($\text{mg/m}^3$) | `xarray.open_dataset` nearest-neighbor |
+| **Sea Surface Temp** | INSAT-3DR Imager (1DVAR) | `3RIMG_L2B_SST` | HDF5 (`.h5`) | Sea Surface Temperature ($^\circ\text{C}$) | `h5py` ($K - 273.15$) |
+| **Surface Winds** | EOS-06 SCAT-3 (Ku-band) | `E06SCT_L2B_WV12`* | HDF5 (`.h5`) | Wind Speed ($\text{km/h}$) & Direction ($^\circ$) | `h5py` dataset slicing |
+
+*\*Note on SCAT-3 L2B vs L3: The MOSDAC catalog endpoint returns HTTP 500 for `E06SCT_L3_WV12` because gridded L3 is not indexed for standing order streams. `E06SCT_L2B_WV12` (12.5 km Ku-band ocean wind vectors) is actively published and updated in real-time. SamudraAI ingests L2B and explicitly identifies it as Level-2B.*
+
+---
+
+## 🧮 Mathematical Risk & Safety Formulation
+
+$$\text{Total Risk} = \sum_{i=1}^{7} w_i \cdot r_i \quad \left(\sum w_i = 1.00\right)$$
+$$\text{Safety Score} = 100 \times (1 - \text{Total Risk})$$
+
+### 7 Configurable Factor Weights:
+1. **Significant Wave Height**: $w = 0.25$
+2. **Surface Wind Speed**: $w = 0.20$
+3. **Atmospheric Weather Hazard (Cyclone / Lightning)**: $w = 0.15$
+4. **Sovereign Border Clearance (IMBL / MPAs / Restricted Zones)**: $w = 0.15$
+5. **Predictive Trajectory Clearance**: $w = 0.10$
+6. **Spaceborne Sea Surface Temperature (SST)**: $w = 0.05$
+7. **Spaceborne Chlorophyll-a Concentration**: $w = 0.05$
+
+---
+
+## 🛠️ Quick Start
 
 ### 1. Prerequisites
-- Python 3.10+ installed
-- Node.js v18+ and npm installed
+- Python 3.11+
+- Node.js v18+ and npm
 
 ### 2. Backend Setup
 ```bash
-# Navigate to project root
-cd samudra-ai
+# Clone the repository
+git clone https://github.com/Aryan1980/samudra_ai.git
+cd samudra_ai
 
-# Install backend dependencies
+# Install dependencies (includes xarray, h5py, netCDF4, fastapi, pydantic)
 pip install -r backend/requirements.txt
 
-# Run automated tests to verify everything
+# Run the automated test suite (30+ tests covering all engines and endpoints)
 python -m pytest backend/tests/ -v
 
-# Start FastAPI backend server
+# Start FastAPI server
 python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
-*API Swagger Documentation is available at: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)*
 
-### 3. Frontend Setup (Optional if using backend single-port serving)
-The backend automatically serves the built frontend SPA at `http://127.0.0.1:8000/`!
-
-To run the Vite development server with Hot Module Replacement:
+### 3. Frontend Setup
 ```bash
 cd frontend
 npm install
+npm run build   # Verified zero TypeScript errors
 npm run dev
 ```
-*Open [http://127.0.0.1:5173](http://127.0.0.1:5173) in your browser.*
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## ?? Try Hackathon Demo Scenarios (1-Click in UI)
+## 📡 Key API Endpoints
 
-Click any of the demo scenario chips in the UI or ask via text/voice:
-1. **"Where is the nearest PFZ?"** ? Discovers thermal-chlorophyll fronts, computes distance and bearing, and displays ranked PFZ cards.
-2. **"Is it safe to go fishing tomorrow morning?"** ? Decomposes 24-hr wave, wind, squall, and cyclone forecasts, running the deterministic 6-factor risk matrix.
-3. **"What are the wave and wind conditions?"** ? Returns swell direction, wave height, Beaufort/Douglas scale, and wind vectors.
-4. **"Show areas with high chlorophyll and favourable SST."** ? Activates ocean color and thermal anomaly layers with upwelling insights.
-5. **"Which PFZ is safest?"** ? Ranks fishing zones by transit risk rather than raw distance.
-6. **"Find a safe route to the nearest PFZ."** ? Calculates direct shortest track, detects hazard intersections (MPAs/geofences), and generates a risk-mitigated safe detour corridor.
-7. **"Are there any cyclone or lightning alerts?"** ? Scans IMD bulletins and convective radar cells.
-8. **"Am I approaching a restricted area?"** ? Performs cross-track distance calculations against the International Maritime Boundary Line (IMBL) and Marine Protected Areas (e.g. Gahirmatha, Gulf of Mannar).
+- `POST /api/chat`: Multi-agent query processing with auditable `multi_agent_evidence` and `provenance`.
+- `POST /api/trajectory/predict`: Predictive forward course modeling with wind leeway drift.
+- `POST /api/demo/simulate`: Deterministic full-chain simulation endpoint for SIH judges.
+- `GET /api/mosdac/status`: SIH Requirement 15 technical dashboard reporting ingested files and dimensions.
+- `POST /api/mosdac/sync`: On-demand satellite pass synchronization across EOS-06 and INSAT-3DR.
+- `GET /api/mosdac/probe?lat=...&lon=...`: Exact localized spaceborne pixel retrieval.
 
 ---
 
-## ?? Repository Structure
-
-```
-samudra-ai/
-??? backend/
-?   ??? app/
-?   ?   ??? config.py              # Risk weights, thresholds & environment configuration
-?   ?   ??? database.py            # SQLite conversation persistence
-?   ?   ??? main.py                # FastAPI app setup, CORS, static SPA mount
-?   ?   ??? schemas/               # Typed Pydantic schemas (marine, risk, route, alert, chat)
-?   ?   ??? providers/             # Base provider interfaces, Demo provider, API adapters
-?   ?   ??? geo/                   # Pure-python Haversine, Ray-Casting & A* Safe Router
-?   ?   ??? agents/                # 11 specialized agents & Central Orchestrator
-?   ?   ??? routes/                # FastAPI REST endpoints
-?   ??? tests/                     # 25 automated unit & integration tests
-?   ??? requirements.txt
-??? frontend/
-?   ??? src/
-?   ?   ??? types/                 # TypeScript interfaces mirroring backend schemas
-?   ?   ??? services/              # Axios API client & Web Speech voice service
-?   ?   ??? context/               # Global AppContext
-?   ?   ??? components/
-?   ?   ?   ??? Header/            # Branding, coastal presets & language selector
-?   ?   ?   ??? Map/               # Leaflet map, layer controls & route polylines
-?   ?   ?   ??? Chat/              # Conversational panel, voice mic, demo queries, evidence drawer
-?   ?   ?   ??? Dashboard/         # Risk badge, condition cards, PFZ list & alert center
-?   ?   ?   ??? Observability/     # Real-time multi-agent execution telemetry
-?   ?   ?   ??? Charts/            # 24-hour environmental trend graphs
-?   ?   ?   ??? Pages/             # Architecture ("How It Works") & Data Sources pages
-?   ?   ??? App.tsx
-?   ?   ??? main.tsx
-?   ??? package.json
-?   ??? vite.config.ts
-??? .env.example
-??? README.md
-??? ARCHITECTURE.md
-??? DATA_SOURCES.md
-??? API.md
-??? DEMO.md
-```
-
----
-
-## ?? Security & Statutory Notice
-- All secrets and API credentials are kept strictly on the backend. No secret tokens are ever exposed to the client.
-- **Statutory Notice**: SamudraAI is an operational decision-support tool. It does not replace official statutory advisories issued by INCOIS, IMD, the Indian Coast Guard, or Ministry of Fisheries.
+## 🔒 Security Compliance
+- MOSDAC credentials are stored exclusively in local `.env` and are strictly excluded via `.gitignore`.
+- Binary satellite files (`*.nc`, `*.hdf`, `*.h5`) are excluded from Git to prevent repository bloat.
+- Zero fake data policy: All scientific values preserve verified SI units with complete provenance.

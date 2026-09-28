@@ -33,13 +33,25 @@ class RiskThresholds(BaseModel):
     # MPA Proximity in km
     MPA_WARNING_KM: float = 5.0
 
-    # Factor Weights (must sum to 1.0)
+    # SST Thresholds (in Celsius)
+    SST_NORMAL_MIN: float = 26.0
+    SST_NORMAL_MAX: float = 30.0
+    SST_ELEVATED: float = 31.0
+
+    # Chlorophyll Thresholds (in mg/m3)
+    CHLOROPHYLL_HAB_ALERT: float = 10.0
+
+    # Configurable Normalized Factor Weights (Sum = 1.00)
     WEIGHT_WIND: float = 0.20
     WEIGHT_WAVE: float = 0.25
-    WEIGHT_LIGHTNING: float = 0.15
-    WEIGHT_CYCLONE: float = 0.25
-    WEIGHT_TIDE: float = 0.05
-    WEIGHT_GEOFENCE: float = 0.10
+    WEIGHT_WEATHER: float = 0.15       # Cyclone & Lightning combined
+    WEIGHT_BORDER: float = 0.15        # Current IMBL/MPA static geofence
+    WEIGHT_TRAJECTORY: float = 0.10     # Predictive forward trajectory intersection
+    WEIGHT_SST: float = 0.05           # Spaceborne SST thermal disturbance
+    WEIGHT_CHLOROPHYLL: float = 0.05   # Spaceborne Chlorophyll bloom/anomaly
+
+    # Missing Data Uncertainty Penalty
+    MISSING_DATA_PENALTY: float = 0.35
 
 class Settings(BaseModel):
     PROJECT_NAME: str = "SamudraAI ? Agentic Marine Intelligence Platform"
@@ -56,6 +68,8 @@ class Settings(BaseModel):
     STORMGLASS_API_KEY: str = os.getenv("STORMGLASS_API_KEY", os.getenv("OCEAN_API_KEY", ""))
     SATELLITE_API_KEY: str = os.getenv("SATELLITE_API_KEY", "")
     OCEAN_API_KEY: str = os.getenv("OCEAN_API_KEY", "")
+    MOSDAC_USERNAME: str = os.getenv("MOSDAC_USERNAME", "")
+    MOSDAC_PASSWORD: str = os.getenv("MOSDAC_PASSWORD", "")
 
     # Risk Engine Configuration
     RISK: RiskThresholds = RiskThresholds()

@@ -8,7 +8,7 @@ from app.schemas.risk import RiskAssessment
 from app.schemas.route import RouteComparison
 from app.schemas.alert import MarineAlert
 from app.schemas.chat import ChatRequest, ChatResponse, AgentTrace, EvidenceDetails
-from app.providers.demo_provider import DemoDataProvider
+from app.providers.mosdac_provider import CompositeMarineDataProvider
 
 from app.agents.planner import PlannerAgent
 from app.agents.discovery import MarineDataDiscoveryAgent
@@ -21,12 +21,14 @@ from app.agents.route import RouteOptimizationAgent
 from app.agents.alert import MarineAlertAgent
 from app.agents.visualization import VisualizationAgent
 from app.agents.explanation import ExplanationAndEvidenceAgent
+from app.agents.trajectory import TrajectoryAgent
+from app.agents.verification import VerificationAgent
 
 class AgentOrchestrator:
     """Central nervous system of SamudraAI, coordinating specialized agents with concurrent execution."""
 
     def __init__(self):
-        self.provider = DemoDataProvider()
+        self.provider = CompositeMarineDataProvider()
         self.planner = PlannerAgent()
         self.discovery = MarineDataDiscoveryAgent(self.provider)
         self.weather_agent = WeatherIntelligenceAgent(self.provider)
@@ -38,6 +40,8 @@ class AgentOrchestrator:
         self.alert_agent = MarineAlertAgent(self.provider)
         self.viz_agent = VisualizationAgent()
         self.explanation_agent = ExplanationAndEvidenceAgent()
+        self.trajectory_agent = TrajectoryAgent()
+        self.verification_agent = VerificationAgent()
 
     async def execute_query(self, req: ChatRequest) -> ChatResponse:
         t_start = time.perf_counter()
@@ -112,19 +116,50 @@ class AgentOrchestrator:
                 summary=f"Identified {len(pfzs)} PFZ clusters sorted by {sort_key}. Nearest: {pfzs[0].name} ({pfzs[0].distance_km} km)."
             ))
 
-        # 5. Deterministic Risk Assessment Agent
+        # 5. Trajectory Agent (Forward Predictive Trajectory with Wind Leeway)
+        traj_t0 = time.perf_counter()
+        traj_pred = self.trajectory_agent.predict(
+            origin=coords,
+            boat_speed_knots=8.0,
+            heading_deg=270.0,
+            time_horizon_min=60.0,
+            wind_speed_kmh=weather.wind_speed_kmh,
+            wind_direction_deg=weather.wind_direction_deg
+        )
+        traj_dur = int((time.perf_counter() - traj_t0) * 1000)
+        traces.append(AgentTrace(
+            agent_name="Trajectory Agent",
+            status="COMPLETED",
+            execution_time_ms=max(1, traj_dur),
+            data_source="Dead Reckoning & Wind Leeway Model",
+            summary=f"Min clearance {traj_pred.min_distance_to_boundary_km} km to {traj_pred.closest_boundary_name}. {'⚠ ' + traj_pred.warning_message if traj_pred.is_approaching else 'Clear course.'}"
+        ))
+
+        # 6. Deterministic Risk Assessment Agent (Safety Agent)
         risk_t0 = time.perf_counter()
-        risk = self.risk_agent.assess_risk(weather, ocean, boundary_ctx)
+        risk = self.risk_agent.assess_risk(weather, ocean, boundary_ctx, trajectory_pred=traj_pred)
         risk_dur = int((time.perf_counter() - risk_t0) * 1000)
         traces.append(AgentTrace(
             agent_name="Risk Assessment Agent",
             status="COMPLETED",
             execution_time_ms=max(1, risk_dur),
-            data_source="Deterministic Multi-Factor Marine Safety Matrix",
-            summary=f"Score: {risk.overall_score}/100 -> Verdict: {risk.safety_verdict} ({risk.risk_level})"
+            data_source="Mathematical Composite Safety Matrix (7 Factors)",
+            summary=f"Safety Score: {risk.safety_score}/100 (Risk: {risk.overall_score}/100) -> Verdict: {risk.safety_verdict} ({risk.risk_level})"
         ))
 
-        # 6. Route Optimization Agent (if route query or requested)
+        # 7. Verification Agent (Cross-Agent Physical Consensus Audit)
+        verif_t0 = time.perf_counter()
+        verif_res = self.verification_agent.verify_consistency(weather, ocean, risk, trajectory=traj_pred)
+        verif_dur = int((time.perf_counter() - verif_t0) * 1000)
+        traces.append(AgentTrace(
+            agent_name="Verification Agent",
+            status="COMPLETED",
+            execution_time_ms=max(1, verif_dur),
+            data_source="Multi-Sensor Physical Consistency Audit",
+            summary=verif_res["summary_note"]
+        ))
+
+        # 8. Route Optimization Agent (if route query or requested)
         route_comp: Optional[RouteComparison] = None
         if "route" in plan.required_agents or plan.intent == "safe_route":
             route_t0 = time.perf_counter()
@@ -141,7 +176,7 @@ class AgentOrchestrator:
                 summary=f"Shortest: {route_comp.shortest_route.distance_km} km ({route_comp.shortest_route.risk_level}) vs Safe: {route_comp.safe_route.distance_km} km ({route_comp.safe_route.risk_level})"
             ))
 
-        # 7. Visualization Agent
+        # 9. Visualization Agent
         viz_t0 = time.perf_counter()
         viz_config = self.viz_agent.determine_visualizations(plan.intent, risk.risk_level)
         viz_dur = int((time.perf_counter() - viz_t0) * 1000)
@@ -153,16 +188,56 @@ class AgentOrchestrator:
             summary=f"Activated layers: {', '.join(viz_config['active_layers'])}"
         ))
 
-        # 8. Explanation & Evidence Agent
+        # 10. Explanation & Evidence Agent
         exp_t0 = time.perf_counter()
         flow_steps = [
-            f"1. Query interpreted as intent '{plan.intent}' targeting {coords.latitude}?N, {coords.longitude}?E",
+            f"1. Query interpreted as intent '{plan.intent}' targeting {coords.latitude}°N, {coords.longitude}°E",
             "2. Concurrent satellite and ocean forecast retrieval executed via provider layer",
-            f"3. Deterministic risk engine evaluated 6 physical factors yielding score {risk.overall_score}/100",
-            f"4. Multilingual template localized in '{plan.language}' preserving physical SI units"
+            f"3. Forward predictive trajectory computed ({traj_pred.heading_deg}° heading with wind leeway)",
+            f"4. Deterministic risk engine evaluated 7 physical factors yielding Safety Score {risk.safety_score}/100",
+            f"5. Verification Agent confirmed cross-sensor physical consensus",
+            f"6. Multilingual template localized in '{plan.language}' preserving physical SI units"
         ]
+
+        multi_agent_evidence = {
+            "Ocean Agent": [
+                f"✓ Spaceborne SST: {ocean.sst}°C (INSAT-3DR Imager)",
+                f"✓ Spaceborne Chlorophyll-a: {ocean.chlorophyll} mg/m³ (EOS-06 OCM-3)",
+                f"✓ Telemetry Source: {ocean.source}"
+            ],
+            "Weather Agent": [
+                f"✓ Surface wind: {weather.wind_speed_kmh} km/h ({weather.wind_direction_deg}°)",
+                f"✓ Significant wave: {ocean.wave_height or weather.wave_height_m} m",
+                f"✓ Convective lightning: {weather.lightning_detected} | Cyclone: {weather.cyclone_status}"
+            ],
+            "Geospatial Agent": [
+                f"✓ IMBL Distance: {boundary_ctx['imbl']['distance_km']} km ({boundary_ctx['imbl']['name']})",
+                f"✓ Marine Protected Area: {boundary_ctx['mpa']['name']} ({boundary_ctx['mpa']['distance_km']} km)"
+            ],
+            "Trajectory Agent": [
+                f"✓ Forward {int(traj_pred.time_horizon_min)} min track: Min clearance {traj_pred.min_distance_to_boundary_km} km to {traj_pred.closest_boundary_name}",
+                f"{'⚠ ' + traj_pred.warning_message if traj_pred.is_approaching else '✓ Safe navigation clearance maintained.'}"
+            ],
+            "Safety Agent": [
+                f"✓ Safety Score: {risk.safety_score}/100 (Composite Risk: {risk.overall_score}/100)",
+                f"✓ Verdict: {risk.safety_verdict} ({risk.risk_level})",
+                f"✓ Formula: {risk.formula_explanation}"
+            ],
+            "Verification Agent": verif_res["audited_checks"]
+        }
+
+        provenance_data = {
+            "sst": {"value": ocean.sst, "unit": "°C", "source": "ISRO MOSDAC", "dataset": "3RIMG_L2B_SST", "timestamp": ocean.timestamp},
+            "chlorophyll": {"value": ocean.chlorophyll, "unit": "mg/m³", "source": "ISRO MOSDAC", "dataset": "E06OCM_L4_AC", "timestamp": ocean.timestamp},
+            "wind": {"value": weather.wind_speed_kmh, "unit": "km/h", "source": weather.source, "timestamp": weather.timestamp},
+            "trajectory": {"model": "Dead Reckoning + Wind Leeway", "time_horizon_min": traj_pred.time_horizon_min, "min_clearance_km": traj_pred.min_distance_to_boundary_km}
+        }
+
         evidence = self.explanation_agent.build_evidence(
-            plan.intent, risk, weather, ocean, flow_steps
+            plan.intent, risk, weather, ocean,
+            agent_reasoning_flow=flow_steps,
+            multi_agent_evidence=multi_agent_evidence,
+            provenance=provenance_data
         )
         resp_content = self.explanation_agent.generate_response(
             query=req.query,

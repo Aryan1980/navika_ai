@@ -94,3 +94,43 @@ def test_chat_endpoint():
     assert "direct_answer" in data
     assert len(data["agent_traces"]) >= 5
     assert data["evidence"]["deterministic_score"] >= 0
+
+def test_trajectory_predict_endpoint():
+    resp = client.post("/api/trajectory/predict", json={
+        "latitude": 9.9312,
+        "longitude": 76.2673,
+        "boat_speed_knots": 12.0,
+        "heading_deg": 240.0,
+        "time_horizon_min": 60.0
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["waypoints"]) > 0
+    assert "min_distance_to_boundary_km" in data
+    assert "trajectory_risk_score" in data
+
+def test_demo_simulate_endpoint():
+    resp = client.post("/api/demo/simulate", json={
+        "latitude": 9.9312,
+        "longitude": 76.2673,
+        "boat_speed_knots": 10.0,
+        "heading_deg": 240.0,
+        "time_horizon_min": 60.0,
+        "language": "en"
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "spaceborne_telemetry" in data
+    assert "trajectory" in data
+    assert "mathematical_risk" in data
+    assert data["mathematical_risk"]["safety_score"] > 0
+    assert "verification_audit" in data
+    assert "fisherman_voice_advisory" in data
+
+def test_mosdac_probe_endpoint():
+    resp = client.get("/api/mosdac/probe?lat=9.9312&lon=76.2673")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["source"] == "MOSDAC"
+    assert "variables" in data
+
