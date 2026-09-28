@@ -42,12 +42,24 @@ app.include_router(api_router, prefix="/api")
 app.include_router(api_router)
 
 # Mount frontend production build if available
-frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist"))
+possible_dist_dirs = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")),
+    os.path.abspath(os.path.join(os.getcwd(), "dist")),
+    os.path.abspath(os.path.join(os.getcwd(), "frontend", "dist")),
+]
+frontend_dist = next((p for p in possible_dist_dirs if os.path.exists(p) and os.path.isfile(os.path.join(p, "index.html"))), None)
 
-if os.path.exists(frontend_dist):
+if frontend_dist:
     assets_dir = os.path.join(frontend_dist, "assets")
     if os.path.exists(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/")
+    async def serve_root():
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str = ""):

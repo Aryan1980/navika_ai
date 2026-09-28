@@ -22,8 +22,8 @@ class MosdacDataProcessor:
     @staticmethod
     def extract_chlorophyll(nc_path: str, target_lat: float, target_lon: float, max_search_radius_km: float = 100.0) -> Optional[Dict[str, Any]]:
         """Extracts Chlorophyll-a from EOS-06 OCM NetCDF product (E06OCM_L4_AC)."""
-        import netCDF4 as nc
         try:
+            import netCDF4 as nc
             with nc.Dataset(nc_path, "r") as ds:
                 lats = ds.variables["lat"][:]
                 lons = ds.variables["lon"][:]
@@ -85,8 +85,8 @@ class MosdacDataProcessor:
     @staticmethod
     def extract_sst(h5_path: str, target_lat: float, target_lon: float, max_search_radius_km: float = 60.0) -> Optional[Dict[str, Any]]:
         """Extracts Sea Surface Temperature from INSAT-3DR HDF5 product (3RIMG_L2B_SST)."""
-        import h5py
         try:
+            import h5py
             with h5py.File(h5_path, "r") as f:
                 if "SST" not in f or "Latitude" not in f or "Longitude" not in f:
                     logger.error(f"Required datasets (SST, Latitude, Longitude) not found in {h5_path}")
@@ -156,8 +156,8 @@ class MosdacDataProcessor:
     @staticmethod
     def extract_wind(h5_path: str, target_lat: float, target_lon: float, max_search_radius_km: float = 120.0) -> Optional[Dict[str, Any]]:
         """Extracts Ocean Surface Wind Vector from EOS-06 SCAT product (E06SCT_L2B_WV12)."""
-        import h5py
         try:
+            import h5py
             with h5py.File(h5_path, "r") as f:
                 if "science_data" not in f:
                     logger.error(f"science_data group not found in {h5_path}")
