@@ -16,7 +16,15 @@ from app.agents.gis import GeospatialReasoningAgent
 from app.agents.pfz import PFZIntelligenceAgent
 from app.agents.risk import RiskAssessmentAgent
 from app.agents.route import RouteOptimizationAgent
-from app.database import save_message, get_conversation_history
+from app.services.bhashini import bhashini_service
+from app.database import (
+    save_message,
+    get_conversation_history,
+    get_or_create_user,
+    update_user_profile,
+    get_user_voyages,
+    save_user_voyage
+)
 router = APIRouter()
 
 provider = DemoDataProvider()
@@ -33,6 +41,25 @@ class CoordinatesPayload(BaseModel):
 class RouteRequestPayload(BaseModel):
     origin: Coordinates
     destination: Coordinates
+
+class VoiceTranscribePayload(BaseModel):
+    audio_base64: str
+    language: str = "ml"
+
+class VoiceSynthesizePayload(BaseModel):
+    text: str
+    language: str = "ml"
+    gender: str = "female"
+
+@router.post("/voice/transcribe")
+async def voice_transcribe(payload: VoiceTranscribePayload):
+    """Transcribes audio voice query using Digital India NLTM Bhashini ASR."""
+    return await bhashini_service.transcribe_audio(payload.audio_base64, payload.language)
+
+@router.post("/voice/synthesize")
+async def voice_synthesize(payload: VoiceSynthesizePayload):
+    """Synthesizes vernacular speech advice using Digital India NLTM Bhashini TTS."""
+    return await bhashini_service.synthesize_speech(payload.text, payload.language, payload.gender)
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(req: ChatRequest):
@@ -293,5 +320,95 @@ async def demo_simulate_endpoint(payload: DemoSimulatePayload):
         "verification_audit": audit,
         "fisherman_voice_advisory": resp_text
     }
+
+# ── User Profile & Phone Sign-In Endpoints ──
+
+class PhoneLoginRequest(BaseModel):
+    phone: str
+    otp: Optional[str] = "1234"
+    name: Optional[str] = "Captain Murugan"
+    vessel_name: Optional[str] = "Matsya Sagar - KL-07-AB-402"
+    vessel_type: Optional[str] = "Motorized Country Craft (9.9 HP)"
+    home_port: Optional[str] = "Fort Kochi Coastal Harbor"
+
+class UserProfileUpdateRequest(BaseModel):
+    phone: str
+    name: str
+    vessel_name: str
+    vessel_type: str
+    home_port: str
+
+class VoyageLogRequest(BaseModel):
+    user_phone: str
+    voyage_date: Optional[str] = None
+    origin_name: str
+    destination_name: str
+    distance_nm: float
+    distance_km: float
+    duration_mins: float
+    fuel_liters: float
+    catch_kg: float
+    catch_species: str
+    safety_rating: Optional[str] = "SAFE"
+    notes: Optional[str] = "Optimal thermal front navigation."
+
+@router.post("/auth/phone-login")
+async def phone_login(payload: PhoneLoginRequest):
+    """Authenticate fisherman by mobile number (simulated OTP verification)."""
+    user = get_or_create_user(
+        phone=payload.phone,
+        name=payload.name or "Captain Murugan",
+        vessel_name=payload.vessel_name or "Matsya Sagar - KL-07-AB-402",
+        vessel_type=payload.vessel_type or "Motorized Country Craft (9.9 HP)",
+        home_port=payload.home_port or "Fort Kochi Coastal Harbor"
+    )
+    voyages = get_user_voyages(payload.phone)
+    return {
+        "status": "success",
+        "message": f"Welcome aboard, {user.get('name')}.",
+        "user": user,
+        "voyages": voyages
+    }
+
+@router.get("/user/profile")
+async def get_profile(phone: str = Query(...)):
+    """Fetch user profile and lifetime stats."""
+    user = get_or_create_user(phone=phone)
+    voyages = get_user_voyages(phone)
+    total_catch = sum(v.get("catch_kg", 0) for v in voyages)
+    total_fuel = sum(v.get("fuel_liters", 0) for v in voyages)
+    return {
+        "user": user,
+        "lifetime_stats": {
+            "total_voyages": len(voyages),
+            "total_catch_kg": round(total_catch, 1),
+            "total_fuel_liters": round(total_fuel, 1),
+            "estimated_fuel_saved_liters": round(len(voyages) * 0.55, 1)
+        }
+    }
+
+@router.post("/user/profile")
+async def update_profile(payload: UserProfileUpdateRequest):
+    """Update captain and vessel details."""
+    updated = update_user_profile(
+        phone=payload.phone,
+        name=payload.name,
+        vessel_name=payload.vessel_name,
+        vessel_type=payload.vessel_type,
+        home_port=payload.home_port
+    )
+    return {"status": "success", "user": updated}
+
+@router.get("/user/voyages")
+async def get_voyages(phone: str = Query(...)):
+    """Retrieve all historical voyages and catch logs for a fisherman."""
+    return get_user_voyages(phone)
+
+@router.post("/user/voyages")
+async def log_voyage(payload: VoyageLogRequest):
+    """Log a completed fishing voyage with catch metrics and captain's experience notes."""
+    saved = save_user_voyage(payload.model_dump())
+    return {"status": "success", "voyage": saved}
+
 
 

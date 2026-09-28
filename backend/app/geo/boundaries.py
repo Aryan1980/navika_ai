@@ -4,12 +4,12 @@ from typing import Dict, List, Any
 COASTAL_PRESETS: List[Dict[str, Any]] = [
     {
         "id": "kochi",
-        "name": "Kochi (Cochin)",
+        "name": "Kochi (Fort Kochi Coastal Harbor)",
         "state": "Kerala",
         "region": "Southwest Coast (Arabian Sea)",
-        "latitude": 9.9312,
-        "longitude": 76.2673,
-        "harbor": "Cochin Fisheries Harbour",
+        "latitude": 9.9650,
+        "longitude": 76.2220,
+        "harbor": "Fort Kochi Coastal Fishery Harbor",
         "key_species": ["Oil Sardine", "Mackerel", "Tuna", "Penaeid Shrimp"]
     },
     {

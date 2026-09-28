@@ -338,14 +338,14 @@ class ExplanationAndEvidenceAgent:
                         "gu": "Gujarati", "or": "Odia"
                     }
                     target_lang_name = lang_names.get(lang, "English")
-                    greet_prompt = f"""You are SamudraAI, the ISRO Agentic Marine Intelligence Assistant.
+                    greet_prompt = f"""You are SamudraAI, the official ISRO Agentic Marine Intelligence Helmsman Assistant.
 The user greeted you: "{query}".
-In {target_lang_name}, reply with a warm, polite, and helpful greeting. Introduce yourself as SamudraAI and concisely highlight that you provide:
-1. Real-time sea conditions (wave height, wind speed, swell)
-2. Potential Fishing Zones (PFZ) & ocean color data
-3. Safe navigational route planning avoiding shoals and hazards
-4. Maritime boundary (IMBL) geofence warnings
-Keep your response friendly, professional, and concise (under 4-5 sentences)."""
+In {target_lang_name}, reply with a professional, authoritative, yet courteous maritime greeting. Introduce yourself as SamudraAI and clearly state that you exclusively assist with:
+1. Real-time sea state (wave height, surface wind, swell, cyclones)
+2. Potential Fishing Zones (PFZ) & satellite ocean color
+3. Safe nautical voyage route planning avoiding shoals and marine hazards
+4. Maritime boundary (IMBL/MPA) geofence warnings
+Keep the response concise (under 4 sentences), respectful, and focused strictly on maritime operations."""
                     import concurrent.futures
                     def _call_gemini_greet():
                         for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
@@ -370,6 +370,31 @@ Keep your response friendly, professional, and concise (under 4-5 sentences)."""
                 except Exception:
                     pass
 
+            # Fallback 1b: Local Ollama Greeting
+            try:
+                import httpx
+                res = httpx.post(
+                    f"{settings.OLLAMA_BASE_URL}/api/generate",
+                    json={
+                        "model": settings.OLLAMA_MODEL,
+                        "prompt": f"You are SamudraAI, a professional marine intelligence assistant. Reply warmly in {lang} to this maritime greeting: '{query}'. Briefly mention sea state, fishing zones, and navigation safety.",
+                        "stream": False,
+                        "options": {"temperature": 0.3}
+                    },
+                    timeout=3.0
+                )
+                if res.status_code == 200:
+                    ollama_data = res.json()
+                    ollama_ans = ollama_data.get("response", "").strip()
+                    if ollama_ans:
+                        return {
+                            "direct_answer": ollama_ans,
+                            "safety_verdict": "SAFE",
+                            "recommendation": "Local AI ready. Inquire about sea state, PFZ, or safe routing."
+                        }
+            except Exception:
+                pass
+
             greeting_text = GREETING_TEMPLATES.get(lang, GREETING_TEMPLATES["en"])
             return {
                 "direct_answer": greeting_text,
@@ -377,48 +402,56 @@ Keep your response friendly, professional, and concise (under 4-5 sentences)."""
                 "recommendation": "SamudraAI operational. Ask about marine weather, PFZ, or safe routing."
             }
 
-        # 1. Check for live Gemini API synthesis for non-greeting queries
-        if settings.GEMINI_API_KEY:
-            try:
-                from google import genai
-                client = genai.Client(api_key=settings.GEMINI_API_KEY)
-                lang_names = {
-                    "en": "English", "hi": "Hindi", "ta": "Tamil", "te": "Telugu",
-                    "ml": "Malayalam", "kn": "Kannada", "bn": "Bengali", "mr": "Marathi",
-                    "gu": "Gujarati", "or": "Odia"
-                }
-                target_lang_name = lang_names.get(lang, "English")
+        # 1. Specialized Maritime Intelligence Prompt Construction
+        lang_names = {
+            "en": "English", "hi": "Hindi", "ta": "Tamil", "te": "Telugu",
+            "ml": "Malayalam", "kn": "Kannada", "bn": "Bengali", "mr": "Marathi",
+            "gu": "Gujarati", "or": "Odia"
+        }
+        target_lang_name = lang_names.get(lang, "English")
 
-                pfz_info = f"- Nearest PFZ: {pfzs[0].name} at {pfzs[0].distance_km} km ({pfzs[0].bearing_compass}), SST {pfzs[0].sst_c}°C, Chlorophyll {pfzs[0].chlorophyll_mg_m3} mg/m³" if pfzs else ""
-                route_info = f"- Routing: Shortest track {route.shortest_route.distance_km} km ({route.shortest_route.risk_level} risk) vs Safe route {route.safe_route.distance_km} km ({route.safe_route.risk_level} risk). Advisory: {route.reasoning}" if route else ""
-                boundary_info = f"- Boundary: Distance to {boundary_ctx['imbl']['name']} is {boundary_ctx['imbl']['distance_km']} km" if (boundary_ctx and 'imbl' in boundary_ctx) else ""
+        pfz_info = f"- Nearest PFZ: {pfzs[0].name} at {pfzs[0].distance_km} km ({pfzs[0].bearing_compass}), SST {pfzs[0].sst_c}°C, Chlorophyll {pfzs[0].chlorophyll_mg_m3} mg/m³" if pfzs else ""
+        route_info = f"- Routing: Shortest track {route.shortest_route.distance_km} km ({route.shortest_route.risk_level} risk) vs Safe route {route.safe_route.distance_km} km ({route.safe_route.risk_level} risk). Advisory: {route.reasoning}" if route else ""
+        boundary_info = f"- Boundary: Distance to {boundary_ctx['imbl']['name']} is {boundary_ctx['imbl']['distance_km']} km" if (boundary_ctx and 'imbl' in boundary_ctx) else ""
 
-                prompt = f"""You are SamudraAI, an operational AI assistant developed for the ISRO Marine Intelligence Platform.
+        specialized_prompt = f"""You are SamudraAI, the specialized operational AI helmsman for the ISRO Agentic Marine Intelligence Platform.
 USER QUERY: "{query}" (Intent: {intent})
-Synthesize an authoritative, highly informative, and empathetic maritime response in {target_lang_name} for coastal fishermen and researchers.
+TARGET LANGUAGE: {target_lang_name}
 
-STRICT GROUNDING FACTS (DO NOT ALTER OR HALLUCINATE):
-- Safety Verdict: {risk.safety_verdict} (Risk Level: {risk.risk_level}, Deterministic Score: {risk.overall_score}/100)
-- Official Recommendation: {risk.recommendation}
+=== STRICT SCOPE & REFUSAL POLICY ===
+1. EXCLUSIVE DOMAIN: You ONLY answer questions related to operational oceanography, marine weather, sea state (waves, wind, currents), potential fishing zones (PFZ), nautical voyage navigation, fish catch advisories, coastal geography, and Indian maritime borders (IMBL/MPA).
+2. REFUSAL RULE: If the user query is UNRELATED to marine operations, ocean conditions, fishing, vessel routing, or maritime safety (e.g., general programming, entertainment, pop culture, non-marine trivia, politics, recipes, homework, etc.), you MUST POLITELY AND FIRMLY REFUSE to answer in {target_lang_name}. State clearly:
+   "I am SamudraAI, an operational marine intelligence platform. I can only assist with oceanographic observations, marine weather, potential fishing zones (PFZ), vessel navigation, and maritime boundary safety within the Indian Exclusive Economic Zone (EEZ)."
+   Do NOT provide answers to off-topic questions.
+
+=== STRICT ANTI-HALLUCINATION GROUNDING (VERIFIED TELEMETRY) ===
+Never fabricate or hallucinate coordinates, buoy data, or weather forecasts. Strictly adhere to these verified facts:
+- Overall Safety Verdict: {risk.safety_verdict} (Risk Level: {risk.risk_level}, Safety Score: {risk.overall_score}/100)
+- Official Navigational Advisory: {risk.recommendation}
 - Surface Wind: {weather.wind_speed_kmh} km/h (Source: {weather.source})
-- Wave Height: {ocean.wave_height or weather.wave_height_m} m
-- SST: {ocean.sst}°C | Chlorophyll: {ocean.chlorophyll} mg/m³
+- Significant Wave Height: {ocean.wave_height or weather.wave_height_m} m
+- Sea Surface Temperature (SST): {ocean.sst}°C | Chlorophyll-a: {ocean.chlorophyll} mg/m³
 {pfz_info}
 {route_info}
 {boundary_info}
 
-FORMATTING REQUIREMENTS:
-- Directly and specifically address the user's question first.
-- Clearly state the Safety Verdict in {target_lang_name}.
-- Provide practical guidance for traditional fishermen and operators.
-- Preserve all physical values and units (km/h, m, °C, mg/m³) exactly as given.
-- Keep the tone serious, respectful, and suitable for an ISRO operational tool.
+=== FORMATTING & RESPONSE STYLE ===
+- Address the user's maritime question directly and concisely in {target_lang_name}.
+- Clearly include the Safety Verdict ({risk.safety_verdict}) in {target_lang_name}.
+- Preserve all physical units (km/h, m, °C, mg/m³, NM) exactly as measured.
+- Maintain an authoritative, professional, respectful tone suitable for working fishermen and maritime captains.
 """
+
+        # Tier 1: Cloud Gemini Inference
+        if settings.GEMINI_API_KEY:
+            try:
+                from google import genai
+                client = genai.Client(api_key=settings.GEMINI_API_KEY)
                 import concurrent.futures
                 def _call_gemini():
                     for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
                         try:
-                            res = client.models.generate_content(model=model_name, contents=prompt)
+                            res = client.models.generate_content(model=model_name, contents=specialized_prompt)
                             if res and res.text:
                                 return res.text.strip()
                         except Exception:
@@ -435,11 +468,35 @@ FORMATTING REQUIREMENTS:
                         "safety_verdict": risk.safety_verdict,
                         "recommendation": risk.recommendation
                     }
-            except Exception as e:
-                # Seamless fallback to deterministic multilingual template
+            except Exception:
                 pass
 
-        # 2. Deterministic Multilingual Template Synthesizer (Fallback / Offline)
+        # Tier 2: Local Ollama Inference Fallback (Offline / Internet-Outage Mode)
+        try:
+            import httpx
+            ollama_res = httpx.post(
+                f"{settings.OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": settings.OLLAMA_MODEL,
+                    "prompt": specialized_prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.2}
+                },
+                timeout=4.5
+            )
+            if ollama_res.status_code == 200:
+                ollama_json = ollama_res.json()
+                ollama_text = ollama_json.get("response", "").strip()
+                if ollama_text:
+                    return {
+                        "direct_answer": ollama_text,
+                        "safety_verdict": risk.safety_verdict,
+                        "recommendation": risk.recommendation
+                    }
+        except Exception:
+            pass
+
+        # Tier 3: Deterministic Multilingual Template Synthesizer (Zero-Internet Engine)
         t = MULTILINGUAL_TEMPLATES.get(lang, MULTILINGUAL_TEMPLATES["en"])
 
         title_map = {

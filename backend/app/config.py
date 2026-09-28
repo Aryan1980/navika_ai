@@ -71,6 +71,19 @@ class Settings(BaseModel):
     MOSDAC_USERNAME: str = os.getenv("MOSDAC_USERNAME", "")
     MOSDAC_PASSWORD: str = os.getenv("MOSDAC_PASSWORD", "")
 
+    # Ollama Local Offline LLM Configuration (fallback when internet unavailable)
+    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
+
+    # Digital India Bhashini ASR/TTS Configuration
+    BHASHINI_API_KEY: str = os.getenv("BHASHINI_API_KEY", "")
+    BHASHINI_USER_ID: str = os.getenv("BHASHINI_USER_ID", "")
+    BHASHINI_PIPELINE_ID: str = os.getenv("BHASHINI_PIPELINE_ID", "")
+    BHASHINI_INFERENCE_URL: str = os.getenv(
+        "BHASHINI_INFERENCE_URL",
+        "https://dhruva-api.bhashini.gov.in/services/inference/pipeline"
+    )
+
     # Risk Engine Configuration
     RISK: RiskThresholds = RiskThresholds()
 

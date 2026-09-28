@@ -94,9 +94,158 @@ def init_db():
                     created_at TEXT
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    phone TEXT PRIMARY KEY,
+                    name TEXT,
+                    vessel_name TEXT,
+                    vessel_type TEXT,
+                    home_port TEXT,
+                    created_at TEXT
+                )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS voyages (
+                    id TEXT PRIMARY KEY,
+                    user_phone TEXT,
+                    voyage_date TEXT,
+                    origin_name TEXT,
+                    destination_name TEXT,
+                    distance_nm REAL,
+                    distance_km REAL,
+                    duration_mins REAL,
+                    fuel_liters REAL,
+                    catch_kg REAL,
+                    catch_species TEXT,
+                    safety_rating TEXT,
+                    notes TEXT,
+                    created_at TEXT,
+                    FOREIGN KEY (user_phone) REFERENCES users(phone)
+                )
+            """)
             conn.commit()
     except Exception as e:
         print(f"Notice: SQLite init_db operating with in-memory or degraded state: {e}")
+
+def get_or_create_user(phone: str, name: str = "Captain Murugan", vessel_name: str = "Matsya Sagar - KL-07-AB-402", vessel_type: str = "Motorized Country Craft (9.9 HP)", home_port: str = "Fort Kochi Coastal Harbor") -> Dict[str, Any]:
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    clean_phone = phone.strip()
+    try:
+        with get_db() as conn:
+            cursor = conn.execute("SELECT * FROM users WHERE phone = ?", (clean_phone,))
+            row = cursor.fetchone()
+            if row:
+                return dict(row)
+            
+            conn.execute(
+                "INSERT INTO users (phone, name, vessel_name, vessel_type, home_port, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (clean_phone, name, vessel_name, vessel_type, home_port, now_str)
+            )
+            # Seed 3 default realistic voyages for this new captain so history is immediately rich
+            seed_voyages = [
+                (
+                    f"voy_{clean_phone}_1", clean_phone, "Yesterday, 05:30 AM", "Fort Kochi Coastal Harbor",
+                    "Nearshore Thermal Front Alpha", 3.8, 7.0, 24.0, 1.1, 340.0, "Indian Oil Sardine", "SAFE",
+                    "SST gradient front was highly visible with surface feeding schools. Good net haul under 45 mins.", now_str
+                ),
+                (
+                    f"voy_{clean_phone}_2", clean_phone, "3 days ago, 06:15 AM", "Fort Kochi Coastal Harbor",
+                    "Coastal Upwelling Convergence", 4.6, 8.5, 30.0, 1.4, 210.0, "Indian Mackerel & Anchovies", "SAFE",
+                    "Upwelling boundary water temperature dropped to 27.6°C. High quality commercial pelagic catch.", now_str
+                ),
+                (
+                    f"voy_{clean_phone}_3", clean_phone, "Last week, 05:00 AM", "Fort Kochi Coastal Harbor",
+                    "Nearshore Thermal Front Beta", 2.8, 5.2, 18.0, 0.8, 185.0, "Mixed Pelagics (Trevally, Sardine)", "SAFE",
+                    "Short nautical transit under 3 NM. Saved ~0.6 L engine fuel compared to blind coastal scouting.", now_str
+                )
+            ]
+            conn.executemany(
+                """INSERT OR IGNORE INTO voyages 
+                   (id, user_phone, voyage_date, origin_name, destination_name, distance_nm, distance_km, duration_mins, fuel_liters, catch_kg, catch_species, safety_rating, notes, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                seed_voyages
+            )
+            conn.commit()
+
+            cursor = conn.execute("SELECT * FROM users WHERE phone = ?", (clean_phone,))
+            return dict(cursor.fetchone())
+    except Exception as e:
+        return {
+            "phone": clean_phone,
+            "name": name,
+            "vessel_name": vessel_name,
+            "vessel_type": vessel_type,
+            "home_port": home_port,
+            "created_at": now_str
+        }
+
+def update_user_profile(phone: str, name: str, vessel_name: str, vessel_type: str, home_port: str) -> Dict[str, Any]:
+    clean_phone = phone.strip()
+    try:
+        with get_db() as conn:
+            conn.execute(
+                "UPDATE users SET name = ?, vessel_name = ?, vessel_type = ?, home_port = ? WHERE phone = ?",
+                (name, vessel_name, vessel_type, home_port, clean_phone)
+            )
+            conn.commit()
+            cursor = conn.execute("SELECT * FROM users WHERE phone = ?", (clean_phone,))
+            row = cursor.fetchone()
+            if row:
+                return dict(row)
+    except Exception:
+        pass
+    return {
+        "phone": clean_phone,
+        "name": name,
+        "vessel_name": vessel_name,
+        "vessel_type": vessel_type,
+        "home_port": home_port
+    }
+
+def get_user_voyages(phone: str) -> List[Dict[str, Any]]:
+    clean_phone = phone.strip()
+    try:
+        with get_db() as conn:
+            cursor = conn.execute(
+                "SELECT * FROM voyages WHERE user_phone = ? ORDER BY id DESC",
+                (clean_phone,)
+            )
+            return [dict(row) for row in cursor.fetchall()]
+    except Exception:
+        return []
+
+def save_user_voyage(voyage_data: Dict[str, Any]) -> Dict[str, Any]:
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    voy_id = voyage_data.get("id") or f"voy_{int(datetime.now(timezone.utc).timestamp()*1000)}"
+    try:
+        with get_db() as conn:
+            conn.execute(
+                """INSERT INTO voyages 
+                   (id, user_phone, voyage_date, origin_name, destination_name, distance_nm, distance_km, duration_mins, fuel_liters, catch_kg, catch_species, safety_rating, notes, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    voy_id,
+                    voyage_data.get("user_phone", ""),
+                    voyage_data.get("voyage_date") or datetime.now().strftime("%d %b %Y, %I:%M %p"),
+                    voyage_data.get("origin_name", "Fort Kochi Harbor"),
+                    voyage_data.get("destination_name", "Nearshore Thermal Front"),
+                    float(voyage_data.get("distance_nm", 0.0)),
+                    float(voyage_data.get("distance_km", 0.0)),
+                    float(voyage_data.get("duration_mins", 0.0)),
+                    float(voyage_data.get("fuel_liters", 0.0)),
+                    float(voyage_data.get("catch_kg", 0.0)),
+                    voyage_data.get("catch_species", "Mixed Pelagics"),
+                    voyage_data.get("safety_rating", "SAFE"),
+                    voyage_data.get("notes", "Good weather and calm sea conditions."),
+                    now_str
+                )
+            )
+            conn.commit()
+    except Exception as e:
+        print(f"Notice saving voyage: {e}")
+    voyage_data["id"] = voy_id
+    voyage_data["created_at"] = now_str
+    return voyage_data
 
 def save_message(conv_id: str, role: str, content: str, meta: Optional[Dict[str, Any]] = None):
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")

