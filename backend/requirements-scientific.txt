@@ -1,0 +1,4 @@
+# Extended scientific HDF5 & NetCDF dependencies for local workstation & Docker container execution
+xarray>=2024.1.0
+h5py>=3.10.0
+netCDF4>=1.6.5
