@@ -54,7 +54,7 @@ class RiskThresholds(BaseModel):
     MISSING_DATA_PENALTY: float = 0.35
 
 class Settings(BaseModel):
-    PROJECT_NAME: str = "SamudraAI ? Agentic Marine Intelligence Platform"
+    PROJECT_NAME: str = "SamudraAI - Agentic Marine Intelligence Platform"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     IS_DEMO_MODE: bool = False

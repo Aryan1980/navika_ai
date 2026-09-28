@@ -24,9 +24,17 @@ from app.geo.boundaries import MARINE_PROTECTED_AREAS, RESTRICTED_ZONES, IMBL_BO
 from app.geo.geofence import is_point_in_polygon, distance_to_polygon
 from app.geo.calculations import haversine_distance, calculate_bearing, destination_point
 
-logger = logging.getLogger("mosdac_provider")
+import tempfile
 
-REGISTRY_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "mosdac", "mosdac_registry.json"))
+def _resolve_registry_file() -> str:
+    local_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "mosdac", "mosdac_registry.json"))
+    if os.path.exists(local_path):
+        return local_path
+    if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("LAMBDA_TASK_ROOT"):
+        return os.path.join(tempfile.gettempdir(), "mosdac_registry.json")
+    return local_path
+
+REGISTRY_FILE = _resolve_registry_file()
 
 
 class MOSDACProvider(MarineDataProvider):
@@ -82,12 +90,18 @@ class MOSDACProvider(MarineDataProvider):
 
     def _save_registry(self):
         """Persists registry to disk."""
+        target = REGISTRY_FILE
         try:
-            os.makedirs(os.path.dirname(REGISTRY_FILE), exist_ok=True)
-            with open(REGISTRY_FILE, "w", encoding="utf-8") as f:
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with open(target, "w", encoding="utf-8") as f:
                 json.dump(self.registry, f, indent=2)
         except Exception as e:
-            logger.error(f"Failed to save MOSDAC registry: {e}")
+            try:
+                temp_file = os.path.join(tempfile.gettempdir(), "mosdac_registry.json")
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    json.dump(self.registry, f, indent=2)
+            except Exception as ex:
+                logger.warning(f"Could not save MOSDAC registry to disk: {ex}")
 
     def sync_dataset(self, category: str, force_download: bool = False) -> Dict[str, Any]:
         """Discovers, retrieves, and validates the latest file for a given category."""
