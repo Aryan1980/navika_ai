@@ -4,7 +4,10 @@ import time
 import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 
 logger = logging.getLogger("mosdac_client")
 
