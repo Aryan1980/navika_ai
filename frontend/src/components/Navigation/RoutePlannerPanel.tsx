@@ -20,6 +20,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { voiceService } from '../../services/voice';
 import { getTranslation } from '../../utils/translations';
+import { localizeInstruction, localizeDestination, getLocalizedPortName } from '../../utils/locationTranslations';
 
 export const RoutePlannerPanel: React.FC = () => {
   const {
@@ -36,11 +37,11 @@ export const RoutePlannerPanel: React.FC = () => {
         <div className="w-14 h-14 rounded-2xl bg-[#384959] border border-[#6A89A7]/40 flex items-center justify-center text-[#88BDF2] mb-3.5 shadow-md">
           <Navigation className="w-7 h-7" />
         </div>
-        <h3 className="text-base font-bold text-white tracking-tight">
-          {getTranslation('maps_for_ocean', language)}
+        <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+          {getTranslation('nav_route', language)}
         </h3>
         <p className="text-xs sm:text-sm text-[#BDDDFC] mt-2 max-w-md leading-relaxed">
-          {getTranslation('route_planner_title', language)}. Select any dynamic Potential Fishing Zone (PFZ) or issue a natural language query to plot an evidence-based nautical voyage route with turn-by-turn guidance and dynamic hazard avoidance.
+          {getTranslation('route_planner_empty_desc', language)}
         </p>
 
         <button
@@ -64,10 +65,10 @@ export const RoutePlannerPanel: React.FC = () => {
   const speakTurnByTurn = () => {
     const voicePrefix = getTranslation('nautical_guidance_voice', language);
     if (safe_route.turn_by_turn_instructions && safe_route.turn_by_turn_instructions.length > 0) {
-      const fullGuide = safe_route.turn_by_turn_instructions.join('. ');
+      const fullGuide = safe_route.turn_by_turn_instructions.map(i => localizeInstruction(i, language)).join('. ');
       voiceService.speak(`${voicePrefix}: ${fullGuide}`, language);
     } else {
-      voiceService.speak(safe_route.description, language);
+      voiceService.speak(localizeInstruction(safe_route.description, language), language);
     }
   };
 
@@ -79,20 +80,19 @@ export const RoutePlannerPanel: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#384959]">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-[#384959] border border-[#6A89A7]/40 flex items-center justify-center text-[#88BDF2] shadow-sm flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#384959] border border-[#6A89A7]/40 flex items-center justify-center text-[#88BDF2] shadow-sm flex-shrink-0">
             <Navigation className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
-                {getTranslation('maps_for_ocean', language)}
-              </h3>
-              <span className="px-2 py-0.5 rounded bg-[#384959] text-[#88BDF2] border border-[#88BDF2]/40 font-mono text-[10px] font-bold whitespace-nowrap">
-                {getTranslation('nautical_route_active', language)}
+            <div>
+              <span className="px-3 py-1 rounded-lg bg-[#384959] text-[#88BDF2] border border-[#88BDF2]/40 text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 shadow-sm">
+                <Navigation className="w-3.5 h-3.5 text-[#88BDF2]" />
+                <span>{getTranslation('nautical_route_active', language)}</span>
               </span>
             </div>
-            <p className="text-xs text-[#BDDDFC] font-mono truncate max-w-[340px] mt-0.5">
-              {getTranslation('destination_label', language)}: <span className="text-[#88BDF2] font-semibold">{targetName}</span>
+            <p className="text-xs sm:text-sm text-[#BDDDFC] font-medium truncate max-w-[360px] mt-1.5">
+              {getTranslation('destination_label', language)}:{' '}
+              <span className="text-white font-bold">{localizeDestination(targetName, language)}</span>
             </p>
           </div>
         </div>
@@ -169,7 +169,7 @@ export const RoutePlannerPanel: React.FC = () => {
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-[#384959] text-xs text-[#F1F5F9] leading-relaxed font-sans">
-              {safe_route.description}
+              {localizeInstruction(safe_route.description, language)}
             </div>
           </div>
 
@@ -241,13 +241,13 @@ export const RoutePlannerPanel: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {safe_route.turn_by_turn_instructions.map((inst, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 p-3 rounded-xl bg-[#1E2632] border border-[#384959] text-xs sm:text-sm text-[#F1F5F9]">
-                  <span className="w-5 h-5 rounded-full bg-[#384959] border border-[#88BDF2]/40 text-[#88BDF2] text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-[#1E2632] border border-[#384959] text-sm text-[#F1F5F9] shadow-sm">
+                  <span className="w-6 h-6 rounded-full bg-[#384959] border border-[#88BDF2]/40 text-[#88BDF2] text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
-                  <span className="leading-relaxed font-normal">{inst}</span>
+                  <span className="leading-relaxed font-medium">{localizeInstruction(inst, language)}</span>
                 </div>
               ))}
             </div>
@@ -258,19 +258,20 @@ export const RoutePlannerPanel: React.FC = () => {
         {refuge && refuge.name && (
           <div className="p-4 rounded-xl bg-[#2A3744] border border-[#384959]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+              <span className="text-sm font-bold text-white flex items-center gap-2">
                 <LifeBuoy className="w-4 h-4 text-[#88BDF2]" />
                 {getTranslation('nearest_emergency_port', language)}
               </span>
-              <span className="font-mono text-[10px] text-[#88BDF2] bg-[#384959] border border-[#88BDF2]/30 px-2 py-0.5 rounded font-bold">
+              <span className="text-xs text-[#88BDF2] bg-[#384959] border border-[#88BDF2]/30 px-2.5 py-0.5 rounded-lg font-bold">
                 {getTranslation('shelter_harbor', language)}
               </span>
             </div>
-            <p className="text-sm text-white font-semibold">
-              {refuge.name} &mdash; <span className="font-mono text-[#88BDF2] font-bold">{refuge.distance_nm} NM ({refuge.distance_km} km)</span>
+            <p className="text-base text-white font-bold">
+              {getLocalizedPortName(refuge.name, language)} &mdash;{' '}
+              <span className="font-mono text-[#88BDF2]">{refuge.distance_nm} NM ({refuge.distance_km} km)</span>
             </p>
-            <p className="text-xs text-[#BDDDFC] mt-1 font-mono">
-              {refuge.instruction} (Transit: ~{refuge.transit_time_minutes} mins)
+            <p className="text-xs sm:text-sm text-[#BDDDFC] mt-1.5 leading-relaxed font-sans">
+              {localizeInstruction(refuge.instruction, language)} (Transit: ~{refuge.transit_time_minutes} mins)
             </p>
           </div>
         )}
@@ -282,11 +283,11 @@ export const RoutePlannerPanel: React.FC = () => {
             <span className="text-xs sm:text-sm font-bold text-white">{getTranslation('navigation_rationale', language)}</span>
           </div>
           <p className="text-xs sm:text-sm text-[#F1F5F9] leading-relaxed">
-            {recommendation}
+            {localizeInstruction(recommendation, language)}
           </p>
           {reasoning && (
             <div className="mt-2.5 text-xs text-[#BDDDFC] font-mono bg-[#1E2632] p-3 rounded-lg border border-[#384959] leading-relaxed">
-              {reasoning}
+              {localizeInstruction(reasoning, language)}
             </div>
           )}
         </div>
@@ -314,9 +315,9 @@ export const RoutePlannerPanel: React.FC = () => {
                     {idx + 1}
                   </span>
                   <div>
-                    <span className="text-white font-sans text-xs sm:text-sm font-semibold">{wp.name}</span>
+                    <span className="text-white font-sans text-xs sm:text-sm font-semibold">{localizeDestination(wp.name, language)}</span>
                     {wp.instruction && (
-                      <span className="block text-xs text-[#88BDF2] font-mono mt-0.5">{wp.instruction}</span>
+                      <span className="block text-xs text-[#88BDF2] font-mono mt-0.5">{localizeInstruction(wp.instruction, language)}</span>
                     )}
                   </div>
                 </div>

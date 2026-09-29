@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Waves, Thermometer, Wind, Ship, ChevronDown } from 'lucide-react';
+import { getTranslation } from '../../utils/translations';
 
 export const OceanDynamicsPanel: React.FC = () => {
-  const { weather, ocean, pfzs } = useApp();
+  const { weather, ocean, pfzs, language } = useApp();
   const [timeframe, setTimeframe] = useState<'Live' | '24h' | 'Week'>('Live');
 
   const safeCount = pfzs.filter((p) => p.safety_rating === 'SAFE').length || 4;
@@ -37,15 +38,15 @@ export const OceanDynamicsPanel: React.FC = () => {
         <div className="flex items-center justify-between pb-2">
           <div>
             <h3 className="text-sm font-semibold text-white tracking-tight font-sans">
-              Ocean Dynamics & Swell Wave Transit
+              {getTranslation('ocean_dynamics_title', language)}
             </h3>
             <span className="text-[11px] text-[#A8C4EC]/75 font-mono">
-              In-situ wave elevation & thermal front gradient
+              {getTranslation('ocean_dynamics_sub', language)}
             </span>
           </div>
 
           <div className="flex items-center gap-1.5 bg-[#151926] border border-[#5379AE]/30 rounded-lg px-2.5 py-1 text-[11px] text-[#A8C4EC] font-mono">
-            <span>{timeframe}</span>
+            <span>{timeframe === 'Live' ? getTranslation('timeframe_live', language) : timeframe === '24h' ? getTranslation('timeframe_24h', language) : getTranslation('timeframe_week', language)}</span>
             <ChevronDown className="w-3 h-3 text-[#5379AE]" />
           </div>
         </div>
@@ -55,7 +56,7 @@ export const OceanDynamicsPanel: React.FC = () => {
           
           {/* Floating Data Badge Node */}
           <div className="absolute top-2 right-1/3 z-10 bg-[#151926]/95 border border-[#0474C4]/50 px-3 py-1.5 rounded-xl text-[10px] font-mono shadow-xl backdrop-blur-md">
-            <div className="text-[#A8C4EC]/75 text-[9px]">Today · Peak Swell Sensor</div>
+            <div className="text-[#A8C4EC]/75 text-[9px]">{getTranslation('peak_swell_sensor', language)}</div>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-emerald-300 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -117,7 +118,7 @@ export const OceanDynamicsPanel: React.FC = () => {
         {/* Status Overview with Segmented Progress Bar */}
         <div className="col-span-7 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-white font-sans">Sector Safety Distribution</span>
+            <span className="text-xs font-semibold text-white font-sans">{getTranslation('sector_safety_dist', language)}</span>
             <span className="text-[10px] text-[#5379AE] font-mono">Real-time</span>
           </div>
 
@@ -126,30 +127,30 @@ export const OceanDynamicsPanel: React.FC = () => {
             <div
               className="h-full rounded-full bg-emerald-400 transition-all shadow-[0_0_8px_rgba(52,211,153,0.3)]"
               style={{ width: `${safePct}%` }}
-              title={`Safe: ${safeCount}`}
+              title={`${getTranslation('safe_status', language)}: ${safeCount}`}
             />
             <div
               className="h-full rounded-full bg-amber-400 transition-all shadow-[0_0_8px_rgba(251,191,36,0.3)]"
               style={{ width: `${cautionPct}%` }}
-              title={`Caution: ${cautionCount}`}
+              title={`${getTranslation('caution_status', language)}: ${cautionCount}`}
             />
             <div
               className="h-full rounded-full bg-rose-500 transition-all shadow-[0_0_8px_rgba(244,63,94,0.3)]"
               style={{ width: `${avoidPct}%` }}
-              title={`Avoid: ${avoidCount}`}
+              title={`${getTranslation('avoid_status', language)}: ${avoidCount}`}
             />
           </div>
 
           {/* Legend */}
           <div className="flex items-center gap-3 text-[10px] font-mono">
             <span className="flex items-center gap-1 text-[#f1f5fb]">
-              <span className="w-2 h-2 rounded-sm bg-emerald-400"></span> Safe ({safeCount})
+              <span className="w-2 h-2 rounded-sm bg-emerald-400"></span> {getTranslation('safe_status', language)} ({safeCount})
             </span>
             <span className="flex items-center gap-1 text-[#f1f5fb]">
-              <span className="w-2 h-2 rounded-sm bg-amber-400"></span> Caution ({cautionCount})
+              <span className="w-2 h-2 rounded-sm bg-amber-400"></span> {getTranslation('caution_status', language)} ({cautionCount})
             </span>
             <span className="flex items-center gap-1 text-[#f1f5fb]">
-              <span className="w-2 h-2 rounded-sm bg-rose-500"></span> Avoid ({avoidCount})
+              <span className="w-2 h-2 rounded-sm bg-rose-500"></span> {getTranslation('avoid_status', language)} ({avoidCount})
             </span>
           </div>
         </div>
@@ -157,12 +158,12 @@ export const OceanDynamicsPanel: React.FC = () => {
         {/* Fleet / Craft Counter */}
         <div className="col-span-5 flex items-center justify-between pl-3 border-l border-[#5379AE]/20">
           <div>
-            <span className="text-[10px] text-[#A8C4EC]/75 block font-sans font-medium">Vessels in Sector</span>
+            <span className="text-[10px] text-[#A8C4EC]/75 block font-sans font-medium">{getTranslation('vessels_in_sector', language)}</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-xs font-mono font-bold text-emerald-400">+4</span>
               <span className="text-2xl font-mono font-bold text-white leading-none">38</span>
             </div>
-            <span className="text-[9px] text-[#5379AE] font-mono">AIS tracked</span>
+            <span className="text-[9px] text-[#5379AE] font-mono">{getTranslation('ais_tracked', language)}</span>
           </div>
 
           <div className="w-11 h-10 rounded-xl bg-[#151926] border border-[#5379AE]/30 flex items-center justify-center text-lg shadow-inner">

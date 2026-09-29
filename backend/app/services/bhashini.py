@@ -47,14 +47,22 @@ class BhashiniService:
         Returns:
             Dict containing transcription text, detected language, and provider status.
         """
-        target_lang = BHASHINI_LANG_MAP.get(language.lower(), "ml")
+        target_lang = BHASHINI_LANG_MAP.get(language.lower(), "hi")
         
-        # If API key is not configured, return an informative fallback response
+        # If API key is not configured, return an informative fallback response in requested language
         if not self.api_key:
             logger.info("Bhashini API Key not set. Using local speech pipeline simulation.")
+            simulated_queries = {
+                "hi": "सुरक्षित समुद्री मार्ग और निकटतम मत्स्य पालन क्षेत्र दिखाएं",
+                "ml": "സുരക്ഷിത പാതയും ഏറ്റവും അടുത്ത മത്സ്യബന്ധന മേഖലയും കാണിക്കുക",
+                "ta": "பாதுகாப்பான கடல் பாதை மற்றும் அருகிலுள்ள மீன்பிடி மண்டலத்தைக் காட்டுங்கள்",
+                "te": "సురక్షిత సముద్ర మార్గం మరియు సమీప చేపల వేట ప్రాంతాన్ని చూపించు",
+                "bn": "নিরাপদ সমুদ্র রুট এবং নিকটতম মাছ ধরার অঞ্চল দেখান",
+                "en": "Show safe nautical route and nearest potential fishing zone"
+            }
             return {
                 "success": True,
-                "text": "സുരക്ഷിത പാതയും ഏറ്റവും അടുത്ത മത്സ്യബന്ധന മേഖലയും കാണിക്കുക",  # Sample Malayalam marine query
+                "text": simulated_queries.get(target_lang, simulated_queries.get("en", "Show safe route")),
                 "language": target_lang,
                 "source": "simulated_local",
                 "message": "Bhashini API key not configured. Dispatched simulated maritime speech transcription."

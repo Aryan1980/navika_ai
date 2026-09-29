@@ -10,9 +10,11 @@ import { LocationSetupView } from './components/Onboarding/LocationSetupView';
 import { RoutePlannerPanel } from './components/Navigation/RoutePlannerPanel';
 import { PhoneAuthModal } from './components/Auth/PhoneAuthModal';
 import { CaptainProfileModal } from './components/Profile/CaptainProfileModal';
+import { DualSyncModeBanner } from './components/Navigation/DualSyncModeBanner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Sun, MapPin, Layers, User, Phone, Globe } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getTranslation } from './utils/translations';
+import { getLocalizedPortName } from './utils/locationTranslations';
 
 const DashboardView: React.FC = () => {
   const {
@@ -91,9 +93,11 @@ const DashboardView: React.FC = () => {
             </div>
 
             {/* Active Port Chip */}
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-[#BDDDFC] font-mono">
-              <MapPin className="w-3.5 h-3.5 text-[#88BDF2]" />
-              <span className="truncate max-w-[150px] sm:max-w-[220px] font-medium text-white">{activeLocationName}</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-[#BDDDFC]">
+              <MapPin className="w-3.5 h-3.5 text-[#88BDF2] flex-shrink-0" />
+              <span className="truncate max-w-[150px] sm:max-w-[240px] font-medium text-white text-xs sm:text-sm">
+                {getLocalizedPortName(activeLocationName, language)}
+              </span>
             </div>
 
             {/* Date & Weather Indicator */}
@@ -126,6 +130,9 @@ const DashboardView: React.FC = () => {
             )}
           </div>
         </header>
+
+        {/* ── Dual Sync Mode Indicator Bar ── */}
+        <DualSyncModeBanner />
 
         {/* ── Viewport Contents by Active Tab ── */}
         <div className="flex-1 relative overflow-hidden">

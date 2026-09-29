@@ -25,6 +25,12 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Coordinates } from '../../types/marine';
 import { SUPPORTED_LANGUAGES, getTranslation } from '../../utils/translations';
+import {
+  getLocalizedPortName,
+  getLocalizedState,
+  getLocalizedSea,
+  getLocalizedSpecies
+} from '../../utils/locationTranslations';
 
 interface HarborOption {
   id: string;
@@ -632,14 +638,21 @@ export const LocationSetupView: React.FC = () => {
               {/* Mode 1: Major Coastal Harbors */}
               {activeTab === 'harbor' && (
                 <div className="p-6">
-                  <div className="text-xs text-[#BDDDFC] mb-4 flex items-center justify-between font-mono">
-                    <span className="font-semibold">Select departure harbor along the Indian coastline:</span>
-                    <span className="text-[#88BDF2] font-bold">{MAJOR_HARBORS.length} Coastal Ports</span>
+                  <div className="text-sm text-[#BDDDFC] mb-4 flex items-center justify-between font-sans">
+                    <span className="font-semibold">{getTranslation('select_departure_coastline', language)}</span>
+                    <span className="text-[#88BDF2] font-bold bg-[#384959]/50 px-2.5 py-1 rounded-lg border border-[#88BDF2]/30 text-xs sm:text-sm">
+                      {getTranslation('coastal_ports_count', language)}
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[380px] overflow-y-auto pr-1">
                     {MAJOR_HARBORS.map((h) => {
                       const isSelected = selectedHarbor.id === h.id;
+                      const localizedName = getLocalizedPortName(h.id, language);
+                      const localizedState = getLocalizedState(h.state, language);
+                      const localizedSea = getLocalizedSea(h.sea, language);
+                      const localizedSpecies = getLocalizedSpecies(h.species, language);
+
                       return (
                         <div
                           key={h.id}
@@ -653,24 +666,26 @@ export const LocationSetupView: React.FC = () => {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <div className="font-semibold text-sm text-white flex items-center gap-2">
-                                <Anchor className={`w-4 h-4 ${isSelected ? 'text-[#88BDF2]' : 'text-[#6A89A7]'}`} />
-                                <span>{h.name}</span>
+                              <div className="font-bold text-base text-white flex items-center gap-2">
+                                <Anchor className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-[#88BDF2]' : 'text-[#6A89A7]'}`} />
+                                <span className="leading-snug">{localizedName}</span>
                               </div>
-                              <div className="text-xs text-[#BDDDFC]/80 mt-1">
-                                {h.state} • <span className="text-[#88BDF2] font-medium">{h.sea}</span>
+                              <div className="text-xs sm:text-sm text-[#BDDDFC] mt-1 font-medium">
+                                {localizedState} • <span className="text-[#88BDF2] font-semibold">{localizedSea}</span>
                               </div>
                             </div>
 
-                            <span className="font-mono text-xs text-[#BDDDFC] px-2 py-0.5 rounded bg-[#263140] border border-[#6A89A7]/40 font-semibold">
+                            <span className="font-mono text-xs sm:text-sm text-[#BDDDFC] px-2.5 py-1 rounded-lg bg-[#263140] border border-[#6A89A7]/40 font-semibold whitespace-nowrap">
                               {h.latitude.toFixed(2)}°N, {h.longitude.toFixed(2)}°E
                             </span>
                           </div>
 
-                          <div className="mt-3 pt-2.5 border-t border-[#384959]/50 flex items-center justify-between text-xs">
-                            <span className="text-[#BDDDFC]/80 flex items-center gap-1.5">
-                              <Fish className="w-3.5 h-3.5 text-[#88BDF2]" />
-                              <span className="truncate max-w-[160px] text-slate-300 font-mono text-[11px]">{h.species.slice(0, 2).join(', ')}</span>
+                          <div className="mt-3.5 pt-2.5 border-t border-[#384959]/50 flex items-center justify-between text-xs sm:text-sm">
+                            <span className="text-[#BDDDFC] flex items-center gap-1.5 min-w-0">
+                              <Fish className="w-4 h-4 text-[#88BDF2] flex-shrink-0" />
+                              <span className="truncate max-w-[190px] text-slate-200 font-medium text-xs sm:text-sm">
+                                {localizedSpecies.slice(0, 2).join(', ')}
+                              </span>
                             </span>
                             
                             <button
@@ -679,9 +694,9 @@ export const LocationSetupView: React.FC = () => {
                                 e.stopPropagation();
                                 handleConfirmHarbor(h);
                               }}
-                              className="btn-signature btn-signature-sm !py-1.5 !px-3 !text-xs group"
+                              className="btn-signature btn-signature-sm !py-2 !px-3.5 !text-xs sm:!text-sm font-bold flex items-center gap-1.5 group flex-shrink-0"
                             >
-                              <span>Select Port</span>
+                              <span>{getTranslation('select_port_btn', language)}</span>
                               <span className="transition-transform group-hover:translate-x-0.5 font-sans">→</span>
                             </button>
                           </div>
@@ -692,12 +707,16 @@ export const LocationSetupView: React.FC = () => {
 
                   {/* Bottom Confirm Bar */}
                   <div className="mt-6 pt-4 border-t border-[#384959]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="text-xs sm:text-sm text-[#BDDDFC] font-mono">
-                      Selected: <strong className="font-bold text-white">{selectedHarbor.name}</strong> ({selectedHarbor.state})
+                    <div className="text-sm sm:text-base text-[#BDDDFC]">
+                      <span className="font-medium mr-1.5">{getTranslation('selected_port_label', language)}</span>
+                      <strong className="font-bold text-white text-base sm:text-lg">
+                        {getLocalizedPortName(selectedHarbor.id, language)}
+                      </strong>{' '}
+                      <span className="text-[#88BDF2]">({getLocalizedState(selectedHarbor.state, language)})</span>
                     </div>
                     <button
                       onClick={() => handleConfirmHarbor(selectedHarbor)}
-                      className="btn-signature w-full sm:w-auto px-6 py-3 cursor-pointer group shadow-lg text-xs sm:text-sm"
+                      className="btn-signature w-full sm:w-auto px-6 py-3 cursor-pointer group shadow-lg text-sm sm:text-base font-bold"
                     >
                       <span>{getTranslation('launch_navigation_button', language)}</span>
                       <span className="text-[#BDDDFC] transition-transform duration-200 group-hover:translate-x-1 font-sans">→</span>

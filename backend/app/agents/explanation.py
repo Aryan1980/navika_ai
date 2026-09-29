@@ -435,6 +435,12 @@ Never fabricate or hallucinate coordinates, buoy data, or weather forecasts. Str
 {route_info}
 {boundary_info}
 
+=== STRICT LANGUAGE ENFORCEMENT ===
+MANDATORY: You MUST compose your entire response exclusively in {target_lang_name} (Language code: {lang}).
+Do NOT use English words or sentences (except for standard SI units like km, km/h, m, °C, NM, mg/m³ and coordinates).
+Even if the user query was typed in English, you MUST strictly respond in {target_lang_name}.
+Every sentence, advisory, warning, and recommendation MUST be in natural, professional {target_lang_name}.
+
 === FORMATTING & RESPONSE STYLE ===
 - Address the user's maritime question directly and concisely in {target_lang_name}.
 - Clearly include the Safety Verdict ({risk.safety_verdict}) in {target_lang_name}.

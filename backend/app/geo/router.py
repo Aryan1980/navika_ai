@@ -1,4 +1,4 @@
-"""Google Maps for the Ocean: Nautical Marine Navigation and Safe Route Engine.
+"""Nautical Marine Navigation and Safe Corridor Routing Engine.
 
 Provides multi-waypoint nautical pathfinding, hazard avoidance (MPAs, Restricted Zones,
 Squall/High-Wave cells), turn-by-turn compass bearings, leg-by-leg ETAs, fuel consumption
@@ -215,6 +215,7 @@ def plan_navigation_route(
         # Fall back cleanly to geometric coastal routing
         searoute_success = False
 
+    offset_dist = 6.0
     if not searoute_success:
         if intersected_hazards:
             # Build intelligent detour waypoints around hazard perimeter
