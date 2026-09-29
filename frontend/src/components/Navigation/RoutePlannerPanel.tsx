@@ -80,17 +80,17 @@ export const RoutePlannerPanel: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#384959]">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#384959] border border-[#6A89A7]/40 flex items-center justify-center text-[#88BDF2] shadow-sm flex-shrink-0">
-            <Navigation className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-xl bg-[#384959] border border-[#6A89A7]/40 flex items-center justify-center text-[#88BDF2] shadow-sm flex-shrink-0">
+            <Navigation className="w-6 h-6" />
           </div>
           <div className="min-w-0">
             <div>
               <span className="px-3 py-1 rounded-lg bg-[#384959] text-[#88BDF2] border border-[#88BDF2]/40 text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 shadow-sm">
-                <Navigation className="w-3.5 h-3.5 text-[#88BDF2]" />
+                <Navigation className="w-4 h-4 text-[#88BDF2]" />
                 <span>{getTranslation('nautical_route_active', language)}</span>
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-[#BDDDFC] font-medium truncate max-w-[360px] mt-1.5">
+            <p className="text-sm sm:text-base text-[#BDDDFC] font-medium truncate max-w-[380px] mt-1.5">
               {getTranslation('destination_label', language)}:{' '}
               <span className="text-white font-bold">{localizeDestination(targetName, language)}</span>
             </p>
@@ -100,7 +100,7 @@ export const RoutePlannerPanel: React.FC = () => {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={speakTurnByTurn}
-            className="flex items-center gap-1.5 text-xs text-[#BDDDFC] hover:text-white bg-[#384959] hover:bg-[#2A3744] border border-[#6A89A7]/40 px-3 py-1.5 rounded-xl transition-colors cursor-pointer font-medium"
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-[#BDDDFC] hover:text-white bg-[#384959] hover:bg-[#2A3744] border border-[#6A89A7]/40 px-3.5 py-2 rounded-xl transition-colors cursor-pointer font-medium"
             title="Read turn-by-turn nautical navigation aloud"
           >
             <Volume2 className="w-4 h-4 text-[#88BDF2]" />
@@ -109,7 +109,7 @@ export const RoutePlannerPanel: React.FC = () => {
 
           <button
             onClick={clearRoute}
-            className="flex items-center gap-1 text-xs text-[#BDDDFC]/80 hover:text-rose-400 bg-[#1E2632] hover:bg-rose-500/10 border border-[#384959] hover:border-rose-500/30 px-3 py-1.5 rounded-xl transition-colors cursor-pointer font-medium"
+            className="flex items-center gap-1 text-xs sm:text-sm text-[#BDDDFC]/80 hover:text-rose-400 bg-[#1E2632] hover:bg-rose-500/10 border border-[#384959] hover:border-rose-500/30 px-3.5 py-2 rounded-xl transition-colors cursor-pointer font-medium"
             title="Clear route"
           >
             <XCircle className="w-4 h-4" />
@@ -125,92 +125,92 @@ export const RoutePlannerPanel: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           
           {/* Card 1: Safe Nautical Route (Recommended) */}
-          <div className="p-4 rounded-xl border border-[#88BDF2]/50 bg-[#2A3744] flex flex-col justify-between relative overflow-hidden shadow-md">
+          <div className="p-4 sm:p-5 rounded-xl border border-[#88BDF2]/50 bg-[#2A3744] flex flex-col justify-between relative overflow-hidden shadow-md">
             <div>
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <span className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-white">
-                  <ShieldCheck className="w-4 h-4 text-[#88BDF2] flex-shrink-0" />
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="flex items-center gap-2 font-bold text-sm sm:text-base text-white">
+                  <ShieldCheck className="w-5 h-5 text-[#88BDF2] flex-shrink-0" />
                   {getTranslation('recommended_safe_route', language)}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-[#384959] text-[#88BDF2] border border-[#88BDF2]/40 text-[10px] font-mono font-bold flex-shrink-0">
+                <span className="px-2.5 py-0.5 rounded bg-[#384959] text-[#88BDF2] border border-[#88BDF2]/40 text-xs font-mono font-bold flex-shrink-0">
                   {getTranslation('hazard_free_badge', language)}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 font-mono my-2.5">
-                <div className="bg-[#1E2632] p-2.5 rounded-lg border border-[#384959]">
-                  <span className="text-[#BDDDFC]/70 block text-[10px] uppercase font-semibold">{getTranslation('distance_label', language)}</span>
-                  <span className="text-white font-bold text-sm sm:text-base">{safe_route.distance_km} km</span>
+              <div className="grid grid-cols-2 gap-2.5 font-mono my-3">
+                <div className="bg-[#1E2632] p-3 rounded-lg border border-[#384959]">
+                  <span className="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">{getTranslation('distance_label', language)}</span>
+                  <span className="text-white font-bold text-base sm:text-lg">{safe_route.distance_km} km</span>
                   <span className="text-xs text-[#BDDDFC]/70 ml-1">({safe_route.distance_nm ?? (safe_route.distance_km / 1.852).toFixed(1)} NM)</span>
                 </div>
-                <div className="bg-[#1E2632] p-2.5 rounded-lg border border-[#384959]">
-                  <span className="text-[#BDDDFC]/70 block text-[10px] uppercase font-semibold">{getTranslation('est_duration', language)}</span>
-                  <span className="text-[#88BDF2] font-bold text-sm sm:text-base">
+                <div className="bg-[#1E2632] p-3 rounded-lg border border-[#384959]">
+                  <span className="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">{getTranslation('est_duration', language)}</span>
+                  <span className="text-[#88BDF2] font-bold text-base sm:text-lg">
                     {safe_route.estimated_duration_minutes ? `${safe_route.estimated_duration_minutes} mins` : `${safe_route.estimated_duration_hours} hrs`}
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-2 text-xs text-[#BDDDFC] pt-1">
+              <div className="space-y-2.5 text-sm text-[#BDDDFC] pt-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[#BDDDFC]/85 flex items-center gap-1.5 font-medium flex-shrink-0">
-                    <Fuel className="w-3.5 h-3.5 text-[#88BDF2] flex-shrink-0" /> {getTranslation('est_fuel_label', language)}
+                    <Fuel className="w-4 h-4 text-[#88BDF2] flex-shrink-0" /> {getTranslation('est_fuel_label', language)}
                   </span>
-                  <span className="font-mono text-white font-bold">{safeFuelLiters} L</span>
+                  <span className="font-mono text-white font-bold text-sm sm:text-base">{safeFuelLiters} L</span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-0.5">
                   <span className="text-[#BDDDFC]/85 flex items-center gap-1.5 font-medium flex-shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#88BDF2] flex-shrink-0" /> {getTranslation('status_label', language)}:
+                    <CheckCircle2 className="w-4 h-4 text-[#88BDF2] flex-shrink-0" /> {getTranslation('status_label', language)}:
                   </span>
                   <span className="text-[#88BDF2] font-semibold text-left sm:text-right leading-tight">{getTranslation('bypasses_restricted_zones', language)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-[#384959] text-xs text-[#F1F5F9] leading-relaxed font-sans">
+            <div className="mt-3.5 pt-3 border-t border-[#384959] text-sm text-[#F1F5F9] leading-relaxed font-sans">
               {localizeInstruction(safe_route.description, language)}
             </div>
           </div>
 
           {/* Card 2: Direct Rhumb Line (Baseline) */}
-          <div className="p-4 rounded-xl border border-[#384959] bg-[#2A3744]/70 flex flex-col justify-between shadow-sm">
+          <div className="p-4 sm:p-5 rounded-xl border border-[#384959] bg-[#2A3744]/70 flex flex-col justify-between shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <span className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-rose-300">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="flex items-center gap-2 font-bold text-sm sm:text-base text-rose-300">
+                  <AlertTriangle className="w-5 h-5 text-rose-400 flex-shrink-0" />
                   {getTranslation('direct_rhumb_line', language)}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-rose-400/15 text-rose-300 text-[10px] font-mono font-bold flex-shrink-0">
+                <span className="px-2.5 py-0.5 rounded bg-rose-400/15 text-rose-300 text-xs font-mono font-bold flex-shrink-0">
                   {shortest_route.risk_level === 'HIGH' ? getTranslation('high_risk_badge', language) : getTranslation('direct_track_badge', language)}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 font-mono my-2.5">
-                <div className="bg-[#1E2632] p-2.5 rounded-lg border border-[#384959]">
-                  <span className="text-[#BDDDFC]/70 block text-[10px] uppercase font-semibold">{getTranslation('distance_label', language)}</span>
-                  <span className="text-white font-bold text-sm sm:text-base">{shortest_route.distance_km} km</span>
+              <div className="grid grid-cols-2 gap-2.5 font-mono my-3">
+                <div className="bg-[#1E2632] p-3 rounded-lg border border-[#384959]">
+                  <span className="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">{getTranslation('distance_label', language)}</span>
+                  <span className="text-white font-bold text-base sm:text-lg">{shortest_route.distance_km} km</span>
                   <span className="text-xs text-[#BDDDFC]/70 ml-1">({shortest_route.distance_nm ?? (shortest_route.distance_km / 1.852).toFixed(1)} NM)</span>
                 </div>
-                <div className="bg-[#1E2632] p-2.5 rounded-lg border border-[#384959]">
-                  <span className="text-[#BDDDFC]/70 block text-[10px] uppercase font-semibold">{getTranslation('est_duration', language)}</span>
-                  <span className="text-rose-300 font-bold text-sm sm:text-base">
+                <div className="bg-[#1E2632] p-3 rounded-lg border border-[#384959]">
+                  <span className="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">{getTranslation('est_duration', language)}</span>
+                  <span className="text-rose-300 font-bold text-base sm:text-lg">
                     {shortest_route.estimated_duration_minutes ? `${shortest_route.estimated_duration_minutes} mins` : `${shortest_route.estimated_duration_hours} hrs`}
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-2 text-xs text-[#BDDDFC] pt-1">
+              <div className="space-y-2.5 text-sm text-[#BDDDFC] pt-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[#BDDDFC]/85 flex items-center gap-1.5 font-medium flex-shrink-0">
-                    <Fuel className="w-3.5 h-3.5 text-[#BDDDFC]/60 flex-shrink-0" /> {getTranslation('fuel_consumption', language)}:
+                    <Fuel className="w-4 h-4 text-[#BDDDFC]/60 flex-shrink-0" /> {getTranslation('fuel_consumption', language)}:
                   </span>
-                  <span className="font-mono text-white font-bold">{directFuelLiters} L</span>
+                  <span className="font-mono text-white font-bold text-sm sm:text-base">{directFuelLiters} L</span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-0.5">
                   <span className="text-[#BDDDFC]/85 flex items-center gap-1.5 font-medium flex-shrink-0">
-                    <ShieldAlert className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" /> {getTranslation('intersections_label', language)}
+                    <ShieldAlert className="w-4 h-4 text-rose-400 flex-shrink-0" /> {getTranslation('intersections_label', language)}
                   </span>
                   <span className="text-rose-300 font-semibold text-left sm:text-right leading-tight">
                     {shortest_route.hazards_intersected && shortest_route.hazards_intersected.length > 0
@@ -221,8 +221,9 @@ export const RoutePlannerPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-[#384959] text-xs text-rose-300/90 leading-relaxed font-sans">
-              {getTranslation('direct_line_warning', language)}
+            <div className="mt-3.5 pt-3 border-t border-[#384959] text-sm text-[#F1F5F9] leading-relaxed font-sans space-y-1.5">
+              <div>{localizeInstruction(shortest_route.description, language)}</div>
+              <div className="text-xs sm:text-sm text-rose-300/90">{getTranslation('direct_line_warning', language)}</div>
             </div>
           </div>
 
@@ -230,20 +231,20 @@ export const RoutePlannerPanel: React.FC = () => {
 
         {/* Turn-by-Turn Nautical Instructions Card (Google Maps for Ocean) */}
         {safe_route.turn_by_turn_instructions && safe_route.turn_by_turn_instructions.length > 0 && (
-          <div className="p-4 rounded-xl bg-[#2A3744] border border-[#384959]">
+          <div className="p-4 sm:p-5 rounded-xl bg-[#2A3744] border border-[#384959]">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                <Compass className="w-4 h-4 text-[#88BDF2]" />
+              <span className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <Compass className="w-5 h-5 text-[#88BDF2]" />
                 {getTranslation('turn_by_turn_instructions', language)}
               </span>
-              <span className="font-mono text-xs text-[#BDDDFC] font-semibold">
+              <span className="font-mono text-xs sm:text-sm text-[#BDDDFC] font-semibold">
                 {safe_route.turn_by_turn_instructions.length} {getTranslation('navigation_steps_suffix', language)}
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {safe_route.turn_by_turn_instructions.map((inst, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-[#1E2632] border border-[#384959] text-sm text-[#F1F5F9] shadow-sm">
+                <div key={idx} className="flex items-start gap-3 p-3.5 sm:p-4 rounded-xl bg-[#1E2632] border border-[#384959] text-sm sm:text-base text-[#F1F5F9] shadow-sm">
                   <span className="w-6 h-6 rounded-full bg-[#384959] border border-[#88BDF2]/40 text-[#88BDF2] text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
@@ -256,73 +257,73 @@ export const RoutePlannerPanel: React.FC = () => {
 
         {/* Emergency Port of Refuge Card */}
         {refuge && refuge.name && (
-          <div className="p-4 rounded-xl bg-[#2A3744] border border-[#384959]">
+          <div className="p-4 sm:p-5 rounded-xl bg-[#2A3744] border border-[#384959]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <LifeBuoy className="w-4 h-4 text-[#88BDF2]" />
+              <span className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <LifeBuoy className="w-5 h-5 text-[#88BDF2]" />
                 {getTranslation('nearest_emergency_port', language)}
               </span>
-              <span className="text-xs text-[#88BDF2] bg-[#384959] border border-[#88BDF2]/30 px-2.5 py-0.5 rounded-lg font-bold">
+              <span className="text-xs sm:text-sm text-[#88BDF2] bg-[#384959] border border-[#88BDF2]/30 px-2.5 py-1 rounded-lg font-bold">
                 {getTranslation('shelter_harbor', language)}
               </span>
             </div>
-            <p className="text-base text-white font-bold">
+            <p className="text-base sm:text-lg text-white font-bold">
               {getLocalizedPortName(refuge.name, language)} &mdash;{' '}
               <span className="font-mono text-[#88BDF2]">{refuge.distance_nm} NM ({refuge.distance_km} km)</span>
             </p>
-            <p className="text-xs sm:text-sm text-[#BDDDFC] mt-1.5 leading-relaxed font-sans">
+            <p className="text-sm sm:text-base text-[#BDDDFC] mt-2 leading-relaxed font-sans">
               {localizeInstruction(refuge.instruction, language)} (Transit: ~{refuge.transit_time_minutes} mins)
             </p>
           </div>
         )}
 
         {/* Tactical Recommendation & Agent Rationale */}
-        <div className="p-4 rounded-xl bg-[#2A3744] border border-[#384959]">
+        <div className="p-4 sm:p-5 rounded-xl bg-[#2A3744] border border-[#384959]">
           <div className="flex items-center gap-2 mb-2">
-            <Gauge className="w-4 h-4 text-[#88BDF2]" />
-            <span className="text-xs sm:text-sm font-bold text-white">{getTranslation('navigation_rationale', language)}</span>
+            <Gauge className="w-5 h-5 text-[#88BDF2]" />
+            <span className="text-sm sm:text-base font-bold text-white">{getTranslation('navigation_rationale', language)}</span>
           </div>
-          <p className="text-xs sm:text-sm text-[#F1F5F9] leading-relaxed">
+          <p className="text-sm sm:text-base text-[#F1F5F9] leading-relaxed">
             {localizeInstruction(recommendation, language)}
           </p>
           {reasoning && (
-            <div className="mt-2.5 text-xs text-[#BDDDFC] font-mono bg-[#1E2632] p-3 rounded-lg border border-[#384959] leading-relaxed">
+            <div className="mt-3 text-xs sm:text-sm text-[#BDDDFC] font-mono bg-[#1E2632] p-3.5 rounded-lg border border-[#384959] leading-relaxed">
               {localizeInstruction(reasoning, language)}
             </div>
           )}
         </div>
 
         {/* Detailed Waypoint Navigation Sequence */}
-        <div className="p-4 rounded-xl bg-[#2A3744] border border-[#384959]">
+        <div className="p-4 sm:p-5 rounded-xl bg-[#2A3744] border border-[#384959]">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-              <Anchor className="w-4 h-4 text-[#88BDF2]" />
+            <span className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <Anchor className="w-5 h-5 text-[#88BDF2]" />
               {getTranslation('waypoint_sequence', language)}
             </span>
-            <span className="font-mono text-xs text-[#BDDDFC]">
+            <span className="font-mono text-xs sm:text-sm text-[#BDDDFC]">
               {safe_route.waypoints.length} {getTranslation('nautical_fix_points', language)}
             </span>
           </div>
 
-          <div className="space-y-2 font-mono text-xs">
+          <div className="space-y-2.5 font-mono text-sm">
             {safe_route.waypoints.map((wp, idx) => (
               <div
                 key={idx}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-[#1E2632] border border-[#384959] gap-1.5"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-[#1E2632] border border-[#384959] gap-2"
               >
-                <div className="flex items-center gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#384959] border border-[#88BDF2]/40 text-[#88BDF2] text-xs flex items-center justify-center font-bold">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-[#384959] border border-[#88BDF2]/40 text-[#88BDF2] text-xs flex items-center justify-center font-bold">
                     {idx + 1}
                   </span>
                   <div>
-                    <span className="text-white font-sans text-xs sm:text-sm font-semibold">{localizeDestination(wp.name, language)}</span>
+                    <span className="text-white font-sans text-sm sm:text-base font-semibold">{localizeDestination(wp.name, language)}</span>
                     {wp.instruction && (
-                      <span className="block text-xs text-[#88BDF2] font-mono mt-0.5">{localizeInstruction(wp.instruction, language)}</span>
+                      <span className="block text-xs sm:text-sm text-[#88BDF2] font-mono mt-0.5">{localizeInstruction(wp.instruction, language)}</span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 text-[#BDDDFC] text-xs flex-shrink-0">
+                <div className="flex items-center gap-2.5 text-[#BDDDFC] text-xs sm:text-sm flex-shrink-0">
                   {wp.bearing_compass && (
                     <span className="px-2 py-0.5 rounded bg-[#384959] text-[#88BDF2] font-bold border border-[#88BDF2]/30">
                       {wp.bearing_compass} ({wp.bearing_deg}&deg;)

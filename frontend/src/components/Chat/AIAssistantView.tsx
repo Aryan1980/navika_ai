@@ -32,7 +32,6 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { voiceService } from '../../services/voice';
-import { DemoQueries } from './DemoQueries';
 import { mobileWebLLM, ModelProgress } from '../../services/webllm';
 import { ChatMessage } from '../../types/marine';
 import { AgentDAGFlowDiagram } from '../Observability/AgentDAGFlowDiagram';
@@ -504,7 +503,7 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                       </span>
                       {language === 'hi' ? '।' : '.'}
                     </h1>
-                    <p className="text-sm sm:text-base text-[#A8C4EC]/85 max-w-xl mx-auto font-light leading-relaxed">
+                    <p className="text-base sm:text-lg text-[#A8C4EC]/90 max-w-xl mx-auto font-light leading-relaxed">
                       {language === 'hi' ? (
                         <>
                           <span className="text-white font-medium">{getLocalizedPortName(activeLocationName, language).split(',')[0]}</span> के तट पर उपग्रह टेलीमेट्री, तरंग गतिशीलता और जैविक मत्स्य क्षेत्रों का समन्वय।
@@ -521,8 +520,8 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                       )}
                     </p>
                     {inferenceMode === 'offline' && (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-mono">
-                        <WifiOff className="w-3.5 h-3.5" />
+                      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-950/40 border border-amber-500/30 text-amber-300 text-sm font-mono">
+                        <WifiOff className="w-4 h-4" />
                         <span>Deep-Sea Offline Mode Active: Running directly on device GPU (0% Internet)</span>
                       </div>
                     )}
@@ -540,21 +539,21 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                         >
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <div className="w-8 h-8 rounded-xl bg-[#262B40] border border-[#5379AE]/30 flex items-center justify-center">
-                                <Icon className={`w-4 h-4 ${starter.color}`} />
+                              <div className="w-9 h-9 rounded-xl bg-[#262B40] border border-[#5379AE]/30 flex items-center justify-center">
+                                <Icon className={`w-4.5 h-4.5 ${starter.color}`} />
                               </div>
-                              <span className="px-2 py-0.5 rounded text-xs font-mono font-bold tracking-wider bg-[#262B40] text-[#5379AE] border border-[#5379AE]/25 uppercase">
+                              <span className="px-2.5 py-1 rounded text-xs font-mono font-bold tracking-wider bg-[#262B40] text-[#5379AE] border border-[#5379AE]/25 uppercase">
                                 {starter.tag}
                               </span>
                             </div>
-                            <h3 className="font-editorial text-xl text-white font-normal group-hover:text-[#A8C4EC] transition-colors">
+                            <h3 className="font-editorial text-xl sm:text-2xl text-white font-normal group-hover:text-[#A8C4EC] transition-colors">
                               {starter.title}
                             </h3>
-                            <p className="text-xs sm:text-sm text-[#A8C4EC]/85 font-light mt-1.5 leading-relaxed">
+                            <p className="text-sm sm:text-base text-[#A8C4EC]/90 font-light mt-2 leading-relaxed">
                               {starter.prompt}
                             </p>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-[#5379AE]/15 flex items-center justify-between text-xs font-mono text-[#A8C4EC] group-hover:text-white uppercase tracking-wider">
+                          <div className="mt-4 pt-3 border-t border-[#5379AE]/15 flex items-center justify-between text-xs sm:text-sm font-mono text-[#A8C4EC] group-hover:text-white uppercase tracking-wider">
                             <span>
                               {language === 'hi' ? 'पूछताछ शुरू करें' : language === 'ml' ? 'ചോദിക്കുക' : language === 'ta' ? 'கேளுங்கள்' : language === 'te' ? 'ప్రశ్నించండి' : language === 'bn' ? 'জিজ্ঞাসা করুন' : 'Execute inquiry'}
                             </span>
@@ -581,27 +580,27 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                     }`}
                   >
                     {!isUser && (
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-md border flex-shrink-0 mt-0.5 ${
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md border flex-shrink-0 mt-0.5 ${
                         isOffline
                           ? 'bg-gradient-to-br from-[#1E2632] to-[#384959] border-[#88BDF2]/40 text-[#88BDF2]'
                           : 'bg-gradient-to-br from-[#0474C4] to-[#06457F] border-[#5379AE]/30 text-white'
                       }`}>
-                        {isOffline ? <Smartphone className="w-4 h-4" /> : <Compass className="w-4 h-4 stroke-[2.5]" />}
+                        {isOffline ? <Smartphone className="w-4 h-4" /> : <Compass className="w-5 h-5 stroke-[2.5]" />}
                       </div>
                     )}
 
                     <div
-                      className={`rounded-2xl p-5 max-w-[85%] text-xs shadow-xl leading-relaxed ${
+                      className={`rounded-2xl p-5 max-w-[85%] text-sm sm:text-base shadow-xl leading-relaxed ${
                         isUser
                           ? 'bg-[#06457F]/60 border border-[#0474C4]/50 text-white font-medium ml-12 rounded-tr-none'
-                          : 'bg-[#1d2334] border border-[#5379AE]/25 text-[#f1f5fb] rounded-tl-none space-y-3'
+                          : 'bg-[#1d2334] border border-[#5379AE]/25 text-[#f1f5fb] rounded-tl-none space-y-3.5'
                       }`}
                     >
                       {/* Safety Verdict Badge for Assistant Messages */}
                       {!isUser && (
                         <div className="flex items-center justify-between pb-2.5 border-b border-[#384959]/40">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                            className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                               msg.safety_verdict === 'SAFE'
                                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                                 : msg.safety_verdict === 'CAUTION'
@@ -610,9 +609,9 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                             }`}
                           >
                             {msg.safety_verdict === 'SAFE' ? (
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <CheckCircle2 className="w-4 h-4" />
                             ) : (
-                              <AlertTriangle className="w-3.5 h-3.5" />
+                              <AlertTriangle className="w-4 h-4" />
                             )}
                             Operational Status: {msg.safety_verdict || 'ACTIVE'}
                           </span>
@@ -629,11 +628,11 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                       )}
 
                       {/* Message Content */}
-                      <div className="text-[#f1f5fb] whitespace-pre-line text-sm sm:text-base leading-relaxed font-sans font-light">
+                      <div className="text-[#f1f5fb] whitespace-pre-line text-sm sm:text-base leading-relaxed font-sans font-normal">
                         {msg.content}
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-[#5379AE]/15 text-xs text-[#88BDF2] font-mono">
+                      <div className="flex items-center justify-between pt-2.5 border-t border-[#5379AE]/15 text-xs text-[#88BDF2] font-mono">
                         <span>{msg.timestamp}</span>
                         {!isUser && (
                           <span>{isOffline ? 'On-Device Mobile Inference' : 'ISRO MOSDAC • INCOIS Telemetry'}</span>
@@ -666,10 +665,7 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
           <div className="relative z-20 pb-20 md:pb-7 pt-2 px-3 sm:px-4 bg-gradient-to-t from-[#151926] via-[#151926]/95 to-transparent flex-shrink-0">
             <div className="max-w-3xl mx-auto">
               
-              {/* 12 Judge Presets Dock */}
-              <DemoQueries />
-
-              <div className="relative flex items-center bg-[#1d2334] border border-[#5379AE]/40 focus-within:border-[#0474C4] focus-within:shadow-[0_0_25px_rgba(4,116,196,0.3)] rounded-2xl px-3.5 py-2.5 transition-all shadow-2xl">
+              <div className="relative flex items-center bg-[#1d2334] border border-[#5379AE]/40 focus-within:border-[#0474C4] focus-within:shadow-[0_0_25px_rgba(4,116,196,0.3)] rounded-2xl px-4 py-3 transition-all shadow-2xl">
                 
                 {/* Input field */}
                 <input
@@ -691,7 +687,7 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
                           ? 'Ask offline helmsman (runs 100% on phone GPU with 0 internet)...'
                           : 'Ask anything about fishing spots, sea state, cyclone warnings, or route safety...')
                   }
-                  className="flex-1 bg-transparent border-none outline-none text-[#f1f5fb] placeholder-[#8fa2bf] text-sm sm:text-base px-3 py-1 font-normal"
+                  className="flex-1 bg-transparent border-none outline-none text-[#f1f5fb] placeholder-[#8fa2bf] text-base sm:text-lg px-3 py-1 font-normal"
                 />
 
                 {/* Voice Mic Button */}

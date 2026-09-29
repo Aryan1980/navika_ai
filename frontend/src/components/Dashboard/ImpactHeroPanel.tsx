@@ -90,14 +90,14 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#5379AE]/20">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 font-mono text-[10px] font-bold tracking-wider uppercase">
+            <span className="px-2.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase">
               NATIONAL MARITIME IMPACT · SIH 2026
             </span>
-            <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+            <span className="text-xs text-slate-300 font-mono hidden sm:inline">
               ISRO Problem Statement 26176
             </span>
           </div>
-          <h2 className="text-xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2">
             Empowering India's Blue Economy & Coastal Safety
           </h2>
         </div>
@@ -106,10 +106,10 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
           {onExploreDAG && (
             <button
               onClick={onExploreDAG}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1d263b] hover:bg-[#253250] border border-[#5379AE]/30 hover:border-cyan-400 text-cyan-300 text-xs font-medium transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1d263b] hover:bg-[#253250] border border-[#5379AE]/30 hover:border-cyan-400 text-cyan-300 text-sm font-medium transition-colors cursor-pointer"
             >
               <span>View 11-Agent DAG</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -122,28 +122,28 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
           return (
             <div
               key={s.id}
-              className={`p-3.5 rounded-xl bg-gradient-to-b ${s.accent} border backdrop-blur-sm flex flex-col justify-between hover:scale-[1.02] transition-transform duration-200`}
+              className={`p-4 rounded-xl bg-gradient-to-b ${s.accent} border backdrop-blur-sm flex flex-col justify-between hover:scale-[1.02] transition-transform duration-200`}
             >
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-slate-400">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-300">
                     {s.label}
                   </span>
                   <div className="p-1 rounded-md bg-white/5">
-                    <Icon className="w-3.5 h-3.5 text-white/80" />
+                    <Icon className="w-4 h-4 text-white/80" />
                   </div>
                 </div>
 
-                <div className="text-2xl lg:text-3xl font-extrabold font-mono text-white tracking-tight">
+                <div className="text-3xl lg:text-4xl font-extrabold font-mono text-white tracking-tight">
                   {s.value}
                 </div>
 
-                <div className="text-xs font-semibold text-slate-200 mt-0.5">
+                <div className="text-sm font-semibold text-slate-100 mt-1">
                   {s.metric}
                 </div>
               </div>
 
-              <div className="text-[10px] text-slate-400 leading-tight mt-2.5 pt-2 border-t border-white/10">
+              <div className="text-xs text-slate-300 leading-normal mt-3 pt-2 border-t border-white/10">
                 {s.subtext}
               </div>
             </div>
@@ -152,9 +152,9 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
       </div>
 
       {/* Trust Guarantee Band */}
-      <div className="relative z-10 mt-4 pt-3 border-t border-[#5379AE]/20 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 font-mono">
+      <div className="relative z-10 mt-4 pt-3 border-t border-[#5379AE]/20 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-slate-300 font-mono">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span>Synthesized from real ISRO MOSDAC satellite passes, INCOIS hydrodynamic forecasts & IMD coastal radar.</span>
         </div>
         <span className="text-[#A8C4EC] font-semibold">Zero-Blackbox Autonomous Safety</span>

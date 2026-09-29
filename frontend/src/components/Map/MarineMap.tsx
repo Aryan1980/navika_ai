@@ -856,31 +856,31 @@ export const MarineMap: React.FC = () => {
 
       {/* Floating Top Nav / Search Header */}
       <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-20 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-2.5 pointer-events-auto flex-wrap">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#88BDF2]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#88BDF2]" />
             <input
               type="text"
               placeholder="Search zones, harbors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 w-36 sm:w-64 md:w-80 rounded-xl sm:rounded-2xl bg-[#161c27]/90 backdrop-blur-md border border-[#384959] text-white placeholder-[#BDDDFC]/50 text-xs font-medium focus:outline-none focus:border-[#88BDF2] shadow-xl"
+              className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 w-40 sm:w-64 md:w-80 rounded-xl sm:rounded-2xl bg-[#161c27]/90 backdrop-blur-md border border-[#384959] text-white placeholder-[#BDDDFC]/50 text-sm font-medium focus:outline-none focus:border-[#88BDF2] shadow-xl"
             />
           </div>
 
           {/* OpenSeaMap Toggle */}
           <button
             onClick={() => setIsOpenSeaMapActive(!isOpenSeaMapActive)}
-            className={`px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               isOpenSeaMapActive
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Toggle Official OpenSeaMap Seamarks (Buoys, Beacons, Lighthouses, Fairways)"
           >
-            <Anchor className="w-3.5 h-3.5" />
+            <Anchor className="w-4 h-4" />
             <span className="hidden sm:inline">OpenSeaMap</span>
-            <span className={`text-[10px] px-1 rounded ${isOpenSeaMapActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
+            <span className={`text-xs px-1.5 py-0.2 rounded font-bold ${isOpenSeaMapActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
               {isOpenSeaMapActive ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -888,14 +888,14 @@ export const MarineMap: React.FC = () => {
           {/* NavIC / LoRaWAN Mesh Toggle */}
           <button
             onClick={() => setIsNavicMeshActive(!isNavicMeshActive)}
-            className={`px-2.5 sm:px-3.5 py-2 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1 sm:gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               isNavicMeshActive
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2] shadow-[0_0_12px_rgba(136,189,242,0.25)]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Toggle NavIC Positioning & Peer-to-Peer LoRaWAN Vessel Mesh"
           >
-            <Radio className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isNavicMeshActive ? 'text-[#88BDF2] animate-pulse' : ''}`} />
+            <Radio className={`w-4 h-4 ${isNavicMeshActive ? 'text-[#88BDF2] animate-pulse' : ''}`} />
             <span className="hidden sm:inline">NavIC Mesh</span>
             <span className={`text-xs px-1.5 py-0.2 rounded font-bold ${isNavicMeshActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
               {isNavicMeshActive ? 'ON' : 'OFF'}
@@ -905,14 +905,14 @@ export const MarineMap: React.FC = () => {
           {/* 3D / 2D Perspective Toggle Button */}
           <button
             onClick={toggle3DMode}
-            className={`px-2.5 sm:px-3.5 py-2 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1 sm:gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               is3DMode
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Switch between 3D Nautical Perspective and 2D Plan View"
           >
-            <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Box className="w-4 h-4" />
             <span className="hidden sm:inline">{is3DMode ? '3D View' : '2D Plan'}</span>
             <span className="sm:hidden">{is3DMode ? '3D' : '2D'}</span>
           </button>
@@ -921,8 +921,8 @@ export const MarineMap: React.FC = () => {
         {/* Departure Coordinate Badge */}
         <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-xl pointer-events-auto font-sans">
           <div className="w-2.5 h-2.5 rounded-full bg-[#0474c4] animate-pulse" />
-          <span className="text-xs sm:text-sm text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</span>
-          <span className="text-xs text-[#BDDDFC]/70 font-mono">
+          <span className="text-sm sm:text-base text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</span>
+          <span className="text-xs sm:text-sm text-[#BDDDFC]/80 font-mono">
             {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
           </span>
         </div>

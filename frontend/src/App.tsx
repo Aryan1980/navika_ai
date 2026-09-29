@@ -9,12 +9,10 @@ import { AgentStreamingDAGView } from './components/Observability/AgentStreaming
 import { SettingsModal } from './components/Dashboard/SettingsModal';
 import { EmergencySOSModal } from './components/Emergency/EmergencySOSModal';
 import { AdvisoryBulletinModal } from './components/Advisory/AdvisoryBulletinModal';
-import { LiveStatusBar } from './components/Header/LiveStatusBar';
 import { LocationSetupView } from './components/Onboarding/LocationSetupView';
 import { RoutePlannerPanel } from './components/Navigation/RoutePlannerPanel';
 import { PhoneAuthModal } from './components/Auth/PhoneAuthModal';
 import { CaptainProfileModal } from './components/Profile/CaptainProfileModal';
-import { DualSyncModeBanner } from './components/Navigation/DualSyncModeBanner';
 import { MobileBottomNav } from './components/Navigation/MobileBottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Sun, MapPin, Layers, ShieldAlert, FileText, Cpu, User, Phone, Globe, Menu } from 'lucide-react';
@@ -103,20 +101,20 @@ const DashboardView: React.FC = () => {
       <div className="flex-1 h-screen flex flex-col overflow-hidden relative">
 
         {/* ── Top Shared Minimalist Header Bar ── */}
-        <header className="h-14 px-3 sm:px-6 bg-[#242E3B] border-b border-[#384959] flex items-center justify-between z-20 flex-shrink-0 shadow-sm gap-2">
+        <header className="h-16 px-3.5 sm:px-6 bg-[#242E3B] border-b border-[#384959] flex items-center justify-between z-20 flex-shrink-0 shadow-sm gap-3">
           
           {/* Left: Mobile Hamburger & Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs min-w-0">
+          <div className="flex items-center gap-2.5 text-sm sm:text-base min-w-0">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-1.5 rounded-xl bg-[#1E2632] border border-[#384959] text-[#BDDDFC] hover:text-white transition-colors cursor-pointer flex-shrink-0"
+              className="md:hidden p-2 rounded-xl bg-[#1E2632] border border-[#384959] text-[#BDDDFC] hover:text-white transition-colors cursor-pointer flex-shrink-0"
               title="Open Navigation Menu"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-5 h-5" />
             </button>
             <span className="text-[#BDDDFC]/75 font-medium hidden sm:inline">SamudraAI</span>
             <span className="text-[#6A89A7] hidden sm:inline">/</span>
-            <span className="text-white font-semibold tracking-tight truncate max-w-[130px] sm:max-w-none">
+            <span className="text-white font-semibold tracking-tight truncate max-w-[140px] sm:max-w-none text-sm sm:text-base">
               {activeNav === 'map' && (getTranslation('nav_dashboard', language) || 'Satellite Recon & Navigation')}
               {activeNav === 'route' && (getTranslation('nav_route', language) || 'Route Planner')}
               {activeNav === 'analytics' && (getTranslation('nav_analytics', language) || 'Port & Ocean Telemetry')}
@@ -126,36 +124,37 @@ const DashboardView: React.FC = () => {
             </span>
           </div>
 
-          {/* Right Header Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-3 text-xs flex-shrink-0">
+          {/* Right Header Controls (Clean, Uncluttered, with Advisory PDF & SOS preserved) */}
+          <div className="flex items-center gap-2 sm:gap-3 text-sm flex-shrink-0">
             
-            {/* Quick Action: Advisory PDF */}
+            {/* Quick Action: Official Advisory PDF */}
             <button
               onClick={() => setIsAdvisoryOpen(true)}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E2632] border border-[#384959] hover:border-emerald-400 text-emerald-300 font-mono transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-[#1E2632] border border-[#384959] hover:border-emerald-400 text-emerald-300 font-medium transition-colors cursor-pointer text-xs sm:text-sm shadow-sm"
               title="Download Official Marine Advisory PDF"
             >
-              <FileText className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Advisory PDF</span>
+              <FileText className="w-4 h-4 text-emerald-400" />
+              <span className="hidden sm:inline">Advisory PDF</span>
+              <span className="sm:hidden">Advisory</span>
             </button>
 
-            {/* Quick Action: SOS 1554 */}
+            {/* Quick Action: SOS 1554 Distress Line */}
             <button
               onClick={() => setIsSOSOpen(true)}
-              className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/60 hover:border-rose-400 text-rose-200 font-mono font-bold transition-all shadow-[0_0_10px_rgba(244,63,94,0.25)] cursor-pointer text-[11px] sm:text-xs"
+              className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-rose-950/80 border border-rose-500/60 hover:border-rose-400 text-rose-200 font-bold transition-all shadow-[0_0_12px_rgba(244,63,94,0.3)] cursor-pointer text-xs sm:text-sm font-mono"
               title="Indian Coast Guard Emergency (1554)"
             >
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+              <ShieldAlert className="w-4 h-4 text-rose-400 animate-pulse" />
               <span>SOS 1554</span>
             </button>
 
             {/* Language Selector Dropdown */}
-            <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-xs">
-              <Globe className="w-3.5 h-3.5 text-[#88BDF2]" />
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#1E2632] border border-[#384959] text-sm">
+              <Globe className="w-4 h-4 text-[#88BDF2]" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-transparent text-[#BDDDFC] text-xs font-medium focus:outline-none cursor-pointer max-w-[70px] sm:max-w-none"
+                className="bg-transparent text-[#BDDDFC] text-xs sm:text-sm font-medium focus:outline-none cursor-pointer max-w-[80px] sm:max-w-none"
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code} className="bg-[#1E2632] text-white">
@@ -166,16 +165,16 @@ const DashboardView: React.FC = () => {
             </div>
 
             {/* Active Port Chip */}
-            <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-[#BDDDFC]">
-              <MapPin className="w-3.5 h-3.5 text-[#88BDF2] flex-shrink-0" />
-              <span className="truncate max-w-[80px] sm:max-w-[160px] md:max-w-[240px] font-medium text-white text-xs sm:text-sm">
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#1E2632] border border-[#384959] text-[#BDDDFC]">
+              <MapPin className="w-4 h-4 text-[#88BDF2] flex-shrink-0" />
+              <span className="truncate max-w-[90px] sm:max-w-[180px] md:max-w-[260px] font-semibold text-white text-xs sm:text-sm">
                 {getLocalizedPortName(activeLocationName, language).split(',')[0]}
               </span>
             </div>
 
             {/* Date & Weather Indicator */}
-            <div className="flex items-center gap-1.5 text-[#BDDDFC] font-mono hidden md:flex">
-              <Sun className="w-4 h-4 text-[#88BDF2]" />
+            <div className="flex items-center gap-1.5 text-[#BDDDFC] font-mono hidden lg:flex text-sm">
+              <Sun className="w-4.5 h-4.5 text-[#88BDF2]" />
               <span className="font-semibold text-white">{tempVal}°C</span>
               <span className="text-[#6A89A7]">· {getTranslation('sea_normal', language)}</span>
             </div>
@@ -184,35 +183,25 @@ const DashboardView: React.FC = () => {
             {user ? (
               <button
                 onClick={() => setIsProfileModalOpen(true)}
-                className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E2632] hover:bg-[#2A3644] border border-[#6A89A7]/50 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1E2632] hover:bg-[#2A3644] border border-[#6A89A7]/50 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer text-xs sm:text-sm"
               >
                 <span className="w-2 h-2 rounded-full bg-[#88BDF2]" />
                 <span className="font-medium text-white">{user.name.split(' ')[0]}</span>
-                <span className="text-[10px] font-mono text-[#88BDF2] bg-[#2A3644] px-1.5 py-0.5 rounded">
+                <span className="text-xs font-mono text-[#88BDF2] bg-[#2A3644] px-1.5 py-0.5 rounded">
                   {voyages.length} {getTranslation('logged_count', language)}
                 </span>
               </button>
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#384959]/60 hover:bg-[#384959] border border-[#88BDF2]/40 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#384959]/60 hover:bg-[#384959] border border-[#88BDF2]/40 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer text-xs sm:text-sm"
               >
-                <Phone className="w-3.5 h-3.5 text-[#88BDF2]" />
+                <Phone className="w-4 h-4 text-[#88BDF2]" />
                 <span className="font-medium text-white">{getTranslation('captain_sign_in', language)}</span>
               </button>
             )}
           </div>
         </header>
-
-        {/* ── Dual Sync Mode Indicator Bar ── */}
-        <DualSyncModeBanner />
-
-        {/* ── Persistent Data Source Status Bar ── */}
-        <LiveStatusBar
-          onOpenSOS={() => setIsSOSOpen(true)}
-          onOpenAdvisory={() => setIsAdvisoryOpen(true)}
-          onOpenDAG={() => setActiveNav('observability')}
-        />
 
         {/* ── Viewport Contents by Active Tab ── */}
         <div className="flex-1 relative overflow-hidden">
