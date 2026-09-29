@@ -19,6 +19,7 @@ import {
 import { PFZZone } from '../../types/marine';
 import { getTranslation } from '../../utils/translations';
 import { getLocalizedPortName, localizeDestination, getLocalizedRecommendation } from '../../utils/locationTranslations';
+import { getSafetyStatusTheme } from '../../utils/statusColors';
 
 interface FishingSpotsViewProps {
   onViewOnMap: () => void;
@@ -44,6 +45,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
   };
 
   const selected = activeSpot || pfzs[0];
+  const selectedTheme = getSafetyStatusTheme(selected?.safety_rating);
 
   const estHours = selected ? (selected.distance_km / 12.0).toFixed(1) : '1.5';
   const fuelEst = selected ? Math.round(selected.distance_km * 0.85) : 18;
@@ -107,7 +109,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
           <div className="space-y-3.5 overflow-y-auto flex-1 pr-1.5 pt-3.5">
             {pfzs.map((pfz, idx) => {
               const isSelected = selected?.id === pfz.id;
-              const isSafe = pfz.safety_rating === 'SAFE';
+              const statusTheme = getSafetyStatusTheme(pfz.safety_rating);
 
               return (
                 <div
@@ -115,8 +117,8 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                   onClick={() => handleSelectSpot(pfz)}
                   className={`p-4 rounded-xl border transition-all cursor-pointer select-none ${
                     isSelected
-                      ? 'bg-[#222d3d] border-[#88BDF2] shadow-[0_0_20px_rgba(136,189,242,0.18)] ring-1 ring-[#88BDF2]/60'
-                      : 'bg-[#151a24] hover:bg-[#1d2533] border-[#384959]'
+                      ? `bg-[#222d3d] ${statusTheme.cardSelectedBorder} ${statusTheme.cardSelectedShadow} ${statusTheme.cardSelectedRing}`
+                      : `bg-[#151a24] hover:bg-[#1d2533] border-[#384959] ${statusTheme.cardBorderHover}`
                   }`}
                 >
                   <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#384959]/60">
@@ -129,9 +131,11 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                       </span>
                     </div>
 
-                    {/* Smooth, high-contrast badge */}
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#384959] text-white border border-[#88BDF2]/40 flex-shrink-0 flex items-center gap-1.5 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#88BDF2]" />
+                    {/* Consistent SAFE / CAUTION / AVOID Status Badge */}
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${statusTheme.badgeBg} ${statusTheme.badgeText} border ${statusTheme.badgeBorder} flex-shrink-0 flex items-center gap-1.5 ${statusTheme.glowClass}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${statusTheme.dotClass}`} />
                       <span>{getTranslation(pfz.safety_rating.toLowerCase(), language) || pfz.safety_rating}</span>
                     </span>
                   </div>
@@ -172,9 +176,17 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
               {/* Active Spot Header */}
               <div className="flex items-center justify-between pb-3.5 border-b border-[#384959]/60">
                 <div>
-                  <span className="text-xs font-mono text-[#88BDF2] uppercase tracking-wider block font-bold">
-                    {getTranslation('selected_front_route', language)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono text-[#88BDF2] uppercase tracking-wider block font-bold">
+                      {getTranslation('selected_front_route', language)}
+                    </span>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${selectedTheme.badgeBg} ${selectedTheme.badgeText} border ${selectedTheme.badgeBorder} flex items-center gap-1.5 shadow-sm`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${selectedTheme.dotClass}`} />
+                      <span>{getTranslation(selected.safety_rating.toLowerCase(), language) || selected.safety_rating}</span>
+                    </span>
+                  </div>
                   <h2 className="font-editorial text-xl sm:text-2xl text-white font-normal mt-1">
                     {localizeDestination(selected.name, language)}
                   </h2>
@@ -236,8 +248,9 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                     <span className="text-white font-extrabold text-base block mt-1">
                       {selected.location.latitude.toFixed(4)}°N, {selected.location.longitude.toFixed(4)}°E
                     </span>
-                    <span className="text-[#88BDF2] text-xs font-semibold block mt-1">
-                      ● {getTranslation('verified_front', language)}
+                    <span className={`${selectedTheme.accentTextClass} text-xs font-semibold block mt-1 flex items-center gap-1.5`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${selectedTheme.dotClass}`} />
+                      <span>{getTranslation('verified_front', language)} ({selected.safety_rating})</span>
                     </span>
                   </div>
 
@@ -256,7 +269,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
               {/* Navigational Hazard & Danger Clearance - High Readability */}
               <div className="p-5 rounded-xl bg-[#12161f] border border-[#384959] space-y-3.5 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-[#88BDF2]" />
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
                   <span className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
                     {getTranslation('hazard_danger_scan', language)}
                   </span>
@@ -265,31 +278,50 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                   <div className="p-3 rounded-xl bg-[#1a222f] border border-[#384959]">
                     <span className="text-[#BDDDFC] block text-[10px] uppercase font-bold tracking-wider">{getTranslation('imbl_border', language)}</span>
-                    <span className="text-white font-bold text-sm block mt-1">{getTranslation('imbl_clear', language)}</span>
+                    <span className="text-white font-bold text-sm mt-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>{getTranslation('imbl_clear', language)}</span>
+                    </span>
                     <span className="text-xs text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('no_territorial_risk', language)}</span>
                   </div>
 
                   <div className="p-3 rounded-xl bg-[#1a222f] border border-[#384959]">
                     <span className="text-[#BDDDFC] block text-[10px] uppercase font-bold tracking-wider">{getTranslation('protected_areas', language)}</span>
-                    <span className="text-white font-bold text-sm block mt-1">{getTranslation('zero_intersections', language)}</span>
+                    <span className="text-white font-bold text-sm mt-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>{getTranslation('zero_intersections', language)}</span>
+                    </span>
                     <span className="text-xs text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('sanctuary_clear', language)}</span>
                   </div>
 
                   <div className="p-3 rounded-xl bg-[#1a222f] border border-[#384959]">
                     <span className="text-[#BDDDFC] block text-[10px] uppercase font-bold tracking-wider">{getTranslation('defense_restrictions', language)}</span>
-                    <span className="text-white font-bold text-sm block mt-1">{getTranslation('unrestricted', language)}</span>
+                    <span className="text-white font-bold text-sm mt-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>{getTranslation('unrestricted', language)}</span>
+                    </span>
                     <span className="text-xs text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('naval_corridor_open', language)}</span>
                   </div>
                 </div>
 
-                {/* Safety Guidance Note - Crisp, High-Contrast Text */}
-                <div className="p-3.5 rounded-xl bg-[#1a222f] border border-[#384959] space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#88BDF2] font-bold text-xs sm:text-sm">
-                    <AlertTriangle className="w-4 h-4 text-[#88BDF2]" />
-                    <span>{getTranslation('areas_to_avoid', language)}</span>
+                {/* Safety Guidance Note - Consistent Dynamic Status Theme */}
+                <div className={`p-3.5 rounded-xl bg-[#1a222f] border ${selectedTheme.badgeBorder} space-y-1.5 shadow-sm`}>
+                  <div className={`flex items-center gap-2 ${selectedTheme.accentTextClass} font-bold text-xs sm:text-sm`}>
+                    {selected.safety_rating === 'SAFE' ? (
+                      <CheckCircle2 className={`w-4 h-4 ${selectedTheme.iconColorClass}`} />
+                    ) : (
+                      <AlertTriangle className={`w-4 h-4 ${selectedTheme.iconColorClass}`} />
+                    )}
+                    <span>
+                      {selected.safety_rating === 'SAFE'
+                        ? 'Safe Seaward Passage Verified'
+                        : selected.safety_rating === 'CAUTION'
+                        ? getTranslation('areas_to_avoid', language) || 'Advisory Caution Zone'
+                        : 'Hazardous Boundary / Restricted Area - Avoid'}
+                    </span>
                   </div>
                   <p className="text-[#F1F5F9] text-xs sm:text-sm leading-relaxed font-normal">
-                    {getTranslation('safety_guidance_text', language).replace('{bearing}', `${selected.bearing_deg}° (${selected.bearing_compass})`)}
+                    {getLocalizedRecommendation(selected.recommendation, language)}
                   </p>
                 </div>
               </div>

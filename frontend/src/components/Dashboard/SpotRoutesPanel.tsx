@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { Navigation, Compass, ChevronDown, MoreHorizontal, ArrowUpRight, Loader2, Check } from 'lucide-react';
 import { PFZZone } from '../../types/marine';
 import { getLocalizedPortName } from '../../utils/locationTranslations';
+import { getSafetyStatusTheme } from '../../utils/statusColors';
 
 export const SpotRoutesPanel: React.FC = () => {
   const { pfzs, activeLocationName, openRouteForPFZ, isAnalyzing, selectedPFZForRoute, language } = useApp();
@@ -50,9 +51,7 @@ export const SpotRoutesPanel: React.FC = () => {
       <div className="space-y-3 overflow-y-auto flex-1 pr-1 max-h-56 mt-3">
         {filteredPfzs.map((pfz, idx) => {
           const isSelected = selectedPFZForRoute?.id === pfz.id;
-          const isSafe = pfz.safety_rating === 'SAFE';
-          const isCaution = pfz.safety_rating === 'CAUTION';
-
+          const statusTheme = getSafetyStatusTheme(pfz.safety_rating);
           const estHours = (pfz.distance_km / 12.0).toFixed(1);
 
           return (
@@ -60,8 +59,8 @@ export const SpotRoutesPanel: React.FC = () => {
               key={pfz.id}
               className={`rounded-xl p-3 border transition-all ${
                 isSelected
-                  ? 'bg-[#131b2e] border-cyan-500/60 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                  : 'bg-[#101524]/80 hover:bg-[#13192b] border-white/[0.06]'
+                  ? `bg-[#131b2e] ${statusTheme.cardSelectedBorder} ${statusTheme.cardSelectedShadow} ${statusTheme.cardSelectedRing}`
+                  : `bg-[#101524]/80 hover:bg-[#13192b] border-white/[0.06] ${statusTheme.cardBorderHover}`
               }`}
             >
               {/* Card Header: Clean Spot Name & Status Badge */}
@@ -75,17 +74,12 @@ export const SpotRoutesPanel: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Status Badge */}
+                {/* Consistent SAFE / CAUTION / AVOID Status Badge */}
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${
-                    isSafe
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                      : isCaution
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                      : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                  }`}
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${statusTheme.badgeBg} ${statusTheme.badgeText} border ${statusTheme.badgeBorder} flex items-center gap-1.5 ${statusTheme.glowClass}`}
                 >
-                  {pfz.safety_rating}
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusTheme.dotClass}`} />
+                  <span>{pfz.safety_rating}</span>
                 </span>
               </div>
 

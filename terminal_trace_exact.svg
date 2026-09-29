@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 260" width="980" height="260">
+  <defs>
+    <filter id="shadow" x="-5%" y="-10%" width="110%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Terminal Container with Shadow -->
+  <g filter="url(#shadow)">
+    <!-- Terminal Background -->
+    <rect x="10" y="10" width="960" height="230" rx="12" fill="#0b0f19" stroke="#334155" stroke-width="1.5"/>
+    
+    <!-- Header Bar -->
+    <path d="M 10 22 C 10 15.37 15.37 10 22 10 L 958 10 C 964.63 10 970 15.37 970 22 L 970 46 L 10 46 Z" fill="#172033" stroke="#283548" stroke-width="1"/>
+    
+    <!-- Traffic Light Buttons -->
+    <circle cx="32" cy="28" r="5.5" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+    <circle cx="50" cy="28" r="5.5" fill="#f59e0b" stroke="#d97706" stroke-width="0.8"/>
+    <circle cx="68" cy="28" r="5.5" fill="#10b981" stroke="#059669" stroke-width="0.8"/>
+    
+    <!-- Title -->
+    <text x="490" y="32" fill="#94a3b8" font-family="Consolas, monospace" font-size="12.5" text-anchor="middle" font-weight="500">live terminal trace — agentic_reasoning.log</text>
+
+    <!-- Terminal Content -->
+    <g font-family="Consolas, monospace" font-size="15" xml:space="preserve">
+      <!-- Line 1: Ocean Agent -->
+      <text x="32" y="84">
+        <tspan fill="#38bdf8" font-weight="bold">[Ocean Agent]  </tspan>
+        <tspan fill="#cbd5e1">SST=</tspan><tspan fill="#f8fafc" font-weight="bold">28.4°C</tspan><tspan fill="#cbd5e1">, Chl-a=</tspan><tspan fill="#f8fafc" font-weight="bold">1.2mg/m³</tspan>
+        <tspan fill="#64748b"> → </tspan><tspan fill="#cbd5e1">PFZ confidence: </tspan><tspan fill="#4ade80" font-weight="bold">HIGH</tspan>
+      </text>
+
+      <!-- Line 2: Meteo Agent -->
+      <text x="32" y="122">
+        <tspan fill="#fbbf24" font-weight="bold">[Meteo Agent]  </tspan>
+        <tspan fill="#cbd5e1">Wave Hs=</tspan><tspan fill="#f8fafc" font-weight="bold">2.8m</tspan>
+        <tspan fill="#64748b"> → </tspan><tspan fill="#facc15" font-weight="bold">CAUTION</tspan><tspan fill="#cbd5e1"> threshold not breached</tspan>
+      </text>
+
+      <!-- Line 3: Safety Veto -->
+      <text x="32" y="160">
+        <tspan fill="#34d399" font-weight="bold">[Safety Veto]  </tspan>
+        <tspan fill="#4ade80" font-weight="bold">No override triggered</tspan>
+      </text>
+
+      <!-- Line 4: Output -->
+      <text x="32" y="198">
+        <tspan fill="#c084fc" font-weight="bold">[Output]       </tspan>
+        <tspan fill="#cbd5e1">Bhashini TTS </tspan><tspan fill="#64748b">→</tspan><tspan fill="#cbd5e1"> “</tspan><tspan fill="#38bdf8" font-family="'Nirmala UI', Consolas, sans-serif" font-weight="600">கடலில் செல்லலாம்</tspan><tspan fill="#cbd5e1">” </tspan><tspan fill="#94a3b8">(Tamil: Safe to proceed)</tspan>
+      </text>
+    </g>
+  </g>
+</svg>

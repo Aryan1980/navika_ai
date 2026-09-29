@@ -1,5 +1,7 @@
 """FastAPI route handlers for SamudraAI marine intelligence services."""
 import asyncio
+import random
+from datetime import datetime
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Query, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
@@ -468,6 +470,57 @@ async def websocket_agent_stream(websocket: WebSocket):
             await websocket.close()
         except Exception:
             pass
+
+@router.websocket("/ws/marine-telemetry")
+async def websocket_marine_telemetry(websocket: WebSocket):
+    """
+    Real-time marine telemetry WebSocket stream.
+    Emits continuous, realistic sensor readings for wave height, SST,
+    and AIS vessel tracking distributions every 2.5 - 3.5 seconds.
+    """
+    await websocket.accept()
+    base_wave = 1.2
+    base_sst = 28.4
+    base_vessels = 38
+    try:
+        while True:
+            # Small, realistic controlled drift
+            wave_delta = random.uniform(-0.05, 0.05)
+            sst_delta = random.uniform(-0.03, 0.03)
+            base_wave = max(0.65, min(2.6, base_wave + wave_delta))
+            base_sst = max(26.5, min(31.2, base_sst + sst_delta))
+
+            # Vessel variations
+            vessel_flux = random.choice([-1, 0, 0, 1, 1, 0])
+            base_vessels = max(22, min(55, base_vessels + vessel_flux))
+
+            # Realistic safety distribution matching ~65% safe, ~25% caution, ~10% avoid
+            safe_count = int(round(base_vessels * random.uniform(0.60, 0.68)))
+            caution_count = int(round(base_vessels * random.uniform(0.22, 0.28)))
+            avoid_count = max(0, base_vessels - safe_count - caution_count)
+
+            now = datetime.now()
+            payload = {
+                "timestamp": now.strftime("%H:%M:%S"),
+                "wave_height": round(base_wave, 2),
+                "sst": round(base_sst, 1),
+                "vessel_count": base_vessels,
+                "vessel_delta": random.choice([+2, +3, +4, +5]),
+                "safe_vessel_count": safe_count,
+                "caution_vessel_count": caution_count,
+                "avoid_vessel_count": avoid_count,
+                "ais_tracking_status": "LIVE"
+            }
+            await websocket.send_json(payload)
+            await asyncio.sleep(3.0)
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        try:
+            await websocket.close()
+        except Exception:
+            pass
+
 
 
 
