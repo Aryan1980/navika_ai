@@ -61,6 +61,10 @@ export interface PFZZone {
   source: string;
   is_demo: boolean;
   target_species?: string[];
+  ml_model_name?: string;
+  predicted_biomass_score?: number;
+  model_confidence_pct?: number;
+  top_features?: { feature: string; impact: string }[];
 }
 
 export interface FactorScore {
@@ -99,6 +103,13 @@ export interface Waypoint {
   longitude: number;
   hazard_distance_km?: number;
   segment_risk: string;
+  bearing_deg?: number;
+  bearing_compass?: string;
+  leg_distance_km?: number;
+  leg_distance_nm?: number;
+  eta_minutes?: number;
+  instruction?: string;
+  sea_state?: string;
 }
 
 export interface RouteOption {
@@ -106,9 +117,24 @@ export interface RouteOption {
   waypoints: Waypoint[];
   distance_km: number;
   estimated_duration_hours: number;
+  distance_nm?: number;
+  estimated_duration_minutes?: number;
+  estimated_fuel_liters?: number;
   risk_level: string;
   hazards_intersected: string[];
   description: string;
+  turn_by_turn_instructions?: string[];
+  emergency_port_refuge?: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    distance_km: number;
+    distance_nm: number;
+    bearing_deg: number;
+    bearing_compass: string;
+    transit_time_minutes: number;
+    instruction: string;
+  };
 }
 
 export interface RouteComparison {
@@ -272,4 +298,30 @@ export interface CoastalPreset {
   longitude: number;
   harbor: string;
   key_species: string[];
+}
+
+export interface UserProfile {
+  phone: string;
+  name: string;
+  vessel_name: string;
+  vessel_type: string;
+  home_port: string;
+  created_at?: string;
+}
+
+export interface VoyageLog {
+  id: string;
+  user_phone: string;
+  voyage_date: string;
+  origin_name: string;
+  destination_name: string;
+  distance_nm: number;
+  distance_km: number;
+  duration_mins: number;
+  fuel_liters: number;
+  catch_kg: number;
+  catch_species: string;
+  safety_rating: string;
+  notes: string;
+  created_at?: string;
 }

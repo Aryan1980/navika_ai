@@ -10,7 +10,9 @@ import {
   RouteComparison,
   DataSourceInfo,
   MosdacTechnicalStatus,
-  MosdacProbeResult
+  MosdacProbeResult,
+  UserProfile,
+  VoyageLog
 } from '../types/marine';
 import {
   getFallbackPFZs,
@@ -67,80 +69,7 @@ client.interceptors.response.use(
 );
 
 export const generateFallbackPFZs = (coords: Coordinates): PFZZone[] => {
-  const { latitude: lat, longitude: lon } = coords;
-  const seawardBearings = lon < 78.0 ? [240, 270, 290, 210] : [70, 90, 120, 150];
-  const distances = [18.5, 31.0, 47.5, 68.0];
-  const names = [
-    "Thermal-Chlorophyll Frontal Zone Alpha",
-    "Oceanic Frontal Convergence Bravo",
-    "Shelf-Break Upwelling Patch Charlie",
-    "Coastal Eddy Pelagic Zone Delta"
-  ];
-
-  return names.map((name, i) => {
-    const bearing = seawardBearings[i];
-    const dist = distances[i];
-
-    const R = 6371.0;
-    const radLat = (lat * Math.PI) / 180.0;
-    const radLon = (lon * Math.PI) / 180.0;
-    const radBrg = (bearing * Math.PI) / 180.0;
-    const dR = dist / R;
-
-    const destLatRad = Math.asin(
-      Math.sin(radLat) * Math.cos(dR) +
-      Math.cos(radLat) * Math.sin(dR) * Math.cos(radBrg)
-    );
-    const destLonRad = radLon + Math.atan2(
-      Math.sin(radBrg) * Math.sin(dR) * Math.cos(radLat),
-      Math.cos(dR) - Math.sin(radLat) * Math.sin(destLatRad)
-    );
-
-    const pfzLat = Number(((destLatRad * 180.0) / Math.PI).toFixed(4));
-    const pfzLon = Number(((destLonRad * 180.0) / Math.PI).toFixed(4));
-
-    const compassBearings = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-    const compassIdx = Math.round(bearing / 22.5) % 16;
-    const bComp = compassBearings[compassIdx];
-
-    const sst = Number((28.2 - i * 0.3).toFixed(1));
-    const chl = Number((2.8 - i * 0.4).toFixed(2));
-    const suitability = Number((92.0 - i * 8.5).toFixed(1));
-    const safetyRating: "SAFE" | "CAUTION" | "AVOID" = dist < 35.0 ? "SAFE" : dist < 55.0 ? "CAUTION" : "AVOID";
-
-    const recommendations = [
-      "Highly Recommended: Optimal SST gradient (ΔT=0.8°C) with rich chlorophyll front.",
-      "Favourable: Strong pelagic aggregation signs. Maintain standard navigational watch.",
-      "Moderate Suitability: Distant offshore zone; monitor wind gusts before departure.",
-      "Not Recommended for Small Crafts: Long transit distance into deeper oceanic waters."
-    ];
-
-    const poly: [number, number][] = [
-      [Number((pfzLat + 0.04).toFixed(4)), Number((pfzLon - 0.04).toFixed(4))],
-      [Number((pfzLat + 0.04).toFixed(4)), Number((pfzLon + 0.04).toFixed(4))],
-      [Number((pfzLat - 0.04).toFixed(4)), Number((pfzLon + 0.04).toFixed(4))],
-      [Number((pfzLat - 0.04).toFixed(4)), Number((pfzLon - 0.04).toFixed(4))],
-      [Number((pfzLat + 0.04).toFixed(4)), Number((pfzLon - 0.04).toFixed(4))]
-    ];
-
-    return {
-      id: `pfz_${Math.round(lat * 100)}_${Math.round(lon * 100)}_${i + 1}`,
-      name,
-      location: { latitude: pfzLat, longitude: pfzLon },
-      polygon: poly,
-      distance_km: dist,
-      bearing_deg: bearing,
-      bearing_compass: bComp,
-      sst_c: sst,
-      chlorophyll_mg_m3: chl,
-      suitability_score: suitability,
-      safety_rating: safetyRating,
-      recommendation: recommendations[i],
-      avoids: safetyRating === "AVOID",
-      source: "INCOIS PFZ Multilingual Advisory (Synthetic / Satellite Feed)",
-      is_demo: true
-    };
-  });
+  return getFallbackPFZs(coords);
 };
 
 export const generateFallbackRoute = (origin: Coordinates, destination: Coordinates): RouteComparison => {
@@ -438,6 +367,128 @@ export const api = {
           is_synthetic: false
         }
       };
+    }
+  },
+
+  async phoneLogin(payload: {
+    phone: string;
+    otp: string;
+    name?: string;
+    vessel_name?: string;
+    vessel_type?: string;
+    home_port?: string;
+  }): Promise<{ success: boolean; user: UserProfile; message?: string }> {
+    try {
+      const res = await client.post<{ success: boolean; user: UserProfile; message?: string }>('/auth/phone-login', payload);
+      return res.data;
+    } catch (err) {
+      const defaultUser: UserProfile = {
+        phone: payload.phone,
+        name: payload.name || `Captain (${payload.phone.slice(-4)})`,
+        vessel_name: payload.vessel_name || 'Matsya Sagar I',
+        vessel_type: payload.vessel_type || 'Mechanized Trawler (18m)',
+        home_port: payload.home_port || 'Fort Kochi Coastal Harbor',
+        created_at: new Date().toISOString()
+      };
+      localStorage.setItem(`samudra_user_${payload.phone}`, JSON.stringify(defaultUser));
+      return { success: true, user: defaultUser };
+    }
+  },
+
+  async getUserProfile(phone: string): Promise<UserProfile | null> {
+    try {
+      const res = await client.get<UserProfile>(`/user/profile?phone=${encodeURIComponent(phone)}`);
+      return res.data;
+    } catch (err) {
+      const saved = localStorage.getItem(`samudra_user_${phone}`);
+      if (saved) return JSON.parse(saved);
+      return null;
+    }
+  },
+
+  async saveUserProfile(profile: UserProfile): Promise<{ success: boolean; user: UserProfile }> {
+    try {
+      const res = await client.post<{ success: boolean; user: UserProfile }>('/user/profile', profile);
+      localStorage.setItem(`samudra_user_${profile.phone}`, JSON.stringify(res.data.user || profile));
+      return res.data;
+    } catch (err) {
+      localStorage.setItem(`samudra_user_${profile.phone}`, JSON.stringify(profile));
+      return { success: true, user: profile };
+    }
+  },
+
+  async getUserVoyages(phone: string): Promise<VoyageLog[]> {
+    try {
+      const res = await client.get<{ voyages: VoyageLog[] }>(`/user/voyages?phone=${encodeURIComponent(phone)}`);
+      return res.data.voyages || [];
+    } catch (err) {
+      const local = localStorage.getItem(`samudra_voyages_${phone}`);
+      if (local) {
+        return JSON.parse(local);
+      }
+      return [
+        {
+          id: 'v_local_1',
+          user_phone: phone,
+          voyage_date: '2026-09-26',
+          origin_name: 'Fort Kochi Coastal Harbor',
+          destination_name: 'Chellanam Seaward Front',
+          distance_nm: 22.4,
+          distance_km: 41.5,
+          duration_mins: 280,
+          fuel_liters: 74,
+          catch_kg: 520,
+          catch_species: 'Oil Sardine, Indian Mackerel',
+          safety_rating: 'SAFE',
+          notes: 'High chlorophyll convergence zone. Swells < 1.1m. Excellent yield.'
+        },
+        {
+          id: 'v_local_2',
+          user_phone: phone,
+          voyage_date: '2026-09-22',
+          origin_name: 'Fort Kochi Coastal Harbor',
+          destination_name: 'Alappuzha Deep Bank',
+          distance_nm: 31.8,
+          distance_km: 58.9,
+          duration_mins: 360,
+          fuel_liters: 105,
+          catch_kg: 780,
+          catch_species: 'Yellowfin Tuna, Ribbon Fish',
+          safety_rating: 'SAFE',
+          notes: 'Thermal gradient 28.1C. Avoided coastal squall by following Samudra route.'
+        }
+      ];
+    }
+  },
+
+  async logVoyage(payload: Partial<VoyageLog>): Promise<{ success: boolean; voyage: VoyageLog }> {
+    try {
+      const res = await client.post<{ success: boolean; voyage: VoyageLog }>('/user/voyages', payload);
+      return res.data;
+    } catch (err) {
+      const newVoyage: VoyageLog = {
+        id: `v_${Date.now()}`,
+        user_phone: payload.user_phone || '',
+        voyage_date: payload.voyage_date || new Date().toISOString().split('T')[0],
+        origin_name: payload.origin_name || 'Coastal Port',
+        destination_name: payload.destination_name || 'PFZ Zone Alpha',
+        distance_nm: payload.distance_nm || 18.5,
+        distance_km: payload.distance_km || 34.2,
+        duration_mins: payload.duration_mins || 240,
+        fuel_liters: payload.fuel_liters || 60,
+        catch_kg: payload.catch_kg || 450,
+        catch_species: payload.catch_species || 'Mixed Pelagic',
+        safety_rating: payload.safety_rating || 'SAFE',
+        notes: payload.notes || 'Navigated using Samudra AI optimal waypoints.',
+        created_at: new Date().toISOString()
+      };
+      if (payload.user_phone) {
+        const existing = localStorage.getItem(`samudra_voyages_${payload.user_phone}`);
+        const list: VoyageLog[] = existing ? JSON.parse(existing) : [];
+        list.unshift(newVoyage);
+        localStorage.setItem(`samudra_voyages_${payload.user_phone}`, JSON.stringify(list));
+      }
+      return { success: true, voyage: newVoyage };
     }
   }
 };

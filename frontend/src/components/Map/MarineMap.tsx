@@ -1,16 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import * as maplibregl from 'maplibre-gl';
 import { useApp } from '../../context/AppContext';
 import { api } from '../../services/api';
-import { Search, Plus, Minus, Crosshair, Navigation, X } from 'lucide-react';
+import { Search, Plus, Minus, Crosshair, Navigation, X, Volume2, Compass, Shield, Flame, Droplets, Anchor, Box, Radio } from 'lucide-react';
 import { PFZZone } from '../../types/marine';
+import { RoutePlannerPanel } from '../Navigation/RoutePlannerPanel';
+import { getTranslation } from '../../utils/translations';
+import { getLocalizedPortName, localizeDestination } from '../../utils/locationTranslations';
 
 export const MarineMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const layerGroupsRef = useRef<{ [key: string]: L.LayerGroup }>({});
+  const mapInstanceRef = useRef<maplibregl.Map | null>(null);
+  const activePopupRef = useRef<maplibregl.Popup | null>(null);
+  const pfzMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const vesselMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const simulatedVesselMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const meshMarkersRef = useRef<maplibregl.Marker[]>([]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isOpenSeaMapActive, setIsOpenSeaMapActive] = useState<boolean>(true);
+  const [isNavicMeshActive, setIsNavicMeshActive] = useState<boolean>(true);
+  const [is3DMode, setIs3DMode] = useState<boolean>(false);
+  const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false);
 
   const {
     activeLocation,
@@ -19,550 +30,978 @@ export const MarineMap: React.FC = () => {
     pfzs,
     selectedPFZForRoute,
     routeComparison,
-    routeToPFZ,
-    clearRoute
+    openRouteForPFZ,
+    clearRoute,
+    language,
+    isRouteDrawerOpen,
+    setIsRouteDrawerOpen,
+    setActiveNav
   } = useApp();
 
-  // 1. Initialize Leaflet Map with High-Resolution Satellite Basemap
+  // 1. Initialize MapLibre GL JS Map
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    delete (mapContainerRef.current as any)._leaflet_id;
-
     try {
-      const map = L.map(mapContainerRef.current, {
-        center: [activeLocation.latitude, activeLocation.longitude],
-        zoom: 11,
-        minZoom: 4,
+      const map = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style: {
+          version: 8,
+          sources: {
+            'satellite-source': {
+              type: 'raster',
+              tiles: [
+                'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+              ],
+              tileSize: 256,
+              maxzoom: 19,
+              attribution: '&copy; Google Satellite / Marine Hydrography'
+            },
+            'openseamap-source': {
+              type: 'raster',
+              tiles: ['https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              maxzoom: 18,
+              attribution: '&copy; OpenSeaMap Navigation Seamarks'
+            }
+          },
+          layers: [
+            {
+              id: 'satellite-layer',
+              type: 'raster',
+              source: 'satellite-source',
+              paint: { 'raster-opacity': 0.96 }
+            },
+            {
+              id: 'openseamap-layer',
+              type: 'raster',
+              source: 'openseamap-source',
+              layout: {
+                visibility: isOpenSeaMapActive ? 'visible' : 'none'
+              },
+              paint: { 'raster-opacity': 0.94 }
+            }
+          ]
+        },
+        center: [activeLocation.longitude, activeLocation.latitude],
+        zoom: 10.5,
+        minZoom: 3,
         maxZoom: 18,
-        zoomControl: false,
+        pitch: is3DMode ? 52 : 0,
+        bearing: is3DMode ? -15 : 0,
         attributionControl: false
       });
 
-      // High-Resolution Seamless Satellite Basemap (Google Hybrid: Satellite + Coastlines & Marine Landmarks)
-      L.tileLayer(
-        'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-        {
-          subdomains: ['0', '1', '2', '3'],
-          maxZoom: 18,
-          maxNativeZoom: 18,
-          keepBuffer: 6,
-          updateWhenIdle: false,
-          attribution: '&copy; Google Satellite'
-        }
-      ).addTo(map);
+      map.on('load', () => {
+        setIsMapLoaded(true);
 
-      // Initialize LayerGroups
-      const layers = ['vessel', 'simulated_vessel', 'pfz', 'sst', 'chlorophyll', 'waves', 'wind', 'imbl', 'mpas', 'restricted', 'route'];
-      layers.forEach((id) => {
-        const group = L.layerGroup().addTo(map);
-        layerGroupsRef.current[id] = group;
+        // Geofences: IMBL
+        map.addSource('imbl-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'imbl-line',
+          type: 'line',
+          source: 'imbl-source',
+          paint: {
+            'line-color': '#f59e0b',
+            'line-width': 2.5,
+            'line-dasharray': [4, 3]
+          }
+        });
+
+        // Geofences: MPAs
+        map.addSource('mpas-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'mpas-fill',
+          type: 'fill',
+          source: 'mpas-source',
+          paint: {
+            'fill-color': '#f43f5e',
+            'fill-opacity': 0.16
+          }
+        });
+        map.addLayer({
+          id: 'mpas-outline',
+          type: 'line',
+          source: 'mpas-source',
+          paint: {
+            'line-color': '#f43f5e',
+            'line-width': 1.5
+          }
+        });
+
+        // Geofences: Restricted Zones
+        map.addSource('restricted-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'restricted-fill',
+          type: 'fill',
+          source: 'restricted-source',
+          paint: {
+            'fill-color': '#a855f7',
+            'fill-opacity': 0.16
+          }
+        });
+        map.addLayer({
+          id: 'restricted-outline',
+          type: 'line',
+          source: 'restricted-source',
+          paint: {
+            'line-color': '#a855f7',
+            'line-width': 1.5
+          }
+        });
+
+        // Navigation Routes (Shortest Direct vs Safe Searoute Fairway)
+        map.addSource('route-shortest-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'route-shortest-line',
+          type: 'line',
+          source: 'route-shortest-source',
+          paint: {
+            'line-color': '#f43f5e',
+            'line-width': 2.5,
+            'line-dasharray': [3, 2],
+            'line-opacity': 0.8
+          }
+        });
+
+        map.addSource('route-safe-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'route-safe-glow',
+          type: 'line',
+          source: 'route-safe-source',
+          paint: {
+            'line-color': '#88BDF2',
+            'line-width': 8,
+            'line-opacity': 0.35,
+            'line-blur': 3
+          }
+        });
+        map.addLayer({
+          id: 'route-safe-line',
+          type: 'line',
+          source: 'route-safe-source',
+          paint: {
+            'line-color': '#BDDDFC',
+            'line-width': 3.5,
+            'line-opacity': 0.95
+          }
+        });
+
+        // Route Waypoint markers
+        map.addSource('route-waypoints-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'route-waypoints-circle',
+          type: 'circle',
+          source: 'route-waypoints-source',
+          paint: {
+            'circle-radius': 6.5,
+            'circle-color': '#88BDF2',
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#0f141d'
+          }
+        });
+
+        // NavIC & LoRaWAN Mesh Peer-to-Peer Links
+        map.addSource('navic-mesh-lines-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'navic-mesh-lines-glow',
+          type: 'line',
+          source: 'navic-mesh-lines-source',
+          paint: {
+            'line-color': '#06b6d4',
+            'line-width': 4,
+            'line-opacity': 0.4,
+            'line-blur': 2
+          }
+        });
+        map.addLayer({
+          id: 'navic-mesh-lines-layer',
+          type: 'line',
+          source: 'navic-mesh-lines-source',
+          paint: {
+            'line-color': '#38bdf8',
+            'line-width': 2,
+            'line-dasharray': [3, 2],
+            'line-opacity': 0.85
+          }
+        });
       });
 
       mapInstanceRef.current = map;
     } catch (err) {
-      console.error('Leaflet initialization notice:', err);
+      console.error('MapLibre GL JS initialization error:', err);
     }
 
     return () => {
-      try {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.remove();
-          mapInstanceRef.current = null;
-        }
-      } catch (err) {
-        console.warn('Leaflet cleanup notice:', err);
+      pfzMarkersRef.current.forEach(m => m.remove());
+      pfzMarkersRef.current = [];
+      meshMarkersRef.current.forEach(m => m.remove());
+      meshMarkersRef.current = [];
+      if (vesselMarkerRef.current) {
+        vesselMarkerRef.current.remove();
+        vesselMarkerRef.current = null;
       }
-      if (mapContainerRef.current) {
-        delete (mapContainerRef.current as any)._leaflet_id;
+      if (simulatedVesselMarkerRef.current) {
+        simulatedVesselMarkerRef.current.remove();
+        simulatedVesselMarkerRef.current = null;
+      }
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
   }, []);
 
-  // Invalidate map size on container resize or layout shifts
+  // 2. OpenSeaMap visibility sync
   useEffect(() => {
-    if (!mapContainerRef.current) return;
-    const observer = new ResizeObserver(() => {
-      mapInstanceRef.current?.invalidateSize();
-    });
-    observer.observe(mapContainerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  // 2. Fit bounds when activeLocation changes or spots load (if no active route)
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-
-    // If an active route is being displayed, let the route effect control framing
-    if (routeComparison) return;
-
-    if (pfzs.length > 0) {
-      const bounds = L.latLngBounds([
-        [activeLocation.latitude, activeLocation.longitude],
-        ...pfzs.map((p) => [p.location.latitude, p.location.longitude] as [number, number])
-      ]);
-      mapInstanceRef.current.fitBounds(bounds, {
-        padding: [60, 60],
-        maxZoom: 12
-      });
-    } else {
-      mapInstanceRef.current.setView([activeLocation.latitude, activeLocation.longitude], 11, {
-        animate: true
-      });
+    const map = mapInstanceRef.current;
+    if (!map || !isMapLoaded) return;
+    if (map.getLayer('openseamap-layer')) {
+      map.setLayoutProperty(
+        'openseamap-layer',
+        'visibility',
+        isOpenSeaMapActive ? 'visible' : 'none'
+      );
     }
-  }, [activeLocation.latitude, activeLocation.longitude, pfzs]);
+  }, [isOpenSeaMapActive, isMapLoaded]);
 
-  // 3. Render Departure Port / Vessel Marker (ONLY a clean Blue Dot)
+  // 3. 3D Mode Perspective Switch
+  const toggle3DMode = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const next3D = !is3DMode;
+    setIs3DMode(next3D);
+
+    map.easeTo({
+      pitch: next3D ? 52 : 0,
+      bearing: next3D ? -18 : 0,
+      duration: 1200
+    });
+  }, [is3DMode]);
+
+  // 4. Update Vessel Position using reliable DOM Marker
   useEffect(() => {
-    const group = layerGroupsRef.current['vessel'];
-    if (!group) return;
-    group.clearLayers();
+    const map = mapInstanceRef.current;
+    if (!map) return;
 
-    // Subtle outer beacon pulse circle
-    const outerHalo = L.circle([activeLocation.latitude, activeLocation.longitude], {
-      radius: 600,
-      color: '#0474c4',
-      weight: 1,
-      fillColor: '#0474c4',
-      fillOpacity: 0.18,
-      interactive: false
-    });
-    group.addLayer(outerHalo);
+    if (vesselMarkerRef.current) {
+      vesselMarkerRef.current.remove();
+    }
 
-    // Single distinct Blue Dot marker
-    const blueDot = L.circleMarker([activeLocation.latitude, activeLocation.longitude], {
-      radius: 8,
-      fillColor: '#0474C4',
-      color: '#ffffff',
-      weight: 2.5,
-      fillOpacity: 1
-    }).bindTooltip(`Departure Fix: ${activeLocationName}`, {
-      permanent: false,
-      direction: 'top',
-      className: 'font-mono text-xs'
-    });
+    const vEl = document.createElement('div');
+    vEl.className = 'relative flex items-center justify-center';
+    vEl.style.width = '36px';
+    vEl.style.height = '36px';
+    vEl.title = `Departure Fix: ${activeLocationName}`;
+    vEl.innerHTML = `
+      <div style="position: absolute; width: 34px; height: 34px; border-radius: 9999px; background: rgba(4, 116, 196, 0.28); border: 1.5px solid rgba(136, 189, 242, 0.7); animation: pulse 2s infinite;"></div>
+      <div style="position: relative; width: 16px; height: 16px; border-radius: 9999px; background: #0474C4; border: 2.5px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.6);"></div>
+    `;
 
-    group.addLayer(blueDot);
+    const vMarker = new maplibregl.Marker({ element: vEl, anchor: 'center' })
+      .setLngLat([activeLocation.longitude, activeLocation.latitude])
+      .addTo(map);
+
+    vesselMarkerRef.current = vMarker;
   }, [activeLocation.latitude, activeLocation.longitude, activeLocationName]);
 
-  // 3b. Render Simulated Vessel Track (AIS IND-8421)
+  // 4b. Render Simulated Vessel Track (AIS IND-8421)
   useEffect(() => {
-    const group = layerGroupsRef.current['simulated_vessel'];
-    if (!group) return;
-    group.clearLayers();
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (simulatedVesselMarkerRef.current) {
+      simulatedVesselMarkerRef.current.remove();
+      simulatedVesselMarkerRef.current = null;
+    }
 
     if (!activeMapLayers.includes('simulated_vessel')) return;
 
     // Seaward track vector from activeLocation heading ~240°
-    const startLat = activeLocation.latitude - 0.04;
-    const startLon = activeLocation.longitude - 0.07;
     const currentLat = activeLocation.latitude - 0.09;
     const currentLon = activeLocation.longitude - 0.14;
 
-    // Breadcrumb trail
-    const breadcrumb = L.polyline([
-      [activeLocation.latitude, activeLocation.longitude],
-      [startLat, startLon],
-      [currentLat, currentLon]
-    ], {
-      color: '#f59e0b',
-      weight: 2.5,
-      dashArray: '5, 8',
-      opacity: 0.85
-    });
-    group.addLayer(breadcrumb);
+    const boatEl = document.createElement('div');
+    boatEl.className = 'simulated-vessel-marker flex items-center justify-center cursor-pointer';
+    boatEl.style.width = '32px';
+    boatEl.style.height = '32px';
+    boatEl.title = 'SIMULATED VESSEL (AIS ID: IND-8421)\nCourse: 240° WSW | Speed: 8.2 kn\nStatus: Underway using engine';
+    boatEl.innerHTML = `
+      <div style="transform: rotate(240deg); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.35); border: 2px solid #f59e0b; border-radius: 50%; box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);">
+        <span style="font-size: 14px;">⛵</span>
+      </div>
+    `;
 
-    // Simulated Boat Marker
-    const boatIcon = L.divIcon({
-      className: 'simulated-vessel-marker',
-      html: `
-        <div style="transform: rotate(240deg); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.25); border: 2px solid #f59e0b; border-radius: 50%; box-shadow: 0 0 14px rgba(245, 158, 11, 0.6);">
-          <span style="font-size: 14px;">⛵</span>
-        </div>
-      `,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
-    });
+    const marker = new maplibregl.Marker({ element: boatEl, anchor: 'center' })
+      .setLngLat([currentLon, currentLat])
+      .addTo(map);
 
-    const vesselMarker = L.marker([currentLat, currentLon], { icon: boatIcon })
-      .bindTooltip(`
-        <div style="font-family: monospace; font-size: 11px; padding: 2px 4px;">
-          <div style="font-weight: bold; color: #f59e0b;">SIMULATED VESSEL (AIS ID: IND-8421)</div>
-          <div>Course: 240° WSW | Speed: 8.2 knots</div>
-          <div>Status: Underway using engine</div>
-        </div>
-      `, { permanent: false, direction: 'top' });
-
-    group.addLayer(vesselMarker);
+    simulatedVesselMarkerRef.current = marker;
   }, [activeLocation.latitude, activeLocation.longitude, activeMapLayers]);
 
-  // 4. Render Spot Markers (ONLY Clean Green Dots - Clicking shows info)
+  // 5. Update PFZ Spot Markers using DOM Markers for 100% reliable rendering
   useEffect(() => {
-    const group = layerGroupsRef.current['pfz'];
     const map = mapInstanceRef.current;
-    if (!group || !map) return;
-    group.clearLayers();
+    if (!map) return;
+
+    // Clear previous PFZ markers
+    pfzMarkersRef.current.forEach(m => m.remove());
+    pfzMarkersRef.current = [];
 
     if (!activeMapLayers.includes('pfz')) return;
 
     const filtered = pfzs.filter((p) =>
-      searchQuery ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.recommendation.toLowerCase().includes(searchQuery.toLowerCase()) : true
+      searchQuery
+        ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.recommendation.toLowerCase().includes(searchQuery.toLowerCase())
+        : true
     );
 
     filtered.forEach((pfz) => {
       const isSafe = pfz.safety_rating === 'SAFE';
       const isCaution = pfz.safety_rating === 'CAUTION';
       const dotColor = isSafe ? '#10b981' : isCaution ? '#f59e0b' : '#f43f5e';
-      const haloColor = isSafe ? '#10b981' : isCaution ? '#f59e0b' : '#f43f5e';
+      const haloBg = isSafe ? 'rgba(16, 185, 129, 0.22)' : isCaution ? 'rgba(245, 158, 11, 0.22)' : 'rgba(244, 63, 94, 0.22)';
+      const haloBorder = isSafe ? 'rgba(52, 211, 153, 0.6)' : isCaution ? 'rgba(251, 191, 36, 0.6)' : 'rgba(251, 113, 133, 0.6)';
 
-      // Subtle outer radar beacon ring
-      const outerHalo = L.circle([pfz.location.latitude, pfz.location.longitude], {
-        radius: isSafe ? 700 : 550,
-        color: haloColor,
-        weight: 1,
-        fillColor: haloColor,
-        fillOpacity: isSafe ? 0.2 : 0.14,
-        interactive: false
+      const markerEl = document.createElement('div');
+      markerEl.className = 'relative flex items-center justify-center cursor-pointer group';
+      markerEl.style.width = '42px';
+      markerEl.style.height = '42px';
+      markerEl.title = `${pfz.name} - ● ${pfz.safety_rating} ZONE (${pfz.distance_km} km · ${pfz.bearing_compass})`;
+
+      markerEl.innerHTML = `
+        <div style="position: absolute; width: 38px; height: 38px; border-radius: 9999px; background: ${haloBg}; border: 1px solid ${haloBorder};"></div>
+        <div style="position: relative; width: 17px; height: 17px; border-radius: 9999px; background: ${dotColor}; border: 2.5px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.65); transition: transform 0.2s ease;"></div>
+      `;
+
+      markerEl.onmouseenter = () => {
+        const dot = markerEl.querySelector('div:last-child') as HTMLElement;
+        if (dot) dot.style.transform = 'scale(1.3)';
+      };
+      markerEl.onmouseleave = () => {
+        const dot = markerEl.querySelector('div:last-child') as HTMLElement;
+        if (dot) dot.style.transform = 'scale(1.0)';
+      };
+
+      markerEl.onclick = () => {
+        if (activePopupRef.current) activePopupRef.current.remove();
+
+        // Smoothly center the map view with an offset so the popup is completely visible without manual scrolling
+        map.easeTo({
+          center: [pfz.location.longitude, pfz.location.latitude],
+          offset: [0, 80],
+          duration: 450
+        });
+
+        const suitabilityScore = Math.round(Number(pfz.suitability_score || 85));
+        const localizedSpotName = localizeDestination(pfz.name, language);
+        const safetyRatingText = `${pfz.safety_rating} ${getTranslation('zone_suffix', language)}`;
+
+        const popupDiv = document.createElement('div');
+        popupDiv.className = 'p-5 text-white font-sans w-[320px] sm:w-[350px] max-h-[75vh] overflow-y-auto custom-scrollbar bg-[#161c27] rounded-3xl border border-[#384959] shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative select-none';
+        popupDiv.innerHTML = `
+          <!-- Header with 36px clearance for close button to prevent overlap -->
+          <div class="mb-3 pr-9">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#384959] text-white border border-[#88BDF2]/40 flex items-center gap-1.5 shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#88BDF2]"></span>
+                <span>● ${safetyRatingText}</span>
+              </span>
+              <span class="text-[11px] text-[#BDDDFC]/80 font-mono font-medium">${getTranslation('high_yield_zone', language)}</span>
+            </div>
+            <span class="font-extrabold text-sm sm:text-base text-white tracking-tight block leading-snug">${localizedSpotName}</span>
+            <span class="text-xs text-[#BDDDFC]/70 font-medium leading-tight block mt-0.5">${getTranslation('isro_marine_observation', language)}</span>
+          </div>
+
+          <!-- Catch Potential -->
+          <div class="mb-3.5 pt-2.5 border-t border-[#384959]/60">
+            <div class="flex items-baseline justify-between mb-1.5">
+              <div>
+                <span class="font-bold text-xs text-white block leading-tight">${getTranslation('catch_potential', language)}</span>
+                <span class="text-[10px] text-[#BDDDFC]/70 leading-tight">${getTranslation('rf_ml_model', language)}</span>
+              </div>
+              <span class="text-3xl font-extrabold text-[#88BDF2] font-mono leading-none tracking-tight">
+                ${suitabilityScore}%
+              </span>
+            </div>
+            <div class="w-full h-2.5 bg-[#12161f] border border-[#384959] rounded-full overflow-hidden mt-1.5 mb-1.5">
+              <div class="h-full bg-gradient-to-r from-[#6A89A7] via-[#88BDF2] to-[#BDDDFC] rounded-full transition-all duration-500" style="width: ${suitabilityScore}%"></div>
+            </div>
+            <div class="flex items-center justify-between text-xs font-medium text-[#BDDDFC]">
+              <span><strong class="text-white font-bold">${suitabilityScore}%</strong> ${getTranslation('predicted_catch', language)}</span>
+              <span><strong class="text-white font-bold">${pfz.model_confidence_pct ?? 92}%</strong> ${getTranslation('confidence', language)}</span>
+            </div>
+          </div>
+
+          <!-- 2 Modular Metric Sub-Cards -->
+          <div class="grid grid-cols-2 gap-2.5 mb-3.5">
+            <div class="p-3 rounded-2xl bg-[#12161f] border border-[#384959] flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-1.5 text-xs font-bold text-[#BDDDFC] mb-1.5">
+                  <span>🌡️</span>
+                  <span>${getTranslation('sst_thermal', language)}</span>
+                </div>
+                <div class="w-full h-1.5 bg-[#1a222f] rounded-full overflow-hidden mb-2">
+                  <div class="h-full bg-[#88BDF2] rounded-full" style="width: 78%"></div>
+                </div>
+                <div class="flex items-baseline justify-between">
+                  <span class="text-base font-bold text-white font-mono">${pfz.sst_c}°C</span>
+                  <span class="text-xs font-bold text-[#88BDF2]">${getTranslation('optimal', language)}</span>
+                </div>
+              </div>
+              <div class="flex items-end justify-between mt-2 pt-1.5 border-t border-[#384959]/50">
+                <div>
+                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">${getTranslation('front', language)}</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">ΔT 0.45°C</span>
+                </div>
+                <span class="text-[#88BDF2] text-xs font-bold">ılıll</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-[#12161f] border border-[#384959] flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-1.5 text-xs font-bold text-[#BDDDFC] mb-1.5">
+                  <span>🌿</span>
+                  <span>${getTranslation('chlorophyll', language)}</span>
+                </div>
+                <div class="w-full h-1.5 bg-[#1a222f] rounded-full overflow-hidden mb-2">
+                  <div class="h-full bg-[#88BDF2] rounded-full" style="width: 84%"></div>
+                </div>
+                <div class="flex items-baseline justify-between">
+                  <span class="text-base font-bold text-white font-mono">${pfz.chlorophyll_mg_m3}</span>
+                  <span class="text-xs font-bold text-[#88BDF2]">mg/m³</span>
+                </div>
+              </div>
+              <div class="flex items-end justify-between mt-2 pt-1.5 border-t border-[#384959]/50">
+                <div>
+                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">${getTranslation('plume', language)}</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">${getTranslation('upwelling', language)}</span>
+                </div>
+                <span class="text-[#88BDF2] text-xs font-bold">ılıll</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coordinates and Telemetry Bar -->
+          <div class="p-3 rounded-2xl bg-[#12161f] border border-[#384959] text-xs font-mono text-[#BDDDFC] mb-3.5 flex items-center justify-between">
+            <div>
+              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">${getTranslation('target_fix', language)}</span>
+              <span class="font-bold text-white text-xs sm:text-sm">${pfz.location.latitude.toFixed(4)}°N, ${pfz.location.longitude.toFixed(4)}°E</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">${getTranslation('distance_heading', language)}</span>
+              <span class="font-bold text-[#88BDF2] text-xs sm:text-sm">${pfz.distance_km} km · ${pfz.bearing_compass} (${pfz.bearing_deg}°)</span>
+            </div>
+          </div>
+        `;
+
+        const navBtn = document.createElement('button');
+        navBtn.className = 'w-full py-3 px-4 bg-[#88BDF2] hover:bg-[#BDDDFC] text-[#0f141d] font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer';
+        navBtn.innerHTML = `<span>${getTranslation('navigate_here', language)}</span>`;
+        navBtn.onclick = () => {
+          openRouteForPFZ(pfz);
+          setIsRouteDrawerOpen(true);
+          if (activePopupRef.current) activePopupRef.current.remove();
+        };
+        popupDiv.appendChild(navBtn);
+
+        const popup = new maplibregl.Popup({
+          maxWidth: '360px',
+          className: 'premium-maplibre-popup',
+          closeButton: true,
+          closeOnClick: false,
+          offset: [0, -14],
+          anchor: 'bottom'
+        })
+          .setLngLat([pfz.location.longitude, pfz.location.latitude])
+          .setDOMContent(popupDiv)
+          .addTo(map);
+
+        popup.on('close', () => {
+          activePopupRef.current = null;
+        });
+
+        activePopupRef.current = popup;
+      };
+
+      const marker = new maplibregl.Marker({ element: markerEl, anchor: 'center' })
+        .setLngLat([pfz.location.longitude, pfz.location.latitude])
+        .addTo(map);
+
+      pfzMarkersRef.current.push(marker);
+    });
+
+    // Auto-fit to activeLocation and spots if no route active
+    if (!routeComparison && filtered.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      bounds.extend([activeLocation.longitude, activeLocation.latitude]);
+      filtered.forEach((p) => bounds.extend([p.location.longitude, p.location.latitude]));
+      map.fitBounds(bounds, { padding: 90, maxZoom: 12, duration: 1000 });
+    }
+  }, [pfzs, activeMapLayers, searchQuery, activeLocation.latitude, activeLocation.longitude, routeComparison, language]);
+
+  // 6. Update Geofences (IMBL, MPAs, Restricted Zones)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !isMapLoaded) return;
+
+    api.getGeofences().then((geofences) => {
+      const imblSource = map.getSource('imbl-source') as maplibregl.GeoJSONSource;
+      if (imblSource && activeMapLayers.includes('imbl') && geofences.imbl) {
+        const features = geofences.imbl.map((b: any) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: b.coordinates.map((coord: [number, number]) => [coord[1], coord[0]])
+          },
+          properties: { name: b.name }
+        }));
+        imblSource.setData({ type: 'FeatureCollection', features });
+      }
+
+      const mpaSource = map.getSource('mpas-source') as maplibregl.GeoJSONSource;
+      if (mpaSource && activeMapLayers.includes('mpas') && geofences.marine_protected_areas) {
+        const features = geofences.marine_protected_areas.map((m: any) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [m.polygon.map((coord: [number, number]) => [coord[1], coord[0]])]
+          },
+          properties: { name: m.name }
+        }));
+        mpaSource.setData({ type: 'FeatureCollection', features });
+      }
+
+      const rzSource = map.getSource('restricted-source') as maplibregl.GeoJSONSource;
+      if (rzSource && activeMapLayers.includes('restricted') && geofences.restricted_zones) {
+        const features = geofences.restricted_zones.map((r: any) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [r.polygon.map((coord: [number, number]) => [coord[1], coord[0]])]
+          },
+          properties: { name: r.name }
+        }));
+        rzSource.setData({ type: 'FeatureCollection', features });
+      }
+    }).catch(err => console.warn('Geofences fetch error:', err));
+  }, [activeMapLayers, isMapLoaded]);
+
+  // 7. Update Navigation Route (Eurostat searoute Corridor & Shortest Rhumb)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !isMapLoaded) return;
+
+    const shortestSource = map.getSource('route-shortest-source') as maplibregl.GeoJSONSource;
+    const safeSource = map.getSource('route-safe-source') as maplibregl.GeoJSONSource;
+    const waypointsSource = map.getSource('route-waypoints-source') as maplibregl.GeoJSONSource;
+
+    if (!routeComparison) {
+      if (shortestSource) shortestSource.setData({ type: 'FeatureCollection', features: [] });
+      if (safeSource) safeSource.setData({ type: 'FeatureCollection', features: [] });
+      if (waypointsSource) waypointsSource.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    const shortestCoords = routeComparison.shortest_route.waypoints.map(w => [w.longitude, w.latitude]);
+    const safeCoords = routeComparison.safe_route.waypoints.map(w => [w.longitude, w.latitude]);
+
+    if (shortestSource) {
+      shortestSource.setData({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: shortestCoords },
+            properties: { type: 'shortest' }
+          }
+        ]
       });
-      group.addLayer(outerHalo);
+    }
 
-      // Distinct Spot Marker
-      const spotDot = L.circleMarker([pfz.location.latitude, pfz.location.longitude], {
-        radius: 8.5,
-        fillColor: dotColor,
-        color: '#ffffff',
-        weight: 2,
-        fillOpacity: 0.98
+    if (safeSource) {
+      safeSource.setData({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: safeCoords },
+            properties: { type: 'safe' }
+          }
+        ]
       });
+    }
 
-      // Hover Tooltip for instant awareness
-      spotDot.bindTooltip(
-        `<div style="font-family: monospace; font-size: 11px; padding: 2px 4px;"><b>${pfz.name}</b><br/><span style="color: ${isSafe ? '#34d399' : '#fbbf24'}; font-weight: bold;">● ${pfz.safety_rating} ZONE</span> (${pfz.distance_km} km · ${pfz.bearing_compass})</div>`,
-        { permanent: false, direction: 'top', opacity: 0.95 }
-      );
+    if (waypointsSource) {
+      const waypointFeatures = routeComparison.safe_route.waypoints.map((w, idx) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [w.longitude, w.latitude]
+        },
+        properties: {
+          index: idx + 1,
+          name: w.name,
+          instruction: w.instruction
+        }
+      }));
+      waypointsSource.setData({
+        type: 'FeatureCollection',
+        features: waypointFeatures
+      });
+    }
 
-      // Clicking opens the info popup
-      const popupDiv = document.createElement('div');
-      popupDiv.className = 'p-3.5 text-[#f1f5fb] font-sans w-[280px] bg-[#181e2e]/98 backdrop-blur-xl rounded-2xl border border-[#5379AE]/40 shadow-2xl relative select-none';
-      popupDiv.innerHTML = `
-        <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#5379AE]/25 pr-6">
-          <span class="font-bold text-sm text-white truncate max-w-[190px]">${pfz.name}</span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
-            isSafe
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-              : isCaution
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-              : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-          }">
-            ${pfz.safety_rating}
-          </span>
-        </div>
+    const bounds = new maplibregl.LngLatBounds();
+    safeCoords.forEach(c => bounds.extend(c as [number, number]));
+    shortestCoords.forEach(c => bounds.extend(c as [number, number]));
+    map.fitBounds(bounds, { padding: 90, duration: 1200 });
+  }, [routeComparison, isMapLoaded]);
 
-        <div class="bg-[#121622] p-2.5 rounded-xl border border-[#5379AE]/25 mb-2">
-          <div class="flex items-center justify-between text-[10px] font-mono text-[#A8C4EC]/70 mb-1">
-            <span>TARGET GPS FIX</span>
-            <span class="${isSafe ? 'text-emerald-400' : 'text-amber-400'} font-semibold">● ${isSafe ? 'Verified Safe' : 'Caution Advised'}</span>
-          </div>
-          <div class="font-mono text-xs font-bold text-white tracking-wider">
-            ${pfz.location.latitude.toFixed(4)}°N, ${pfz.location.longitude.toFixed(4)}°E
-          </div>
-        </div>
+  // 8. NavIC & LoRaWAN Mesh Peer-to-Peer Relay Effect
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !isMapLoaded) return;
 
-        <div class="grid grid-cols-2 gap-1.5 mb-2 text-xs font-mono bg-[#121622] p-2 rounded-xl border border-[#5379AE]/20">
-          <div>
-            <span class="text-[#5379AE] block text-[9px]">DISTANCE</span>
-            <span class="text-white font-semibold">${pfz.distance_km} km</span>
-          </div>
-          <div>
-            <span class="text-[#5379AE] block text-[9px]">BEARING</span>
-            <span class="text-[#0474C4] font-semibold">${pfz.bearing_compass} (${pfz.bearing_deg}°)</span>
-          </div>
-          <div>
-            <span class="text-[#5379AE] block text-[9px]">SST FRONT</span>
-            <span class="text-amber-300 font-semibold">${pfz.sst_c}°C</span>
-          </div>
-          <div>
-            <span class="text-[#5379AE] block text-[9px]">CHLOROPHYLL</span>
-            <span class="text-emerald-400 font-semibold">${pfz.chlorophyll_mg_m3} mg/m³</span>
-          </div>
-        </div>
+    // Clear old mesh markers
+    meshMarkersRef.current.forEach(m => m.remove());
+    meshMarkersRef.current = [];
 
-        <div class="bg-[#121622]/90 p-2 rounded-xl border border-[#5379AE]/20 text-[10px] mb-2.5 space-y-1">
-          <div class="${isSafe ? 'text-emerald-400' : 'text-amber-400'} font-bold font-mono text-[9px] uppercase tracking-wider flex items-center gap-1">
-            <span>🛡️ ${isSafe ? 'Certified Safe Fishing Zone' : 'Moderate Transit Advisory'}</span>
-          </div>
-          <p class="text-[#A8C4EC]/90 leading-tight">
-            ${pfz.recommendation}
-          </p>
-          <p class="text-amber-300/85 leading-tight text-[9px]">
-            Sovereign IMBL clearance verified (>100 km buffer). Maintain heading ${pfz.bearing_deg}°.
-          </p>
+    const meshSource = map.getSource('navic-mesh-lines-source') as maplibregl.GeoJSONSource;
+
+    if (!isNavicMeshActive) {
+      if (meshSource) {
+        meshSource.setData({ type: 'FeatureCollection', features: [] });
+      }
+      return;
+    }
+
+    // 3 Simulated peer vessels near active location for P2P mesh demo
+    const peerVessels = [
+      {
+        id: 'IND-TN-0482',
+        name: 'Meenavan 1',
+        type: 'Mechanized Trawler (18m)',
+        lat: activeLocation.latitude + 0.042,
+        lng: activeLocation.longitude + 0.062,
+        sats: 7,
+        rssi: -82,
+        hop: 1
+      },
+      {
+        id: 'IND-TN-0819',
+        name: 'Kadalur Express',
+        type: 'Motorized Fiber Craft (12m)',
+        lat: activeLocation.latitude + 0.078,
+        lng: activeLocation.longitude + 0.108,
+        sats: 8,
+        rssi: -89,
+        hop: 2
+      },
+      {
+        id: 'IND-KL-1204',
+        name: 'Sagara Jyoti',
+        type: 'Gillnetter (15m)',
+        lat: activeLocation.latitude - 0.035,
+        lng: activeLocation.longitude + 0.072,
+        sats: 6,
+        rssi: -85,
+        hop: 1
+      }
+    ];
+
+    // GeoJSON lines connecting active user vessel to peer vessels and between peers
+    const lines = [
+      [[activeLocation.longitude, activeLocation.latitude], [peerVessels[0].lng, peerVessels[0].lat]],
+      [[activeLocation.longitude, activeLocation.latitude], [peerVessels[2].lng, peerVessels[2].lat]],
+      [[peerVessels[0].lng, peerVessels[0].lat], [peerVessels[1].lng, peerVessels[1].lat]],
+      [[peerVessels[0].lng, peerVessels[0].lat], [peerVessels[2].lng, peerVessels[2].lat]]
+    ];
+
+    if (meshSource) {
+      meshSource.setData({
+        type: 'FeatureCollection',
+        features: lines.map((coords, i) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: coords
+          },
+          properties: { id: `mesh-link-${i}` }
+        }))
+      });
+    }
+
+    // Create DOM markers for peer vessels
+    peerVessels.forEach((v) => {
+      const el = document.createElement('div');
+      el.className = 'relative flex items-center justify-center cursor-pointer';
+      el.style.width = '32px';
+      el.style.height = '32px';
+      el.title = `${v.name} (${v.id}) - NavIC Mesh Node`;
+      el.innerHTML = `
+        <div style="position: absolute; width: 30px; height: 30px; border-radius: 9999px; background: rgba(6, 182, 212, 0.2); border: 1.5px dashed rgba(56, 189, 248, 0.8); animation: spin 8s linear infinite;"></div>
+        <div style="position: relative; width: 14px; height: 14px; border-radius: 9999px; background: #06b6d4; border: 2px solid #ffffff; box-shadow: 0 0 10px rgba(6,182,212,0.8); display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 8px;">📡</span>
         </div>
       `;
 
-      // Button row: Copy Coordinates & Center
-      const btnRow = document.createElement('div');
-      btnRow.className = 'grid grid-cols-2 gap-1.5';
+      el.onclick = () => {
+        if (activePopupRef.current) activePopupRef.current.remove();
 
-      const copyBtn = document.createElement('button');
-      copyBtn.className = 'btn-signature btn-signature-sm !py-2 !px-2 !text-[10px] cursor-pointer w-full text-center justify-center';
-      copyBtn.innerHTML = '<span>Copy GPS</span>';
-      copyBtn.onclick = (e) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(`${pfz.location.latitude.toFixed(4)}, ${pfz.location.longitude.toFixed(4)}`);
-        copyBtn.innerHTML = '<span class="text-emerald-300 font-bold">✓ Copied!</span>';
-        setTimeout(() => {
-          copyBtn.innerHTML = '<span>Copy GPS</span>';
-        }, 1800);
+        const pDiv = document.createElement('div');
+        pDiv.className = 'p-3.5 bg-[#0f141d] border border-cyan-500/50 rounded-2xl text-white font-mono text-xs shadow-2xl';
+        pDiv.innerHTML = `
+          <div class="flex items-center justify-between pb-2 border-b border-[#384959] mb-2.5">
+            <div>
+              <span class="font-bold text-cyan-300 text-sm">${v.name}</span>
+              <span class="text-xs text-slate-400 block">${v.type}</span>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              Mesh Relay Active
+            </span>
+          </div>
+
+          <div class="space-y-1.5 text-xs text-[#BDDDFC]">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Vessel Reg ID:</span>
+              <span class="font-bold text-white">${v.id}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">NavIC Constellation:</span>
+              <span class="font-bold text-amber-300">🛰️ ${v.sats} Sats (L5/S)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">LoRa 868MHz RSSI:</span>
+              <span class="font-bold text-cyan-300">${v.rssi} dBm (SNR +9.2dB)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Mesh Forwarding:</span>
+              <span class="font-bold text-emerald-400">Hop ${v.hop} of 3 → Shore Gateway</span>
+            </div>
+          </div>
+
+          <div class="mt-2.5 pt-2 border-t border-[#384959] text-[10px] text-[#88BDF2] flex items-center justify-between">
+            <span>Zero-4G Offshore Peer-to-Peer</span>
+            <span class="text-emerald-400 font-bold">100% Offline</span>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({
+          maxWidth: '320px',
+          closeButton: true,
+          closeOnClick: false,
+          offset: [0, -12]
+        })
+          .setLngLat([v.lng, v.lat])
+          .setDOMContent(pDiv)
+          .addTo(map);
+
+        activePopupRef.current = popup;
       };
 
-      const centerBtn = document.createElement('button');
-      centerBtn.className = 'btn-signature btn-signature-sm !py-2 !px-2 !text-[10px] cursor-pointer w-full text-center justify-center';
-      centerBtn.innerHTML = '<span>Inspect Fix</span>';
-      centerBtn.onclick = () => {
-        routeToPFZ(pfz);
-        map.setView([pfz.location.latitude, pfz.location.longitude], 12, { animate: true });
-        map.closePopup();
-      };
+      const m = new maplibregl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([v.lng, v.lat])
+        .addTo(map);
 
-      btnRow.appendChild(copyBtn);
-      btnRow.appendChild(centerBtn);
-      popupDiv.appendChild(btnRow);
-
-      spotDot.bindPopup(popupDiv, { maxWidth: 300, minWidth: 260 });
-      group.addLayer(spotDot);
+      meshMarkersRef.current.push(m);
     });
-  }, [pfzs, activeMapLayers, searchQuery, routeToPFZ]);
 
-  // 5. Render Ocean Geofences (IMBL, MPAs, Restricted)
-  useEffect(() => {
-    api.getGeofences().then((geofences) => {
-      // IMBL
-      const imblGroup = layerGroupsRef.current['imbl'];
-      if (imblGroup) {
-        imblGroup.clearLayers();
-        if (activeMapLayers.includes('imbl') && geofences.imbl) {
-          geofences.imbl.forEach((b: any) => {
-            const line = L.polyline(b.coordinates, {
-              color: '#f59e0b',
-              weight: 2.5,
-              dashArray: '6, 6'
-            }).bindPopup(`
-              <div class="p-2 text-slate-100 font-sans text-xs bg-[#090d18] rounded-lg">
-                <strong class="text-amber-400 font-semibold">${b.name}</strong>
-                <p class="text-[11px] text-slate-300 mt-1">${b.description}</p>
-                <div class="mt-1.5 pt-1 border-t border-white/10 text-[10px] text-rose-400">
-                  Buffer warning: ${b.buffer_warning_km} km
-                </div>
-              </div>
-            `);
-            imblGroup.addLayer(line);
-          });
-        }
-      }
+  }, [isNavicMeshActive, isMapLoaded, activeLocation.latitude, activeLocation.longitude]);
 
-      // MPAs
-      const mpaGroup = layerGroupsRef.current['mpas'];
-      if (mpaGroup) {
-        mpaGroup.clearLayers();
-        if (activeMapLayers.includes('mpas') && geofences.marine_protected_areas) {
-          geofences.marine_protected_areas.forEach((mpa: any) => {
-            const poly = L.polygon(mpa.polygon, {
-              color: '#f43f5e',
-              fillColor: '#f43f5e',
-              fillOpacity: 0.15,
-              weight: 1.5
-            }).bindTooltip(mpa.name, { permanent: false });
-            mpaGroup.addLayer(poly);
-          });
-        }
-      }
-
-      // Restricted
-      const resGroup = layerGroupsRef.current['restricted'];
-      if (resGroup) {
-        resGroup.clearLayers();
-        if (activeMapLayers.includes('restricted') && geofences.restricted_zones) {
-          geofences.restricted_zones.forEach((rz: any) => {
-            const poly = L.polygon(rz.polygon, {
-              color: '#a855f7',
-              fillColor: '#a855f7',
-              fillOpacity: 0.15,
-              weight: 1.5
-            }).bindTooltip(rz.name, { permanent: false });
-            resGroup.addLayer(poly);
-          });
-        }
-      }
-    }).catch((err) => console.error('Geofence load error:', err));
-  }, [activeMapLayers]);
-
-  // 6. Render Environmental Overlays (SST & Chlorophyll)
-  useEffect(() => {
-    const sstGroup = layerGroupsRef.current['sst'];
-    const chlGroup = layerGroupsRef.current['chlorophyll'];
-    if (!sstGroup || !chlGroup) return;
-
-    sstGroup.clearLayers();
-    chlGroup.clearLayers();
-
-    const lat = activeLocation.latitude;
-    const lon = activeLocation.longitude;
-
-    if (sstGroup && activeMapLayers.includes('sst')) {
-      const sstCircle = L.circle([lat - 0.05, lon - 0.18], {
-        radius: 25000,
-        color: '#f59e0b',
-        fillColor: '#fbbf24',
-        fillOpacity: 0.12,
-        weight: 1.5
-      }).bindTooltip('SST Thermal Gradient (28.4°C)', { permanent: false });
-      sstGroup.addLayer(sstCircle);
-    }
-
-    if (chlGroup && activeMapLayers.includes('chlorophyll')) {
-      const chlCircle = L.circle([lat - 0.08, lon - 0.24], {
-        radius: 20000,
-        color: '#10b981',
-        fillColor: '#059669',
-        fillOpacity: 0.18,
-        weight: 1.5
-      }).bindTooltip('Chlorophyll Bloom Core (3.4 mg/m³)', { permanent: false });
-      chlGroup.addLayer(chlCircle);
-    }
-  }, [activeLocation.latitude, activeLocation.longitude, activeMapLayers]);
-
-  // 7. Auto-Frame Target Spot & Departure Port (No Arbitrary Straight Line Polylines)
-  useEffect(() => {
-    const routeGroup = layerGroupsRef.current['route'];
-    const map = mapInstanceRef.current;
-    if (!routeGroup) return;
-    routeGroup.clearLayers();
-
-    if (!selectedPFZForRoute || !map) return;
-
-    // Highlight target spot with a distinct pulsing outer beacon
-    const targetBeacon = L.circleMarker([selectedPFZForRoute.location.latitude, selectedPFZForRoute.location.longitude], {
-      radius: 14,
-      color: '#34d399',
-      weight: 2,
-      dashArray: '3, 4',
-      fillOpacity: 0.15,
-      fillColor: '#34d399'
-    });
-    routeGroup.addLayer(targetBeacon);
-
-    // Frame camera smoothly between departure port and target spot
-    const bounds = L.latLngBounds([
-      [activeLocation.latitude, activeLocation.longitude],
-      [selectedPFZForRoute.location.latitude, selectedPFZForRoute.location.longitude]
-    ]);
-    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 12, animate: true });
-  }, [selectedPFZForRoute, activeLocation.latitude, activeLocation.longitude]);
-
-  // Zoom helpers
-  const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
-  const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
+  // Zoom and Camera Controls
+  const handleZoomIn = () => mapInstanceRef.current?.zoomIn({ duration: 300 });
+  const handleZoomOut = () => mapInstanceRef.current?.zoomOut({ duration: 300 });
   const handleRecenter = () => {
-    mapInstanceRef.current?.setView([activeLocation.latitude, activeLocation.longitude], 11, {
-      animate: true
+    mapInstanceRef.current?.flyTo({
+      center: [activeLocation.longitude, activeLocation.latitude],
+      zoom: 11,
+      duration: 1200
     });
+  };
+  const handleResetNorth = () => {
+    mapInstanceRef.current?.resetNorthPitch({ duration: 800 });
+    setIs3DMode(false);
   };
 
   return (
-    <div className="relative w-full h-full min-h-[560px] overflow-hidden bg-[#151926] font-sans">
-      
-      {/* ── Active Target HUD (Displayed when a spot is being inspected) ── */}
-      {selectedPFZForRoute && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-3 bg-[#181e2e]/95 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-[#5379AE]/40 shadow-2xl text-xs font-mono animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-white font-bold">{selectedPFZForRoute.name}:</span>
-            <span className="text-emerald-300 font-semibold">{selectedPFZForRoute.location.latitude.toFixed(4)}°N, {selectedPFZForRoute.location.longitude.toFixed(4)}°E</span>
-            <span className="text-[#A8C4EC]">({selectedPFZForRoute.distance_km} km · Heading {selectedPFZForRoute.bearing_compass})</span>
-            <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[10px] border border-emerald-500/30">Corridors Clear</span>
+    <div className="relative w-full h-full overflow-hidden select-none bg-[#090d18]">
+      {/* MapLibre GL Canvas Container */}
+      <div ref={mapContainerRef} className="w-full h-full" />
+
+      {/* Floating Top Nav / Search Header */}
+      <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#88BDF2]" />
+            <input
+              type="text"
+              placeholder="Search nautical zones, safe harbors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2.5 w-64 sm:w-80 rounded-2xl bg-[#161c27]/90 backdrop-blur-md border border-[#384959] text-white placeholder-[#BDDDFC]/50 text-xs font-medium focus:outline-none focus:border-[#88BDF2] shadow-xl"
+            />
           </div>
+
+          {/* OpenSeaMap Toggle */}
           <button
-            onClick={clearRoute}
-            className="flex items-center gap-1 text-[#e59883] hover:text-white px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-xs transition-colors cursor-pointer border border-rose-500/20"
+            onClick={() => setIsOpenSeaMapActive(!isOpenSeaMapActive)}
+            className={`px-3 py-2.5 rounded-2xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+              isOpenSeaMapActive
+                ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
+                : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
+            }`}
+            title="Toggle Official OpenSeaMap Seamarks (Buoys, Beacons, Lighthouses, Fairways)"
           >
-            <X className="w-3 h-3" />
-            <span>Dismiss</span>
+            <Anchor className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">OpenSeaMap</span>
+            <span className={`text-[10px] px-1 rounded ${isOpenSeaMapActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
+              {isOpenSeaMapActive ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {/* NavIC / LoRaWAN Mesh Toggle */}
+          <button
+            onClick={() => setIsNavicMeshActive(!isNavicMeshActive)}
+            className={`px-3.5 py-2 rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+              isNavicMeshActive
+                ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2] shadow-[0_0_12px_rgba(136,189,242,0.25)]'
+                : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
+            }`}
+            title="Toggle NavIC Positioning & Peer-to-Peer LoRaWAN Vessel Mesh"
+          >
+            <Radio className={`w-4 h-4 ${isNavicMeshActive ? 'text-[#88BDF2] animate-pulse' : ''}`} />
+            <span className="hidden sm:inline">NavIC Mesh</span>
+            <span className={`text-xs px-1.5 py-0.2 rounded font-bold ${isNavicMeshActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
+              {isNavicMeshActive ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {/* 3D / 2D Perspective Toggle Button */}
+          <button
+            onClick={toggle3DMode}
+            className={`px-3.5 py-2 rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+              is3DMode
+                ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
+                : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
+            }`}
+            title="Switch between 3D Nautical Perspective and 2D Plan View"
+          >
+            <Box className="w-4 h-4" />
+            <span>{is3DMode ? '3D View' : '2D Plan'}</span>
           </button>
         </div>
-      )}
 
-      {/* ── Top Floating Search Pill on Satellite ── */}
-      <div className="absolute top-4 left-4 z-[400] flex items-center gap-2 pointer-events-auto">
-        <div className="flex items-center gap-2 bg-[#181e2e]/90 backdrop-blur-xl px-3.5 py-2 rounded-xl border border-[#5379AE]/35 text-xs shadow-2xl w-72">
-          <Search className="w-4 h-4 text-[#0474C4]" />
-          <input
-            type="text"
-            placeholder="Filter spots by species or name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none outline-none text-[#f1f5fb] placeholder-[#8fa2bf] text-xs w-full font-normal"
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="text-[#A8C4EC] hover:text-white text-xs cursor-pointer">✕</button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Bottom-Left Operational Stats Pill ── */}
-      <div className="absolute bottom-6 left-6 z-[400] bg-[#181e2e]/90 backdrop-blur-xl px-4 py-2.5 rounded-xl border border-[#5379AE]/35 text-xs font-mono shadow-2xl space-y-1 pointer-events-none hidden sm:block">
-        <div className="flex items-center gap-4 text-[#A8C4EC]">
-          <span className="text-[#5379AE] text-xs">Identified Spots:</span>
-          <span className="text-white font-bold">{pfzs.length} Active</span>
-        </div>
-        <div className="flex items-center gap-4 text-[#A8C4EC]">
-          <span className="text-[#5379AE] text-xs">Green Dots:</span>
-          <span className="text-emerald-400 font-bold">
-            {pfzs.filter((p) => p.safety_rating === 'SAFE').length} Safe Zones
+        {/* Departure Coordinate Badge */}
+        <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-xl pointer-events-auto font-sans">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#0474c4] animate-pulse" />
+          <span className="text-xs sm:text-sm text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</span>
+          <span className="text-xs text-[#BDDDFC]/70 font-mono">
+            {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
           </span>
         </div>
-        {pfzs.some((p) => p.safety_rating === 'CAUTION') && (
-          <div className="flex items-center gap-4 text-[#A8C4EC]">
-            <span className="text-[#5379AE] text-xs">Amber Dots:</span>
-            <span className="text-amber-400 font-bold">
-              {pfzs.filter((p) => p.safety_rating === 'CAUTION').length} Caution Zones
+      </div>
+
+      {/* ── Marine Map NavIC Legend (Bottom Left) - Sleek UI matching other elements ── */}
+      <div className="absolute left-4 bottom-8 z-20 pointer-events-auto max-w-xs sm:max-w-sm p-4 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs sm:text-sm font-sans transition-all">
+        <div className="flex items-center justify-between pb-2.5 border-b border-[#384959] mb-2.5 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Radio className="w-4 h-4 text-[#88BDF2] flex-shrink-0" />
+            <span className="font-bold text-white text-xs sm:text-sm truncate">
+              {getTranslation('nautical_mesh_title', language)}
             </span>
           </div>
-        )}
-        <div className="flex items-center gap-4 text-[#A8C4EC]">
-          <span className="text-[#5379AE] text-xs">Blue Dot:</span>
-          <span className="text-[#0474C4] font-bold">Port Fix</span>
+          <span className="text-xs font-semibold text-[#88BDF2] bg-[#384959] px-2.5 py-0.5 rounded-full border border-[#88BDF2]/40 whitespace-nowrap">
+            {getTranslation('navic_constellation_label', language)}
+          </span>
+        </div>
+
+        <div className="space-y-2 text-xs sm:text-sm text-[#BDDDFC]">
+          <div className="flex items-center gap-2.5">
+            <span className="w-3 h-3 rounded-full bg-[#0474C4] border-2 border-white shadow-sm flex-shrink-0"></span>
+            <span className="text-white font-medium">{getTranslation('active_vessel_fix', language)}</span>
+          </div>
+          {isNavicMeshActive && (
+            <>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-[#88BDF2] flex-shrink-0"></span>
+                <span>{getTranslation('peer_fleet_relays', language)}</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-4 h-0.5 border-b-2 border-dashed border-[#88BDF2] flex-shrink-0"></span>
+                <span>{getTranslation('lora_mesh_links', language)}</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-3 pt-2.5 border-t border-[#384959] text-xs text-amber-300 font-medium leading-relaxed">
+          {getTranslation('navic_legend_footnote', language)}
         </div>
       </div>
 
-      {/* ── Bottom-Right Floating Controls (Zoom & Recenter) ── */}
-      <div className="absolute bottom-6 right-6 z-[400] flex flex-col gap-1.5 pointer-events-auto">
-        <button
-          onClick={handleRecenter}
-          className="w-9 h-9 rounded-xl bg-[#181e2e]/95 hover:bg-[#20273a] text-[#A8C4EC] hover:text-white border border-[#5379AE]/35 flex items-center justify-center shadow-2xl transition-colors cursor-pointer"
-          title="Center Departure Harbor"
-        >
-          <Crosshair className="w-4 h-4" />
-        </button>
+      {/* Floating Map Action Controls (Right Side) */}
+      <div className="absolute right-4 bottom-8 z-20 flex flex-col gap-2 pointer-events-auto">
         <button
           onClick={handleZoomIn}
-          className="w-9 h-9 rounded-xl bg-[#181e2e]/95 hover:bg-[#20273a] text-[#A8C4EC] hover:text-white border border-[#5379AE]/35 flex items-center justify-center text-sm font-bold shadow-2xl transition-colors cursor-pointer"
+          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
           title="Zoom In"
         >
           <Plus className="w-4 h-4" />
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-9 h-9 rounded-xl bg-[#181e2e]/95 hover:bg-[#20273a] text-[#A8C4EC] hover:text-white border border-[#5379AE]/35 flex items-center justify-center text-sm font-bold shadow-2xl transition-colors cursor-pointer"
+          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
           title="Zoom Out"
         >
           <Minus className="w-4 h-4" />
         </button>
+        <button
+          onClick={handleRecenter}
+          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
+          title="Center Vessel Position"
+        >
+          <Crosshair className="w-4 h-4 text-[#88BDF2]" />
+        </button>
+        <button
+          onClick={handleResetNorth}
+          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
+          title="Reset Heading & North"
+        >
+          <Compass className="w-4 h-4 text-emerald-400" />
+        </button>
       </div>
 
-      {/* Leaflet Satellite Map Element */}
-      <div ref={mapContainerRef} className="w-full h-full z-0" />
-
+      {/* Slide-out Route Navigation Plan Panel */}
+      {isRouteDrawerOpen && (
+        <div className="absolute inset-y-0 right-0 z-30 w-full sm:w-[580px] md:w-[640px] lg:w-[680px] shadow-2xl">
+          <RoutePlannerPanel />
+        </div>
+      )}
     </div>
   );
 };

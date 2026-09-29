@@ -19,6 +19,8 @@ import {
 import { OceanDynamicsPanel } from './OceanDynamicsPanel';
 import { ImpactHeroPanel } from './ImpactHeroPanel';
 import { DeterministicRiskExplanation } from './DeterministicRiskExplanation';
+import { getTranslation } from '../../utils/translations';
+import { getLocalizedPortName, getLocalizedRiskVerdict, getLocalizedRiskFactor } from '../../utils/locationTranslations';
 
 interface LocationAnalyticsViewProps {
   onOpenAdvisory?: () => void;
@@ -26,7 +28,7 @@ interface LocationAnalyticsViewProps {
 }
 
 export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ onOpenAdvisory, onOpenDAG }) => {
-  const { activeLocation, activeLocationName, weather, ocean, risk, pfzs } = useApp();
+  const { activeLocation, activeLocationName, weather, ocean, risk, pfzs, language } = useApp();
 
   const sstVal = ocean?.sst ?? 28.4;
   const chlVal = ocean?.chlorophyll ?? 3.4;
@@ -59,11 +61,11 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             </div>
             <div>
               <h1 className="font-editorial text-2xl sm:text-3xl font-normal text-white tracking-tight">
-                Location Telemetry & Ocean Analytics
+                {getTranslation('analytics_header_title', language)}
               </h1>
               <p className="text-xs text-[#A8C4EC]/80 font-mono mt-0.5 flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-[#0474C4]" />
-                <span className="font-medium text-white">{activeLocationName}</span>
+                <span className="font-medium text-white">{getLocalizedPortName(activeLocationName, language)}</span>
                 <span className="text-[#5379AE]">·</span>
                 <span className="text-[#A8C4EC]">{activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E</span>
               </p>
@@ -97,7 +99,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1d2334] border border-[#5379AE]/30 font-mono text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[#A8C4EC]">Oceansat-3 & INCOIS Synced</span>
+            <span className="text-[#A8C4EC]">{getTranslation('oceansat_incois_synced', language)}</span>
           </div>
         </div>
       </div>
@@ -138,7 +140,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             <div className="banner-hatched-rust px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
                 <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
-                  THERMAL FRONTS
+                  {getTranslation('thermal_fronts_badge', language)}
                 </span>
               </div>
             </div>
@@ -153,7 +155,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               {/* Title & Big Metric */}
               <div>
                 <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
-                  Sea Surface Temp (SST)
+                  {getTranslation('sst_title', language)}
                 </h3>
                 <div className="flex items-baseline gap-1.5 mt-1 font-mono">
                   <span className="text-3xl font-bold text-white tracking-tight">{sstVal}</span>
@@ -163,7 +165,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
               {/* Oceanographic Narrative Description */}
               <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
-                Thermal front detected along the 200m depth contour where cooler upwelling intersects warm surface currents.
+                {getTranslation('sst_desc', language)}
               </p>
             </div>
           </div>
@@ -201,7 +203,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             <div className="banner-hatched-pine px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
                 <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
-                  BIOGEOCHEMICAL
+                  {getTranslation('biogeochemical_badge', language)}
                 </span>
               </div>
             </div>
@@ -214,7 +216,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
               <div>
                 <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
-                  Chlorophyll-A Plume
+                  {getTranslation('chlorophyll_title', language)}
                 </h3>
                 <div className="flex items-baseline gap-1.5 mt-1 font-mono">
                   <span className="text-3xl font-bold text-emerald-300 tracking-tight">{chlVal}</span>
@@ -223,7 +225,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               </div>
 
               <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
-                Dense phytoplankton convergence zone indicates active trophic food chain supporting pelagic schools.
+                {getTranslation('chlorophyll_desc', language)}
               </p>
             </div>
           </div>
@@ -260,7 +262,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             <div className="banner-hatched-sapphire px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
                 <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
-                  HYDRODYNAMICS
+                  {getTranslation('hydrodynamics_badge', language)}
                 </span>
               </div>
             </div>
@@ -273,7 +275,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
               <div>
                 <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
-                  Wave Swell Height
+                  {getTranslation('wave_swell_title', language)}
                 </h3>
                 <div className="flex items-baseline gap-1.5 mt-1 font-mono">
                   <span className="text-3xl font-bold text-sky-200 tracking-tight">{waveVal}</span>
@@ -282,7 +284,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               </div>
 
               <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
-                Gentle swell pattern arriving from {weather?.wave_direction_deg ?? 235}° SSW at 8.2s interval. Smooth navigation window.
+                {getTranslation('wave_swell_desc', language)}
               </p>
             </div>
           </div>
@@ -320,7 +322,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             <div className="banner-hatched-steel px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
                 <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
-                  METEOROLOGY
+                  {getTranslation('meteorology_badge', language)}
                 </span>
               </div>
             </div>
@@ -333,7 +335,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
               <div>
                 <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
-                  Surface Wind Velocity
+                  {getTranslation('wind_velocity_title', language)}
                 </h3>
                 <div className="flex items-baseline gap-1.5 mt-1 font-mono">
                   <span className="text-3xl font-bold text-white tracking-tight">{windKmh}</span>
@@ -343,7 +345,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               </div>
 
               <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
-                Moderate coastal breeze with gusts to {windGust} km/h (Beaufort 3). Favorable for small craft and mechanized vessels.
+                {getTranslation('wind_desc', language)}
               </p>
             </div>
           </div>
@@ -370,7 +372,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               <div className="w-8 h-8 rounded-xl bg-[#06457F]/60 border border-[#5379AE]/40 flex items-center justify-center">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
               </div>
-              <h2 className="font-editorial text-lg font-normal text-white">Physical Risk & Hazard Assessment</h2>
+              <h2 className="font-editorial text-lg font-normal text-white">{getTranslation('risk_hazard_title', language)}</h2>
             </div>
             <span
               className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
@@ -382,42 +384,42 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               }`}
             >
               {isLowRisk ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
-              {risk?.safety_verdict ?? 'SAFE TO VENTURE'}
+              {getLocalizedRiskVerdict(risk?.safety_verdict || 'SAFE TO VENTURE', language)}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">COMPOSITE RISK SCORE</span>
+              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">{getTranslation('composite_risk_score', language)}</span>
               <div className="flex items-baseline gap-1 mt-1.5 font-mono">
                 <span className="text-2xl font-bold text-emerald-300">{score}</span>
                 <span className="text-xs text-[#5379AE]">/ 100</span>
               </div>
-              <span className="text-[10px] text-[#A8C4EC]/75 block mt-1">Minimal sea turbulence</span>
+              <span className="text-[10px] text-[#A8C4EC]/75 block mt-1">{getTranslation('minimal_turbulence', language)}</span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">CRAFT SUITABILITY</span>
-              <span className="text-sm font-semibold text-white block mt-1.5">All Vessel Classes</span>
-              <span className="text-[10px] text-emerald-400 block mt-1">Canoe, OBM, Trawler</span>
+              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">{getTranslation('craft_suitability', language)}</span>
+              <span className="text-sm font-semibold text-white block mt-1.5">{getTranslation('all_vessel_classes', language)}</span>
+              <span className="text-[10px] text-emerald-400 block mt-1">{getTranslation('canoe_obm_trawler', language)}</span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">INCOIS CYCLONE RISK</span>
-              <span className="text-sm font-semibold text-white block mt-1.5">Level 0 (Normal)</span>
-              <span className="text-[10px] text-[#A8C4EC]/75 block mt-1">No active depression</span>
+              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">{getTranslation('cyclone_risk_title', language)}</span>
+              <span className="text-sm font-semibold text-white block mt-1.5">{getTranslation('normal_level_0', language)}</span>
+              <span className="text-[10px] text-[#A8C4EC]/75 block mt-1">{getTranslation('no_active_depression', language)}</span>
             </div>
           </div>
 
           {/* Risk Factors Breakdown Progress Bars */}
           <div className="space-y-3 pt-2">
             <span className="text-[11px] font-mono text-[#A8C4EC] uppercase tracking-wider block font-medium">
-              Hazard Factor Severity Breakdown
+              {getTranslation('hazard_breakdown_title', language)}
             </span>
             {risk?.factors.map((factor) => (
               <div key={factor.factor_name} className="space-y-1.5">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#f1f5fb]">{factor.factor_name}</span>
+                  <span className="text-[#f1f5fb]">{getLocalizedRiskFactor(factor.factor_name, language)}</span>
                   <span className={factor.severity === 'LOW' ? 'text-emerald-400' : 'text-amber-400'}>
                     {factor.score}% ({factor.severity})
                   </span>
@@ -442,35 +444,35 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
               <div className="w-8 h-8 rounded-xl bg-[#06457F]/60 border border-[#5379AE]/40 flex items-center justify-center">
                 <Gauge className="w-4 h-4 text-[#A8C4EC]" />
               </div>
-              <h2 className="font-editorial text-lg font-normal text-white">In-Situ Sea State & Tide Profile</h2>
+              <h2 className="font-editorial text-lg font-normal text-white">{getTranslation('insitu_state_title', language)}</h2>
             </div>
 
             <div className="space-y-2.5 mt-4 font-mono text-xs">
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-                <span className="text-[#A8C4EC]/75">Tidal Status:</span>
+                <span className="text-[#A8C4EC]/75">{getTranslation('tidal_status', language)}</span>
                 <span className="text-[#0474C4] font-semibold">{ocean?.tide ?? 'Ebb Tide (Receding)'}</span>
               </div>
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-                <span className="text-[#A8C4EC]/75">Tidal Elevation:</span>
-                <span className="text-white font-semibold">{ocean?.tide_height_m ?? 1.1} m above chart datum</span>
+                <span className="text-[#A8C4EC]/75">{getTranslation('tidal_elevation', language)}</span>
+                <span className="text-white font-semibold">{ocean?.tide_height_m ?? 1.1} m {getTranslation('above_chart_datum', language)}</span>
               </div>
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-                <span className="text-[#A8C4EC]/75">WMO Sea State:</span>
+                <span className="text-[#A8C4EC]/75">{getTranslation('wmo_sea_state', language)}</span>
                 <span className="text-emerald-300 font-semibold">{ocean?.sea_state ?? 'State 2 (Smooth/Slight)'}</span>
               </div>
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-                <span className="text-[#A8C4EC]/75">Barometric Pressure:</span>
-                <span className="text-white font-semibold">1012.4 hPa (Steady)</span>
+                <span className="text-[#A8C4EC]/75">{getTranslation('barometric_pressure', language)}</span>
+                <span className="text-white font-semibold">1012.4 hPa ({getTranslation('steady', language)})</span>
               </div>
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-                <span className="text-[#A8C4EC]/75">Precipitation Rate:</span>
-                <span className="text-[#A8C4EC] font-semibold">{weather?.rainfall_mm ?? 0.0} mm/hr (Dry)</span>
+                <span className="text-[#A8C4EC]/75">{getTranslation('precipitation_rate', language)}</span>
+                <span className="text-[#A8C4EC] font-semibold">{weather?.rainfall_mm ?? 0.0} mm/hr ({getTranslation('dry', language)})</span>
               </div>
             </div>
           </div>
 
           <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/30 text-xs text-[#A8C4EC] font-light">
-            All readings calibrated from INCOIS Ocean State Forecasts & Oceansat-3 satellite telemetry for {activeLocationName.split(',')[0]}.
+            {getTranslation('calibrated_footnote', language).replace('{port}', getLocalizedPortName(activeLocationName.split(',')[0], language))}
           </div>
         </div>
 

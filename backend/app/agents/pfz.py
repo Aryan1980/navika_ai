@@ -10,9 +10,9 @@ class PFZIntelligenceAgent:
         self,
         coords: Coordinates,
         sort_by: str = "distance", # 'distance' | 'suitability' | 'safety' | 'combined'
-        radius_km: float = 120.0
+        radius_km: float = 10.0
     ) -> List[PFZZone]:
-        pfzs = await self.provider.get_pfz_advisories(coords, radius_km)
+        pfzs = await self.provider.get_pfz_advisories(coords, min(radius_km, 10.0))
 
         if sort_by == "distance":
             pfzs.sort(key=lambda x: x.distance_km)
@@ -22,7 +22,7 @@ class PFZIntelligenceAgent:
             safety_rank = {"SAFE": 1, "CAUTION": 2, "AVOID": 3}
             pfzs.sort(key=lambda x: safety_rank.get(x.safety_rating, 9))
         elif sort_by == "combined":
-            # Combined score = 0.5 * suitability + 0.5 * (100 - distance/2)
-            pfzs.sort(key=lambda x: (0.6 * x.suitability_score + 0.4 * max(0, 100 - x.distance_km)), reverse=True)
+            # Combined score = 60% suitability + 40% proximity (closer to 0-10 km is better)
+            pfzs.sort(key=lambda x: (0.6 * x.suitability_score + 0.4 * max(0.0, 100.0 - (x.distance_km / 10.0) * 100.0)), reverse=True)
 
         return pfzs
