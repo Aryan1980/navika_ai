@@ -10,6 +10,7 @@ import { LocationSetupView } from './components/Onboarding/LocationSetupView';
 import { RoutePlannerPanel } from './components/Navigation/RoutePlannerPanel';
 import { PhoneAuthModal } from './components/Auth/PhoneAuthModal';
 import { CaptainProfileModal } from './components/Profile/CaptainProfileModal';
+import { DualSyncModeBanner } from './components/Navigation/DualSyncModeBanner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Sun, MapPin, Layers, User, Phone, Globe } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getTranslation } from './utils/translations';
@@ -126,6 +127,9 @@ const DashboardView: React.FC = () => {
             )}
           </div>
         </header>
+
+        {/* ── Dual Sync Mode Indicator Bar ── */}
+        <DualSyncModeBanner />
 
         {/* ── Viewport Contents by Active Tab ── */}
         <div className="flex-1 relative overflow-hidden">

@@ -746,33 +746,74 @@ export function getFallbackChatResponse(coords: Coordinates): ChatResponse {
       observed_vs_forecast: 'Observed swell 1.2m matching seasonal forecast.',
       demo_vs_live: 'Synthetically calibrated to coastal geometry.',
       agent_reasoning_flow: [
-        'Planner Agent classified query as PFZ discovery & safe navigation.',
-        'PFZ Intelligence Agent calculated seaward baseline and ranked 8 spots.',
-        'Geospatial Reasoning Agent checked ray-casting for MPAs and IMBL buffer (>100 km).',
-        'Deterministic Risk Engine certified 6 spots as SAFE.'
-      ]
+        '1. Supervisor Agent (Router) decomposed query into Ocean, Meteo, and Kinematics subtasks.',
+        '2. Ocean Agent computed PFZ Math identifying 8 chlorophyll-thermal frontal zones.',
+        '3. Meteo Agent audited Wave Guard (Hs=1.2m, Wind=14kts) confirming SAFE state.',
+        '4. Kinematics Agent confirmed IMBL vector clearance (>80 km) and clear harbor channels.',
+        '5. Conflict Resolution Engine evaluated composite matrix: Zero veto triggered. Certified SAFE.'
+      ],
+      multi_agent_evidence: {
+        "Supervisor Agent": [
+          "✓ LangGraph Router dispatched subtasks for query",
+          "✓ Operational coordinates calibrated"
+        ],
+        "Ocean Agent": [
+          "✓ PFZ Math SST: 28.2°C (Thermal front ΔT = 0.45°C)",
+          "✓ Chlorophyll-a Front: 2.1 mg/m³ (Upwelling plume)",
+          "✓ Tidal curve: Flood tide (+0.8m)"
+        ],
+        "Meteo Agent": [
+          "✓ Wave Guard Hs: 1.2m swell",
+          "✓ Surface wind: 14 km/h WSW",
+          "✓ Cyclone Alert: None detected"
+        ],
+        "Kinematics Agent": [
+          "✓ IMBL Vector Clearance: >80 km safe buffer",
+          "✓ MPA Containment: Clear of protected sanctuaries",
+          "✓ Leeway Drift: 1.2 knots northward offset"
+        ],
+        "Conflict Resolution Engine": [
+          "✓ Status: PASS — Composite Safe (18/100 Risk)",
+          "✓ No safety veto triggered",
+          "✓ Transparent mathematical consensus certified"
+        ]
+      }
     },
     agent_traces: [
       {
-        agent_name: 'Planner Agent',
+        agent_name: 'Supervisor Agent (Router)',
         status: 'COMPLETED',
         execution_time_ms: 12,
-        data_source: 'Intent Classification Matrix',
-        summary: 'Decomposed request into PFZ analysis and safety evaluation.'
+        data_source: 'LangGraph Intent Classifier & Subtask Router',
+        summary: 'Supervisor → routing to OceanAgent + MeteoAgent + KinematicsAgent'
       },
       {
-        agent_name: 'PFZ Intelligence Agent',
+        agent_name: 'Ocean Agent',
         status: 'COMPLETED',
         execution_time_ms: 24,
-        data_source: 'INCOIS OCM-3 Frontal Engine',
-        summary: 'Generated 8 open-ocean zones with chlorophyll-thermal ranking.'
+        data_source: 'Oceansat-3 OCM-3 & INSAT-3DR (MOSDAC / INCOIS)',
+        summary: 'PFZ Math: SST=28.2°C, Chlorophyll-a=2.1 mg/m³, 8 zones ranked.'
       },
       {
-        agent_name: 'Deterministic Risk Engine',
+        agent_name: 'Meteo Agent',
         status: 'COMPLETED',
-        execution_time_ms: 10,
-        data_source: 'Physical Safety Matrix',
-        summary: 'Scored transit risk at 18/100 (Certified SAFE).'
+        execution_time_ms: 18,
+        data_source: 'IMD & Coastal Weather Kinematics',
+        summary: 'Wave Guard: Hs=1.2m, Wind=14kts, Status=SAFE'
+      },
+      {
+        agent_name: 'Kinematics Agent',
+        status: 'COMPLETED',
+        execution_time_ms: 16,
+        data_source: 'NavIC Demarcation GIS & searoute Engine',
+        summary: 'IMBL buffer: >80km | Harbor channel exit: Clear'
+      },
+      {
+        agent_name: 'Conflict Resolution Engine',
+        status: 'COMPLETED',
+        execution_time_ms: 8,
+        data_source: 'LangGraph Safety Veto Override Layer',
+        summary: 'No veto triggered. Composite: SAFE (Safety Score: 82/100)'
       }
     ],
     active_map_layers: ['pfz', 'waves', 'imbl', 'risk_zones'],

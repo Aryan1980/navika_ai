@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { useApp } from '../../context/AppContext';
 import { api } from '../../services/api';
-import { Search, Plus, Minus, Crosshair, Navigation, X, Volume2, Compass, Shield, Flame, Droplets, Anchor, Box } from 'lucide-react';
+import { Search, Plus, Minus, Crosshair, Navigation, X, Volume2, Compass, Shield, Flame, Droplets, Anchor, Box, Radio } from 'lucide-react';
 import { PFZZone } from '../../types/marine';
 import { RoutePlannerPanel } from '../Navigation/RoutePlannerPanel';
 
@@ -12,9 +12,11 @@ export const MarineMap: React.FC = () => {
   const activePopupRef = useRef<maplibregl.Popup | null>(null);
   const pfzMarkersRef = useRef<maplibregl.Marker[]>([]);
   const vesselMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const meshMarkersRef = useRef<maplibregl.Marker[]>([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpenSeaMapActive, setIsOpenSeaMapActive] = useState<boolean>(true);
+  const [isNavicMeshActive, setIsNavicMeshActive] = useState<boolean>(true);
   const [is3DMode, setIs3DMode] = useState<boolean>(false);
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false);
 
@@ -216,6 +218,34 @@ export const MarineMap: React.FC = () => {
             'circle-stroke-color': '#0f141d'
           }
         });
+
+        // NavIC & LoRaWAN Mesh Peer-to-Peer Links
+        map.addSource('navic-mesh-lines-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        map.addLayer({
+          id: 'navic-mesh-lines-glow',
+          type: 'line',
+          source: 'navic-mesh-lines-source',
+          paint: {
+            'line-color': '#06b6d4',
+            'line-width': 4,
+            'line-opacity': 0.4,
+            'line-blur': 2
+          }
+        });
+        map.addLayer({
+          id: 'navic-mesh-lines-layer',
+          type: 'line',
+          source: 'navic-mesh-lines-source',
+          paint: {
+            'line-color': '#38bdf8',
+            'line-width': 2,
+            'line-dasharray': [3, 2],
+            'line-opacity': 0.85
+          }
+        });
       });
 
       mapInstanceRef.current = map;
@@ -226,6 +256,8 @@ export const MarineMap: React.FC = () => {
     return () => {
       pfzMarkersRef.current.forEach(m => m.remove());
       pfzMarkersRef.current = [];
+      meshMarkersRef.current.forEach(m => m.remove());
+      meshMarkersRef.current = [];
       if (vesselMarkerRef.current) {
         vesselMarkerRef.current.remove();
         vesselMarkerRef.current = null;
@@ -594,6 +626,157 @@ export const MarineMap: React.FC = () => {
     map.fitBounds(bounds, { padding: 90, duration: 1200 });
   }, [routeComparison, isMapLoaded]);
 
+  // 8. NavIC & LoRaWAN Mesh Peer-to-Peer Relay Effect
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !isMapLoaded) return;
+
+    // Clear old mesh markers
+    meshMarkersRef.current.forEach(m => m.remove());
+    meshMarkersRef.current = [];
+
+    const meshSource = map.getSource('navic-mesh-lines-source') as maplibregl.GeoJSONSource;
+
+    if (!isNavicMeshActive) {
+      if (meshSource) {
+        meshSource.setData({ type: 'FeatureCollection', features: [] });
+      }
+      return;
+    }
+
+    // 3 Simulated peer vessels near active location for P2P mesh demo
+    const peerVessels = [
+      {
+        id: 'IND-TN-0482',
+        name: 'Meenavan 1',
+        type: 'Mechanized Trawler (18m)',
+        lat: activeLocation.latitude + 0.042,
+        lng: activeLocation.longitude + 0.062,
+        sats: 7,
+        rssi: -82,
+        hop: 1
+      },
+      {
+        id: 'IND-TN-0819',
+        name: 'Kadalur Express',
+        type: 'Motorized Fiber Craft (12m)',
+        lat: activeLocation.latitude + 0.078,
+        lng: activeLocation.longitude + 0.108,
+        sats: 8,
+        rssi: -89,
+        hop: 2
+      },
+      {
+        id: 'IND-KL-1204',
+        name: 'Sagara Jyoti',
+        type: 'Gillnetter (15m)',
+        lat: activeLocation.latitude - 0.035,
+        lng: activeLocation.longitude + 0.072,
+        sats: 6,
+        rssi: -85,
+        hop: 1
+      }
+    ];
+
+    // GeoJSON lines connecting active user vessel to peer vessels and between peers
+    const lines = [
+      [[activeLocation.longitude, activeLocation.latitude], [peerVessels[0].lng, peerVessels[0].lat]],
+      [[activeLocation.longitude, activeLocation.latitude], [peerVessels[2].lng, peerVessels[2].lat]],
+      [[peerVessels[0].lng, peerVessels[0].lat], [peerVessels[1].lng, peerVessels[1].lat]],
+      [[peerVessels[0].lng, peerVessels[0].lat], [peerVessels[2].lng, peerVessels[2].lat]]
+    ];
+
+    if (meshSource) {
+      meshSource.setData({
+        type: 'FeatureCollection',
+        features: lines.map((coords, i) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: coords
+          },
+          properties: { id: `mesh-link-${i}` }
+        }))
+      });
+    }
+
+    // Create DOM markers for peer vessels
+    peerVessels.forEach((v) => {
+      const el = document.createElement('div');
+      el.className = 'relative flex items-center justify-center cursor-pointer';
+      el.style.width = '32px';
+      el.style.height = '32px';
+      el.title = `${v.name} (${v.id}) - NavIC Mesh Node`;
+      el.innerHTML = `
+        <div style="position: absolute; width: 30px; height: 30px; border-radius: 9999px; background: rgba(6, 182, 212, 0.2); border: 1.5px dashed rgba(56, 189, 248, 0.8); animation: spin 8s linear infinite;"></div>
+        <div style="position: relative; width: 14px; height: 14px; border-radius: 9999px; background: #06b6d4; border: 2px solid #ffffff; box-shadow: 0 0 10px rgba(6,182,212,0.8); display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 8px;">📡</span>
+        </div>
+      `;
+
+      el.onclick = () => {
+        if (activePopupRef.current) activePopupRef.current.remove();
+
+        const pDiv = document.createElement('div');
+        pDiv.className = 'p-3.5 bg-[#0f141d] border border-cyan-500/50 rounded-2xl text-white font-mono text-xs shadow-2xl';
+        pDiv.innerHTML = `
+          <div class="flex items-center justify-between pb-2 border-b border-[#384959] mb-2.5">
+            <div>
+              <span class="font-bold text-cyan-300 text-xs">${v.name}</span>
+              <span class="text-[10px] text-slate-400 block">${v.type}</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              Mesh Relay Active
+            </span>
+          </div>
+
+          <div class="space-y-1.5 text-[11px] text-[#BDDDFC]">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Vessel Reg ID:</span>
+              <span class="font-bold text-white">${v.id}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">NavIC Constellation:</span>
+              <span class="font-bold text-amber-300">🛰️ ${v.sats} Sats (L5/S)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">LoRa 868MHz RSSI:</span>
+              <span class="font-bold text-cyan-300">${v.rssi} dBm (SNR +9.2dB)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Mesh Forwarding:</span>
+              <span class="font-bold text-emerald-400">Hop ${v.hop} of 3 → Shore Gateway</span>
+            </div>
+          </div>
+
+          <div class="mt-2.5 pt-2 border-t border-[#384959] text-[10px] text-[#88BDF2] flex items-center justify-between">
+            <span>Zero-4G Offshore Peer-to-Peer</span>
+            <span class="text-emerald-400 font-bold">100% Offline</span>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({
+          maxWidth: '320px',
+          closeButton: true,
+          closeOnClick: false,
+          offset: [0, -12]
+        })
+          .setLngLat([v.lng, v.lat])
+          .setDOMContent(pDiv)
+          .addTo(map);
+
+        activePopupRef.current = popup;
+      };
+
+      const m = new maplibregl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([v.lng, v.lat])
+        .addTo(map);
+
+      meshMarkersRef.current.push(m);
+    });
+
+  }, [isNavicMeshActive, isMapLoaded, activeLocation.latitude, activeLocation.longitude]);
+
   // Zoom and Camera Controls
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn({ duration: 300 });
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut({ duration: 300 });
@@ -645,6 +828,23 @@ export const MarineMap: React.FC = () => {
             </span>
           </button>
 
+          {/* NavIC / LoRaWAN Mesh Toggle */}
+          <button
+            onClick={() => setIsNavicMeshActive(!isNavicMeshActive)}
+            className={`px-3 py-2.5 rounded-2xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+              isNavicMeshActive
+                ? 'bg-[#1E2632] border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
+            }`}
+            title="Toggle NavIC Positioning & Peer-to-Peer LoRaWAN Vessel Mesh"
+          >
+            <Radio className={`w-3.5 h-3.5 ${isNavicMeshActive ? 'text-cyan-400 animate-pulse' : ''}`} />
+            <span className="hidden sm:inline">NavIC Mesh</span>
+            <span className={`text-[10px] px-1 rounded ${isNavicMeshActive ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-500'}`}>
+              {isNavicMeshActive ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
           {/* 3D / 2D Perspective Toggle Button */}
           <button
             onClick={toggle3DMode}
@@ -667,6 +867,42 @@ export const MarineMap: React.FC = () => {
           <span className="text-[10px] font-mono text-[#BDDDFC]/60">
             {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
           </span>
+        </div>
+      </div>
+
+      {/* ── Marine Map NavIC Legend (Bottom Left) ── */}
+      <div className="absolute left-4 bottom-8 z-20 pointer-events-auto max-w-xs sm:max-w-sm p-3 rounded-2xl bg-[#161c27]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs font-mono">
+        <div className="flex items-center justify-between pb-1.5 border-b border-[#384959]/60 mb-2">
+          <div className="flex items-center gap-1.5">
+            <Radio className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="font-bold text-white text-[11px]">Nautical Positioning & Mesh</span>
+          </div>
+          <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30">
+            ISRO NavIC L5/S
+          </span>
+        </div>
+
+        <div className="space-y-1.5 text-[10px] text-[#BDDDFC]/80">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#0474C4] border border-white"></span>
+            <span className="text-white font-medium">Your Vessel (Active Departure Fix)</span>
+          </div>
+          {isNavicMeshActive && (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                <span>Peer Fishing Fleet Relays (3 vessels online)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-0.5 border-b border-dashed border-cyan-400"></span>
+                <span>LoRaWAN 868MHz Mesh Links (Zero-4G P2P)</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-2 pt-1.5 border-t border-[#384959]/60 text-[9px] text-amber-300/90 leading-tight">
+          🛰️ NavIC Positioning · Zero GPS dependency · Vessel-to-vessel relay
         </div>
       </div>
 

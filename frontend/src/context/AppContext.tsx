@@ -41,6 +41,8 @@ export interface AppContextType {
   coastalPresets: CoastalPreset[];
   activeNav: string;
   isRouteDrawerOpen: boolean;
+  syncMode: 'cloud' | 'edge';
+  setSyncMode: (mode: 'cloud' | 'edge') => void;
   setIsVoiceActive: (val: boolean) => void;
   stopSpeech: () => void;
   setActiveNav: (nav: string) => void;
@@ -120,6 +122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [coastalPresets, setCoastalPresets] = useState<CoastalPreset[]>([]);
   const [activeNav, setActiveNav] = useState<string>('map');
   const [isRouteDrawerOpen, setIsRouteDrawerOpen] = useState<boolean>(false);
+  const [syncMode, setSyncMode] = useState<'cloud' | 'edge'>('edge');
 
   // User Profile & Voyage States
   const [user, setUser] = useState<UserProfile | null>(() => {
@@ -452,6 +455,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         coastalPresets,
         activeNav,
         isRouteDrawerOpen,
+        syncMode,
+        setSyncMode,
         setIsVoiceActive,
         stopSpeech,
         setActiveNav,

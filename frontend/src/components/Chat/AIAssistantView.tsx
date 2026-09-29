@@ -19,11 +19,32 @@ import {
   Download,
   RefreshCw,
   Cpu,
-  WifiOff
+  WifiOff,
+  Volume2,
+  VolumeX,
+  Languages,
+  GitCommit,
+  Terminal,
+  HelpCircle,
+  ExternalLink
 } from 'lucide-react';
 import { voiceService } from '../../services/voice';
 import { mobileWebLLM, ModelProgress } from '../../services/webllm';
 import { ChatMessage } from '../../types/marine';
+import { AgentDAGFlowDiagram } from '../Observability/AgentDAGFlowDiagram';
+import { LiveTerminalTrace } from '../Observability/LiveTerminalTrace';
+import { ReasoningTerminal } from '../Observability/ReasoningTerminal';
+
+const BHASHINI_LANGUAGES = [
+  { code: 'ta', name: 'Tamil', native: 'தமிழ்' },
+  { code: 'te', name: 'Telugu', native: 'తెలుగు' },
+  { code: 'ml', name: 'Malayalam', native: 'മലയാളം' },
+  { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી' },
+  { code: 'bn', name: 'Bengali', native: 'বাংলা' },
+  { code: 'mr', name: 'Marathi', native: 'मराठी' },
+  { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
+  { code: 'en', name: 'English', native: 'English' }
+];
 
 const STARTER_PROMPTS = [
   {
@@ -71,11 +92,13 @@ export const AIAssistantView: React.FC = () => {
     chatMessages,
     isAnalyzing: isAnalyzingCloud,
     language,
+    setLanguage,
     sendQuery,
     addChatMessage,
     clearChat
   } = useApp();
 
+  const [activeTab, setActiveTab] = useState<'chat' | 'observability'>('chat');
   const [inputPrompt, setInputPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [inferenceMode, setInferenceMode] = useState<'cloud' | 'offline'>('cloud');
@@ -84,6 +107,7 @@ export const AIAssistantView: React.FC = () => {
   const [modelProgress, setModelProgress] = useState<ModelProgress>({ progress: 0, text: '' });
   const [hasWebGPU, setHasWebGPU] = useState<boolean | null>(null);
   const [isAnalyzingLocal, setIsAnalyzingLocal] = useState<boolean>(false);
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(true);
 
   const isAnalyzing = isAnalyzingCloud || isAnalyzingLocal;
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -158,8 +182,10 @@ export const AIAssistantView: React.FC = () => {
         };
         addChatMessage(assistantMsg);
 
-        // Vocalize response
-        voiceService.speak(localReply, language);
+        // Vocalize response if TTS enabled
+        if (ttsEnabled) {
+          voiceService.speak(localReply, language);
+        }
       } catch (err: any) {
         addChatMessage({
           id: `err_${Date.now()}`,
@@ -213,85 +239,98 @@ export const AIAssistantView: React.FC = () => {
   return (
     <div className="h-full min-h-0 flex-1 flex flex-col bg-[#151926] text-[#f1f5fb] selection:bg-[#0474C4]/30 selection:text-[#A8C4EC] overflow-hidden relative font-sans">
       
-      {/* ── Ambient Sapphire Nightfall Whisper Glow ── */}
+      {/* ── Ambient Sapphire Glow ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-[#06457F]/25 via-[#0474C4]/10 to-transparent rounded-full blur-[140px]" />
         <div className="absolute bottom-1/4 right-10 w-[400px] h-[400px] bg-[#2C444C]/20 rounded-full blur-[120px]" />
       </div>
 
-      {/* ── Top AI Engine Mode Switcher Bar ── */}
-      <div className="relative z-20 px-4 py-3 bg-[#181e2e]/95 backdrop-blur-md border-b border-[#384959] flex-shrink-0">
-        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      {/* ── Top Unified AI Bar: Mode Switcher & Observability Tabs ── */}
+      <div className="relative z-20 px-4 py-2.5 bg-[#181e2e]/95 backdrop-blur-md border-b border-[#384959] flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           
-          {/* Mode Switcher Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#12161f] border border-[#384959] w-fit">
+          {/* Main View Switcher: Chat vs LangGraph Observability */}
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#12161f] border border-[#384959]">
             <button
-              onClick={() => setInferenceMode('cloud')}
+              onClick={() => setActiveTab('chat')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-                inferenceMode === 'cloud'
+                activeTab === 'chat'
                   ? 'bg-[#0474C4] text-white shadow-md'
                   : 'text-[#BDDDFC]/70 hover:text-white'
               }`}
             >
-              <Cloud className="w-3.5 h-3.5" />
-              <span>Cloud AI (Gemini 2.5)</span>
+              <Compass className="w-3.5 h-3.5" />
+              <span>Helmsman Chat</span>
             </button>
 
             <button
-              onClick={() => setInferenceMode('offline')}
+              onClick={() => setActiveTab('observability')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-                inferenceMode === 'offline'
-                  ? 'bg-[#1E2632] text-[#88BDF2] border border-[#88BDF2]/40 shadow-md'
+                activeTab === 'observability'
+                  ? 'bg-gradient-to-r from-indigo-600 to-[#0474C4] text-white shadow-md'
                   : 'text-[#BDDDFC]/70 hover:text-white'
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5 text-[#88BDF2]" />
-              <span>On-Device WebLLM (Offline)</span>
+              <GitCommit className="w-3.5 h-3.5 text-cyan-300" />
+              <span>LangGraph Architecture</span>
+              <span className="text-[9px] bg-indigo-500/30 text-indigo-200 px-1.5 py-0.2 rounded border border-indigo-400/30 font-mono">
+                5 Nodes
+              </span>
             </button>
           </div>
 
-          {/* Engine Status & One-Click Download if Offline Selected */}
+          {/* Engine Selector: Cloud vs On-Device */}
           <div className="flex items-center gap-2">
-            {inferenceMode === 'cloud' ? (
-              <span className="text-[11px] font-mono text-[#BDDDFC]/70 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>Online Cloud Pipeline Connected</span>
-              </span>
-            ) : (
-              <div className="flex items-center gap-2">
-                {isModelLoaded ? (
-                  <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>SmolLM2-360M Active on GPU</span>
-                  </span>
+            <div className="flex items-center gap-1 p-0.5 rounded-xl bg-[#12161f] border border-[#384959]/70 text-xs">
+              <button
+                onClick={() => setInferenceMode('cloud')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer ${
+                  inferenceMode === 'cloud'
+                    ? 'bg-[#1E2632] text-white border border-white/10'
+                    : 'text-[#BDDDFC]/60 hover:text-white'
+                }`}
+              >
+                Cloud (Gemini 2.5)
+              </button>
+              <button
+                onClick={() => setInferenceMode('offline')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer ${
+                  inferenceMode === 'offline'
+                    ? 'bg-[#1E2632] text-[#88BDF2] border border-[#88BDF2]/40'
+                    : 'text-[#BDDDFC]/60 hover:text-white'
+                }`}
+              >
+                On-Device WebLLM
+              </button>
+            </div>
+
+            {/* Offline Model Download Status */}
+            {inferenceMode === 'offline' && !isModelLoaded && (
+              <button
+                onClick={handleDownloadModel}
+                disabled={isModelDownloading}
+                className="px-2.5 py-1 bg-[#88BDF2] hover:bg-[#BDDDFC] text-[#0f141d] font-bold rounded-xl text-[11px] font-mono flex items-center gap-1.5 transition-all cursor-pointer shadow-md disabled:opacity-50"
+              >
+                {isModelDownloading ? (
+                  <>
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    <span>{modelProgress.progress}%</span>
+                  </>
                 ) : (
-                  <button
-                    onClick={handleDownloadModel}
-                    disabled={isModelDownloading}
-                    className="px-3 py-1 bg-[#88BDF2] hover:bg-[#BDDDFC] text-[#0f141d] font-bold rounded-xl text-[11px] font-mono flex items-center gap-1.5 transition-all cursor-pointer shadow-md disabled:opacity-50"
-                  >
-                    {isModelDownloading ? (
-                      <>
-                        <RefreshCw className="w-3 h-3 animate-spin" />
-                        <span>Downloading ({modelProgress.progress}%)...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-3 h-3" />
-                        <span>Download Offline Model (~210MB)</span>
-                      </>
-                    )}
-                  </button>
+                  <>
+                    <Download className="w-3 h-3" />
+                    <span>Cache Model (210MB)</span>
+                  </>
                 )}
-              </div>
+              </button>
             )}
           </div>
 
         </div>
 
-        {/* Progress Bar for In-Browser Model Download */}
+        {/* Progress Bar for Model Download */}
         {isModelDownloading && (
-          <div className="max-w-3xl mx-auto mt-2 space-y-1">
+          <div className="max-w-4xl mx-auto mt-2 space-y-1">
             <div className="flex justify-between text-[10px] font-mono text-[#BDDDFC]">
               <span>{modelProgress.text}</span>
               <span className="font-bold text-white">{modelProgress.progress}%</span>
@@ -306,234 +345,331 @@ export const AIAssistantView: React.FC = () => {
         )}
       </div>
 
-      {/* ── Central Conversation Stream ── */}
-      <div
-        ref={scrollContainerRef}
-        className="relative z-10 flex-1 overflow-y-auto px-4 py-8"
-      >
-        <div className="max-w-3xl mx-auto space-y-6">
+      {/* ── Bhashini Audio UX Panel ── */}
+      <div className="relative z-15 px-4 py-2 bg-gradient-to-r from-[#21160e] via-[#1a1f2c] to-[#12161f] border-b border-amber-500/25 flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
           
-          {/* Welcome Greeting State */}
-          {!hasMessages && (
-            <div className="text-center py-6 space-y-5 animate-in fade-in zoom-in-95 duration-300">
-              
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#06457F]/40 via-[#0474C4]/20 to-[#2C444C]/30 border border-[#5379AE]/30 flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(4,116,196,0.2)]">
-                <Compass className="w-8 h-8 text-[#A8C4EC] stroke-[1.75]" />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            
+            {/* Left: Saffron Bhashini Badge & Voice Input Action */}
+            <div className="flex items-center flex-wrap gap-2.5">
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-amber-600 text-white font-bold text-[11px] font-mono shadow-sm">
+                <span>🇮🇳</span>
+                <span>Bhashini</span>
               </div>
 
-              <div className="space-y-2">
-                <h1 className="font-editorial text-4xl sm:text-5xl font-normal text-white leading-tight">
-                  Ask the <span className="italic text-[#88BDF2] font-editorial">Helmsman</span>.
-                </h1>
-                <p className="text-sm sm:text-base text-[#A8C4EC]/85 max-w-xl mx-auto font-light leading-relaxed">
-                  Autonomous conversational intelligence synthesizing satellite telemetry, physical wave kinematics, and biological fishing zones off <span className="text-white font-medium">{activeLocationName.split(',')[0]}</span>.
-                </p>
-                {inferenceMode === 'offline' && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-mono">
-                    <WifiOff className="w-3.5 h-3.5" />
-                    <span>Deep-Sea Offline Mode Active: Running directly on device GPU (0% Internet)</span>
-                  </div>
-                )}
-              </div>
-
-              {/* 4 Clean Starter Prompt Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-left max-w-2xl mx-auto">
-                {STARTER_PROMPTS.map((starter, i) => {
-                  const Icon = starter.icon;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => handleSend(starter.prompt)}
-                      className={`p-5 rounded-2xl bg-[#1d2334] border border-[#5379AE]/25 ${starter.border} transition-all cursor-pointer group shadow-lg text-left flex flex-col justify-between hover:scale-[1.01]`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="w-8 h-8 rounded-xl bg-[#262B40] border border-[#5379AE]/30 flex items-center justify-center">
-                            <Icon className={`w-4 h-4 ${starter.color}`} />
-                          </div>
-                          <span className="px-2 py-0.5 rounded text-[9px] font-mono tracking-wider bg-[#262B40] text-[#5379AE] border border-[#5379AE]/25 uppercase">
-                            {starter.tag}
-                          </span>
-                        </div>
-                        <h3 className="font-editorial text-lg text-white font-normal group-hover:text-[#A8C4EC] transition-colors">
-                          {starter.title}
-                        </h3>
-                        <p className="text-xs text-[#A8C4EC]/80 font-light mt-1.5 leading-relaxed">
-                          {starter.prompt}
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-[#5379AE]/15 flex items-center justify-between text-[11px] font-mono text-[#A8C4EC] group-hover:text-white uppercase tracking-wider">
-                        <span>Execute inquiry</span>
-                        <span className="transition-transform duration-200 group-hover:translate-x-1 font-sans">→</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-            </div>
-          )}
-
-          {/* Messages Feed */}
-          {chatMessages.map((msg) => {
-            const isUser = msg.role === 'user';
-            const isOffline = msg.content.includes('[📱 WEBGPU') || msg.content.includes('[OFFLINE HELM');
-
-            return (
-              <div
-                key={msg.id}
-                className={`flex gap-3.5 animate-in fade-in duration-200 ${
-                  isUser ? 'justify-end' : 'justify-start'
+              {/* Hands-Free Vernacular Input Mic Button */}
+              <button
+                onClick={toggleVoice}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                  isListening
+                    ? 'bg-rose-600 text-white border-rose-400 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.5)]'
+                    : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/40 shadow-sm'
                 }`}
+                title="Tap to speak hands-free in your native maritime dialect"
               >
-                {!isUser && (
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-md border flex-shrink-0 mt-0.5 ${
-                    isOffline
-                      ? 'bg-gradient-to-br from-[#1E2632] to-[#384959] border-[#88BDF2]/40 text-[#88BDF2]'
-                      : 'bg-gradient-to-br from-[#0474C4] to-[#06457F] border-[#5379AE]/30 text-white'
-                  }`}>
-                    {isOffline ? <Smartphone className="w-4 h-4" /> : <Compass className="w-4 h-4 stroke-[2.5]" />}
-                  </div>
-                )}
+                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-amber-400" />}
+                <span>{isListening ? 'Listening (Speak now)...' : 'Hands-Free Vernacular Input'}</span>
+              </button>
 
-                <div
-                  className={`rounded-2xl p-5 max-w-[85%] text-xs shadow-xl leading-relaxed ${
-                    isUser
-                      ? 'bg-[#06457F]/60 border border-[#0474C4]/50 text-white font-medium ml-12 rounded-tr-none'
-                      : 'bg-[#1d2334] border border-[#5379AE]/25 text-[#f1f5fb] rounded-tl-none space-y-3'
+              {/* Active TTS Badge */}
+              <button
+                onClick={() => setTtsEnabled(!ttsEnabled)}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-mono cursor-pointer border transition-colors ${
+                  ttsEnabled
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    : 'bg-white/5 text-slate-400 border-white/10'
+                }`}
+                title="Toggle Natural Vernacular Voice Synthesis"
+              >
+                {ttsEnabled ? <Volume2 className="w-3 h-3 text-emerald-400" /> : <VolumeX className="w-3 h-3" />}
+                <span>{ttsEnabled ? 'TTS Active: Natural Indian Accent' : 'TTS Muted'}</span>
+              </button>
+            </div>
+
+            {/* Language Chips (Tamil, Telugu, Malayalam, Gujarati, Bengali, Marathi) */}
+            <div className="flex items-center gap-1 overflow-x-auto py-0.5 text-[11px]">
+              {BHASHINI_LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => setLanguage(lang.code)}
+                  className={`px-2 py-0.5 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
+                    language === lang.code
+                      ? 'bg-amber-500 text-[#12161f] font-bold shadow-sm'
+                      : 'bg-white/5 hover:bg-white/10 text-slate-300'
                   }`}
+                  title={`Switch to ${lang.name}`}
                 >
-                  {/* Safety Verdict Badge for Assistant Messages */}
-                  {!isUser && (
-                    <div className="flex items-center justify-between pb-2.5 border-b border-[#384959]/40">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                          msg.safety_verdict === 'SAFE'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : msg.safety_verdict === 'CAUTION'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                        }`}
-                      >
-                        {msg.safety_verdict === 'SAFE' ? (
-                          <CheckCircle2 className="w-3 h-3" />
-                        ) : (
-                          <AlertTriangle className="w-3 h-3" />
-                        )}
-                        Operational Status: {msg.safety_verdict || 'ACTIVE'}
-                      </span>
+                  <span>{lang.native}</span>
+                </button>
+              ))}
+            </div>
 
-                      {isOffline && (
-                        <span className="text-[10px] font-mono text-[#88BDF2] font-bold">
-                          📱 WebGPU Edge (0% Net)
-                        </span>
-                      )}
-                    </div>
-                  )}
+          </div>
 
-                  {/* Message Content */}
-                  <div className="text-[#f1f5fb] whitespace-pre-line text-xs sm:text-sm leading-relaxed font-sans font-light">
-                    {msg.content}
+          {/* Official GoI Bhashini Mission Disclaimer */}
+          <div className="text-[10px] text-amber-200/70 font-mono flex items-center justify-between border-t border-amber-500/15 pt-1">
+            <span>
+              Bhashini (National Language Translation Mission, MeitY, Govt of India) · Voice recognition running local offshore fallback models
+            </span>
+            <span className="hidden md:inline text-slate-500">
+              Zero cloud telemetry required for acoustic features
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── Main Tab Content ── */}
+      {activeTab === 'observability' ? (
+        /* Observability & LangGraph Full View */
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 max-w-5xl mx-auto w-full">
+          <AgentDAGFlowDiagram />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <LiveTerminalTrace />
+            <ReasoningTerminal />
+          </div>
+        </div>
+      ) : (
+        /* Helmsman Conversation View */
+        <>
+          {/* Central Conversation Stream */}
+          <div
+            ref={scrollContainerRef}
+            className="relative z-10 flex-1 overflow-y-auto px-4 py-6"
+          >
+            <div className="max-w-3xl mx-auto space-y-6">
+              
+              {/* Welcome Greeting State */}
+              {!hasMessages && (
+                <div className="text-center py-6 space-y-5 animate-in fade-in zoom-in-95 duration-300">
+                  
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#06457F]/40 via-[#0474C4]/20 to-[#2C444C]/30 border border-[#5379AE]/30 flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(4,116,196,0.2)]">
+                    <Compass className="w-8 h-8 text-[#A8C4EC] stroke-[1.75]" />
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[#5379AE]/15 text-[10px] text-[#5379AE] font-mono">
-                    <span>{msg.timestamp}</span>
-                    {!isUser && (
-                      <span>{isOffline ? 'On-Device Mobile Inference' : 'ISRO MOSDAC • INCOIS Telemetry'}</span>
+                  <div className="space-y-2">
+                    <h1 className="font-editorial text-4xl sm:text-5xl font-normal text-white leading-tight">
+                      Ask the <span className="italic text-[#88BDF2] font-editorial">Helmsman</span>.
+                    </h1>
+                    <p className="text-sm sm:text-base text-[#A8C4EC]/85 max-w-xl mx-auto font-light leading-relaxed">
+                      Autonomous multi-agent intelligence synthesizing satellite telemetry, physical wave kinematics, and biological fishing zones off <span className="text-white font-medium">{activeLocationName.split(',')[0]}</span>.
+                    </p>
+                    {inferenceMode === 'offline' && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-mono">
+                        <WifiOff className="w-3.5 h-3.5" />
+                        <span>Deep-Sea Offline Mode Active: Running directly on device GPU (0% Internet)</span>
+                      </div>
                     )}
                   </div>
+
+                  {/* 4 Clean Starter Prompt Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-left max-w-2xl mx-auto">
+                    {STARTER_PROMPTS.map((starter, i) => {
+                      const Icon = starter.icon;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => handleSend(starter.prompt)}
+                          className={`p-5 rounded-2xl bg-[#1d2334] border border-[#5379AE]/25 ${starter.border} transition-all cursor-pointer group shadow-lg text-left flex flex-col justify-between hover:scale-[1.01]`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="w-8 h-8 rounded-xl bg-[#262B40] border border-[#5379AE]/30 flex items-center justify-center">
+                                <Icon className={`w-4 h-4 ${starter.color}`} />
+                              </div>
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono tracking-wider bg-[#262B40] text-[#5379AE] border border-[#5379AE]/25 uppercase">
+                                {starter.tag}
+                              </span>
+                            </div>
+                            <h3 className="font-editorial text-lg text-white font-normal group-hover:text-[#A8C4EC] transition-colors">
+                              {starter.title}
+                            </h3>
+                            <p className="text-xs text-[#A8C4EC]/80 font-light mt-1.5 leading-relaxed">
+                              {starter.prompt}
+                            </p>
+                          </div>
+                          <div className="mt-4 pt-3 border-t border-[#5379AE]/15 flex items-center justify-between text-[11px] font-mono text-[#A8C4EC] group-hover:text-white uppercase tracking-wider">
+                            <span>Execute inquiry</span>
+                            <span className="transition-transform duration-200 group-hover:translate-x-1 font-sans">→</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                </div>
+              )}
+
+              {/* Messages Feed */}
+              {chatMessages.map((msg) => {
+                const isUser = msg.role === 'user';
+                const isOffline = msg.content.includes('[📱 WEBGPU') || msg.content.includes('[OFFLINE HELM');
+
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex gap-3.5 animate-in fade-in duration-200 ${
+                      isUser ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    {!isUser && (
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-md border flex-shrink-0 mt-0.5 ${
+                        isOffline
+                          ? 'bg-gradient-to-br from-[#1E2632] to-[#384959] border-[#88BDF2]/40 text-[#88BDF2]'
+                          : 'bg-gradient-to-br from-[#0474C4] to-[#06457F] border-[#5379AE]/30 text-white'
+                      }`}>
+                        {isOffline ? <Smartphone className="w-4 h-4" /> : <Compass className="w-4 h-4 stroke-[2.5]" />}
+                      </div>
+                    )}
+
+                    <div
+                      className={`rounded-2xl p-5 max-w-[85%] text-xs shadow-xl leading-relaxed ${
+                        isUser
+                          ? 'bg-[#06457F]/60 border border-[#0474C4]/50 text-white font-medium ml-12 rounded-tr-none'
+                          : 'bg-[#1d2334] border border-[#5379AE]/25 text-[#f1f5fb] rounded-tl-none space-y-3'
+                      }`}
+                    >
+                      {/* Safety Verdict Badge for Assistant Messages */}
+                      {!isUser && (
+                        <div className="flex items-center justify-between pb-2.5 border-b border-[#384959]/40">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                              msg.safety_verdict === 'SAFE'
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                : msg.safety_verdict === 'CAUTION'
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            }`}
+                          >
+                            {msg.safety_verdict === 'SAFE' ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : (
+                              <AlertTriangle className="w-3 h-3" />
+                            )}
+                            Operational Status: {msg.safety_verdict || 'ACTIVE'}
+                          </span>
+
+                          <button
+                            onClick={() => setActiveTab('observability')}
+                            className="text-[10px] font-mono text-[#88BDF2] hover:text-white flex items-center gap-1 cursor-pointer underline"
+                            title="Inspect LangGraph State Traces"
+                          >
+                            <GitCommit className="w-3 h-3" />
+                            <span>Inspect LangGraph Trace</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Message Content */}
+                      <div className="text-[#f1f5fb] whitespace-pre-line text-xs sm:text-sm leading-relaxed font-sans font-light">
+                        {msg.content}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-[#5379AE]/15 text-[10px] text-[#5379AE] font-mono">
+                        <span>{msg.timestamp}</span>
+                        {!isUser && (
+                          <span>{isOffline ? 'On-Device Mobile Inference' : 'ISRO MOSDAC • INCOIS Telemetry'}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Thinking / Analyzing State */}
+              {isAnalyzing && (
+                <div className="flex gap-3 items-center text-slate-300 text-xs py-3 animate-pulse">
+                  <div className="w-8 h-8 rounded-xl bg-[#1d2334] border border-[#0474C4]/50 flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 text-[#0474C4] animate-spin" />
+                  </div>
+                  <span className="font-mono text-xs text-[#A8C4EC]">
+                    {inferenceMode === 'offline'
+                      ? 'Executing on-device WebGPU inference on mobile hardware...'
+                      : 'Executing LangGraph agent DAG: Ocean, Meteo, Kinematics & Conflict Resolution Engine...'}
+                  </span>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Bottom Floating Input Dock */}
+          <div className="relative z-20 pb-7 pt-2 px-4 bg-gradient-to-t from-[#151926] via-[#151926]/95 to-transparent flex-shrink-0">
+            <div className="max-w-3xl mx-auto">
+              
+              <div className="relative flex items-center bg-[#1d2334] border border-[#5379AE]/40 focus-within:border-[#0474C4] focus-within:shadow-[0_0_25px_rgba(4,116,196,0.3)] rounded-2xl px-3.5 py-2.5 transition-all shadow-2xl">
+                
+                {/* Input field */}
+                <input
+                  type="text"
+                  value={inputPrompt}
+                  onChange={(e) => setInputPrompt(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isAnalyzing}
+                  placeholder={
+                    inferenceMode === 'offline'
+                      ? 'Ask offline helmsman (runs 100% on phone GPU with 0 internet)...'
+                      : 'Ask anything about fishing spots, sea state, cyclone warnings, or route safety...'
+                  }
+                  className="flex-1 bg-transparent border-none outline-none text-[#f1f5fb] placeholder-[#8fa2bf] text-sm sm:text-base px-3 py-1 font-normal"
+                />
+
+                {/* Voice Mic Button */}
+                <button
+                  onClick={toggleVoice}
+                  className={`p-2.5 rounded-xl transition-colors cursor-pointer mr-1.5 outline-none ${
+                    isListening
+                      ? 'bg-rose-500 text-white animate-pulse'
+                      : 'text-[#A8C4EC] hover:text-white hover:bg-white/5'
+                  }`}
+                  title={isListening ? 'Stop Listening' : 'Hands-Free Vernacular Voice Input'}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </button>
+
+                {/* Send Button */}
+                <button
+                  onClick={() => handleSend()}
+                  disabled={!inputPrompt.trim() || isAnalyzing}
+                  className="p-2.5 rounded-xl bg-[#0474C4] hover:bg-[#0360a3] text-white font-bold transition-all disabled:opacity-30 cursor-pointer shadow-[0_2px_12px_rgba(4,116,196,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] border border-[#5379AE]/40 outline-none"
+                >
+                  <Send className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-[#8fa2bf] font-mono mt-2.5 px-2">
+                <span>
+                  {inferenceMode === 'offline'
+                    ? 'Mode: On-Device Mobile AI (Zero Internet) · GPU Accelerated'
+                    : 'Press Enter to send · Multilingual Bhashini Voice Input Active'}
+                </span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveTab('observability')}
+                    className="text-[#88BDF2] hover:text-white transition-colors flex items-center gap-1 cursor-pointer outline-none"
+                  >
+                    <GitCommit className="w-3.5 h-3.5" />
+                    <span>View DAG Observability</span>
+                  </button>
+                  {chatMessages.length > 1 && (
+                    <button
+                      onClick={clearChat}
+                      className="text-[#8fa2bf] hover:text-rose-300 transition-colors flex items-center gap-1 cursor-pointer outline-none"
+                      title="Clear Conversation"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Clear</span>
+                    </button>
+                  )}
                 </div>
               </div>
-            );
-          })}
 
-          {/* Thinking / Analyzing State */}
-          {isAnalyzing && (
-            <div className="flex gap-3 items-center text-slate-300 text-xs py-3 animate-pulse">
-              <div className="w-8 h-8 rounded-xl bg-[#1d2334] border border-[#0474C4]/50 flex items-center justify-center">
-                <Loader2 className="w-4 h-4 text-[#0474C4] animate-spin" />
-              </div>
-              <span className="font-mono text-xs text-[#A8C4EC]">
-                {inferenceMode === 'offline'
-                  ? 'Executing on-device WebGPU inference on mobile hardware...'
-                  : 'Synthesizing Oceansat-3 chlorophyll fronts, wave heights & IMBL coordinates...'}
-              </span>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* ── Bottom Floating Input Dock ── */}
-      <div className="relative z-20 pb-7 pt-2 px-4 bg-gradient-to-t from-[#151926] via-[#151926]/95 to-transparent flex-shrink-0">
-        <div className="max-w-3xl mx-auto">
-          
-          <div className="relative flex items-center bg-[#1d2334] border border-[#5379AE]/40 focus-within:border-[#0474C4] focus-within:shadow-[0_0_25px_rgba(4,116,196,0.3)] rounded-2xl px-3.5 py-2.5 transition-all shadow-2xl">
-            
-            {/* Input field */}
-            <input
-              type="text"
-              value={inputPrompt}
-              onChange={(e) => setInputPrompt(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isAnalyzing}
-              placeholder={
-                inferenceMode === 'offline'
-                  ? 'Ask offline helmsman (runs 100% on phone GPU with 0 internet)...'
-                  : 'Ask anything about fishing spots, sea state, cyclone warnings, or route safety...'
-              }
-              className="flex-1 bg-transparent border-none outline-none text-[#f1f5fb] placeholder-[#8fa2bf] text-sm sm:text-base px-3 py-1 font-normal"
-            />
-
-            {/* Voice Mic Button */}
-            <button
-              onClick={toggleVoice}
-              className={`p-2.5 rounded-xl transition-colors cursor-pointer mr-1.5 outline-none ${
-                isListening
-                  ? 'bg-rose-500 text-white animate-pulse'
-                  : 'text-[#A8C4EC] hover:text-white hover:bg-white/5'
-              }`}
-              title={isListening ? 'Stop Listening' : 'Multilingual Voice Input'}
-            >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            </button>
-
-            {/* Send Button */}
-            <button
-              onClick={() => handleSend()}
-              disabled={!inputPrompt.trim() || isAnalyzing}
-              className="p-2.5 rounded-xl bg-[#0474C4] hover:bg-[#0360a3] text-white font-bold transition-all disabled:opacity-30 cursor-pointer shadow-[0_2px_12px_rgba(4,116,196,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] border border-[#5379AE]/40 outline-none"
-            >
-              <Send className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-[#8fa2bf] font-mono mt-2.5 px-2">
-            <span>
-              {inferenceMode === 'offline'
-                ? 'Mode: On-Device Mobile AI (Zero Internet) · GPU Accelerated'
-                : 'Press Enter to send · Multilingual Hindi, Tamil, Malayalam & English'}
-            </span>
-            <div className="flex items-center gap-3">
-              <span className="text-[#A8C4EC]/70 hidden sm:inline">
-                {inferenceMode === 'offline' ? 'WebLLM / IndexedDB' : 'INCOIS PFZ / ISRO MOSDAC'}
-              </span>
-              {chatMessages.length > 1 && (
-                <button
-                  onClick={clearChat}
-                  className="text-[#8fa2bf] hover:text-rose-300 transition-colors flex items-center gap-1 cursor-pointer outline-none"
-                  title="Clear Conversation"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Clear</span>
-                </button>
-              )}
             </div>
           </div>
-
-        </div>
-      </div>
+        </>
+      )}
 
     </div>
   );
