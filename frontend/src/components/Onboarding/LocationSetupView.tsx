@@ -166,30 +166,108 @@ export const LocationSetupView: React.FC = () => {
   // Active section tracker for right-hand dynamic progress indicator (Start, 01, 02, 03)
   const [activeSection, setActiveSection] = useState<'hero' | '01' | '02' | '03'>('hero');
 
-  // Dynamic Scroll Observer for right-hand navigation indicator
+  // Dynamic Scroll & Intersection Observer for right-hand navigation indicator
   useEffect(() => {
+    // 1. Precise real-time scroll calculation
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const vh = window.innerHeight;
+      const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      
+      // If close to top, active is always Start/Hero
+      if (scrollY < 260) {
+        setActiveSection('hero');
+        return;
+      }
+
+      const vh = window.innerHeight || 800;
+      const viewportCenter = vh * 0.45;
 
       const f1 = document.getElementById('feature-01');
       const f2 = document.getElementById('feature-02');
       const f3 = document.getElementById('feature-03');
 
-      if (f3 && f3.getBoundingClientRect().top <= vh * 0.55) {
+      // Check sections from bottom to top
+      if (f3) {
+        const r3 = f3.getBoundingClientRect();
+        if (r3.top <= viewportCenter && r3.bottom >= 120) {
+          setActiveSection('03');
+          return;
+        }
+      }
+
+      if (f2) {
+        const r2 = f2.getBoundingClientRect();
+        if (r2.top <= viewportCenter && r2.bottom >= 120) {
+          setActiveSection('02');
+          return;
+        }
+      }
+
+      if (f1) {
+        const r1 = f1.getBoundingClientRect();
+        if (r1.top <= viewportCenter && r1.bottom >= 120) {
+          setActiveSection('01');
+          return;
+        }
+      }
+
+      // If past bottom of feature 3
+      if (f3 && f3.getBoundingClientRect().bottom < viewportCenter) {
         setActiveSection('03');
-      } else if (f2 && f2.getBoundingClientRect().top <= vh * 0.55) {
-        setActiveSection('02');
-      } else if (f1 && f1.getBoundingClientRect().top <= vh * 0.55) {
-        setActiveSection('01');
-      } else {
+      } else if (f1 && f1.getBoundingClientRect().top > viewportCenter) {
         setActiveSection('hero');
       }
     };
 
+    // 2. High-performance native IntersectionObserver
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Sort visible entries by intersection ratio
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          visible.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          const topVisible = visible[0];
+          if (topVisible.target.id === 'hero-section') {
+            setActiveSection('hero');
+          } else if (topVisible.target.id === 'feature-01') {
+            setActiveSection('01');
+          } else if (topVisible.target.id === 'feature-02') {
+            setActiveSection('02');
+          } else if (topVisible.target.id === 'feature-03') {
+            setActiveSection('03');
+          }
+        }
+      },
+      {
+        root: null,
+        threshold: [0.15, 0.4, 0.7],
+        rootMargin: '-10% 0px -25% 0px'
+      }
+    );
+
+    const heroEl = document.getElementById('hero-section');
+    const f1 = document.getElementById('feature-01');
+    const f2 = document.getElementById('feature-02');
+    const f3 = document.getElementById('feature-03');
+
+    if (heroEl) observer.observe(heroEl);
+    if (f1) observer.observe(f1);
+    if (f2) observer.observe(f2);
+    if (f3) observer.observe(f3);
+
+    // Listen across window, document, and documentElement
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Trigger initial check
-    return () => window.removeEventListener('scroll', handleScroll);
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+
+    // Initial check
+    handleScroll();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   // Synchronize onboarding step if user state changes
@@ -314,23 +392,40 @@ export const LocationSetupView: React.FC = () => {
     setOnboardingStep(user ? 'port' : 'signin');
   };
 
-  const scrollToHero = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToHero = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setActiveSection('hero');
+
+    const heroEl = document.getElementById('hero-section');
+    if (heroEl) {
+      heroEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    } catch (err) {}
+    try {
+      (document.scrollingElement || document.documentElement || document.body).scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    } catch (err) {}
   };
 
   const scrollToSection = (e: React.MouseEvent, sectionId: string, sectionKey: 'hero' | '01' | '02' | '03') => {
     e.preventDefault();
-    if (sectionId === 'top') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      const el = document.getElementById(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
+    e.stopPropagation();
+
     setActiveSection(sectionKey);
+
+    if (sectionKey === 'hero' || sectionId === 'hero-section' || sectionId === 'top') {
+      scrollToHero();
+      return;
+    }
+
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -430,21 +525,21 @@ export const LocationSetupView: React.FC = () => {
       </div>
 
       {/* ── User Requested: Floating Right Section Progress Indicator (Start, 01, 02, 03) ── */}
-      {/* Prominently scaled, clear click targets, and dynamically tracked on scroll */}
+      {/* Prominently scaled, clear click targets, and dynamically tracked on scroll across desktop and mobile */}
       <aside
         aria-label="Section Navigation"
-        className="hidden md:flex fixed right-4 lg:right-8 xl:right-12 top-1/2 -translate-y-1/2 z-40 flex-col items-end gap-7 sm:gap-9 select-none"
+        className="fixed right-2 sm:right-6 lg:right-10 top-1/2 -translate-y-1/2 z-40 flex flex-col items-end gap-5 sm:gap-8 select-none"
       >
         {/* Item: Start */}
         <button
           type="button"
-          onClick={(e) => scrollToSection(e, 'top', 'hero')}
-          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
+          onClick={(e) => scrollToSection(e, 'hero-section', 'hero')}
+          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
               activeSection === 'hero'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -453,8 +548,8 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === 'hero'
-                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
-                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
@@ -463,12 +558,12 @@ export const LocationSetupView: React.FC = () => {
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'feature-01', '01')}
-          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
               activeSection === '01'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -477,8 +572,8 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === '01'
-                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
-                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
@@ -487,12 +582,12 @@ export const LocationSetupView: React.FC = () => {
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'feature-02', '02')}
-          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
               activeSection === '02'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -501,8 +596,8 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === '02'
-                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
-                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
@@ -511,12 +606,12 @@ export const LocationSetupView: React.FC = () => {
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'feature-03', '03')}
-          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
               activeSection === '03'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -525,15 +620,15 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === '03'
-                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
-                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
       </aside>
 
       {/* ── 1. Full-Bleed Atmospheric Ocean Hero Section ── */}
-      <section className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-24 sm:pt-28 pb-16 overflow-hidden">
+      <section id="hero-section" className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-24 sm:pt-28 pb-16 overflow-hidden scroll-mt-20">
         
         {/* Ocean Background Image with Smooth Fading Gradient Overlay */}
         <div className="absolute inset-0 z-0">
