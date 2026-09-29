@@ -6,7 +6,8 @@ import {
   Sparkles,
   Settings,
   LogOut,
-  Compass
+  Compass,
+  Cpu
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -24,6 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
     { id: 'analytics', label: 'Location Analytics', icon: Layers },
     { id: 'spots', label: 'Fishing Spots & Routes', icon: Fish, badge: pfzs.length },
     { id: 'assistant', label: 'AI Helmsman Assistant', icon: Sparkles },
+    { id: 'observability', label: '11-Agent AI DAG', icon: Cpu, badge: '11' },
   ];
 
   return (
