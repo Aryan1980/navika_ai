@@ -5,6 +5,8 @@ import { api } from '../../services/api';
 import { Search, Plus, Minus, Crosshair, Navigation, X, Volume2, Compass, Shield, Flame, Droplets, Anchor, Box, Radio } from 'lucide-react';
 import { PFZZone } from '../../types/marine';
 import { RoutePlannerPanel } from '../Navigation/RoutePlannerPanel';
+import { getTranslation } from '../../utils/translations';
+import { getLocalizedPortName } from '../../utils/locationTranslations';
 
 export const MarineMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -420,13 +422,13 @@ export const MarineMap: React.FC = () => {
                 </div>
                 <div class="flex items-baseline justify-between">
                   <span class="text-base font-bold text-white font-mono">${pfz.sst_c}°C</span>
-                  <span class="text-[10px] font-bold text-[#88BDF2]">Optimal</span>
+                  <span class="text-xs font-bold text-[#88BDF2]">Optimal</span>
                 </div>
               </div>
               <div class="flex items-end justify-between mt-2 pt-1.5 border-t border-[#384959]/50">
                 <div>
-                  <span class="text-[9px] text-[#BDDDFC]/70 uppercase block font-semibold">Front</span>
-                  <span class="text-xs font-bold text-white">ΔT 0.45°C</span>
+                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">Front</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">ΔT 0.45°C</span>
                 </div>
                 <span class="text-[#88BDF2] text-xs font-bold">ılıll</span>
               </div>
@@ -443,13 +445,13 @@ export const MarineMap: React.FC = () => {
                 </div>
                 <div class="flex items-baseline justify-between">
                   <span class="text-base font-bold text-white font-mono">${pfz.chlorophyll_mg_m3}</span>
-                  <span class="text-[10px] font-bold text-[#88BDF2]">mg/m³</span>
+                  <span class="text-xs font-bold text-[#88BDF2]">mg/m³</span>
                 </div>
               </div>
               <div class="flex items-end justify-between mt-2 pt-1.5 border-t border-[#384959]/50">
                 <div>
-                  <span class="text-[9px] text-[#BDDDFC]/70 uppercase block font-semibold">Plume</span>
-                  <span class="text-xs font-bold text-white">Upwelling</span>
+                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">Plume</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">Upwelling</span>
                 </div>
                 <span class="text-[#88BDF2] text-xs font-bold">ılıll</span>
               </div>
@@ -459,19 +461,19 @@ export const MarineMap: React.FC = () => {
           <!-- Coordinates and Telemetry Bar -->
           <div class="p-3 rounded-2xl bg-[#12161f] border border-[#384959] text-xs font-mono text-[#BDDDFC] mb-3.5 flex items-center justify-between">
             <div>
-              <span class="text-[#BDDDFC]/70 block text-[9px] uppercase font-semibold">Target Fix</span>
-              <span class="font-bold text-white text-xs">${pfz.location.latitude.toFixed(4)}°N, ${pfz.location.longitude.toFixed(4)}°E</span>
+              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">Target Fix</span>
+              <span class="font-bold text-white text-xs sm:text-sm">${pfz.location.latitude.toFixed(4)}°N, ${pfz.location.longitude.toFixed(4)}°E</span>
             </div>
             <div class="text-right">
-              <span class="text-[#BDDDFC]/70 block text-[9px] uppercase font-semibold">Distance & Heading</span>
-              <span class="font-bold text-[#88BDF2] text-xs">${pfz.distance_km} km · ${pfz.bearing_compass} (${pfz.bearing_deg}°)</span>
+              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">Distance & Heading</span>
+              <span class="font-bold text-[#88BDF2] text-xs sm:text-sm">${pfz.distance_km} km · ${pfz.bearing_compass} (${pfz.bearing_deg}°)</span>
             </div>
           </div>
         `;
 
         const navBtn = document.createElement('button');
         navBtn.className = 'w-full py-3 px-4 bg-[#88BDF2] hover:bg-[#BDDDFC] text-[#0f141d] font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer';
-        navBtn.innerHTML = '<span>🧭 Navigate Here</span>';
+        navBtn.innerHTML = `<span>${getTranslation('navigate_here', language)}</span>`;
         navBtn.onclick = () => {
           openRouteForPFZ(pfz);
           setIsRouteDrawerOpen(true);
@@ -722,15 +724,15 @@ export const MarineMap: React.FC = () => {
         pDiv.innerHTML = `
           <div class="flex items-center justify-between pb-2 border-b border-[#384959] mb-2.5">
             <div>
-              <span class="font-bold text-cyan-300 text-xs">${v.name}</span>
-              <span class="text-[10px] text-slate-400 block">${v.type}</span>
+              <span class="font-bold text-cyan-300 text-sm">${v.name}</span>
+              <span class="text-xs text-slate-400 block">${v.type}</span>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
               Mesh Relay Active
             </span>
           </div>
 
-          <div class="space-y-1.5 text-[11px] text-[#BDDDFC]">
+          <div class="space-y-1.5 text-xs text-[#BDDDFC]">
             <div class="flex justify-between">
               <span class="text-slate-400">Vessel Reg ID:</span>
               <span class="font-bold text-white">${v.id}</span>
@@ -831,16 +833,16 @@ export const MarineMap: React.FC = () => {
           {/* NavIC / LoRaWAN Mesh Toggle */}
           <button
             onClick={() => setIsNavicMeshActive(!isNavicMeshActive)}
-            className={`px-3 py-2.5 rounded-2xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3.5 py-2 rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               isNavicMeshActive
-                ? 'bg-[#1E2632] border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2] shadow-[0_0_12px_rgba(136,189,242,0.25)]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Toggle NavIC Positioning & Peer-to-Peer LoRaWAN Vessel Mesh"
           >
-            <Radio className={`w-3.5 h-3.5 ${isNavicMeshActive ? 'text-cyan-400 animate-pulse' : ''}`} />
+            <Radio className={`w-4 h-4 ${isNavicMeshActive ? 'text-[#88BDF2] animate-pulse' : ''}`} />
             <span className="hidden sm:inline">NavIC Mesh</span>
-            <span className={`text-[10px] px-1 rounded ${isNavicMeshActive ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-500'}`}>
+            <span className={`text-xs px-1.5 py-0.2 rounded font-bold ${isNavicMeshActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
               {isNavicMeshActive ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -848,61 +850,63 @@ export const MarineMap: React.FC = () => {
           {/* 3D / 2D Perspective Toggle Button */}
           <button
             onClick={toggle3DMode}
-            className={`px-3 py-2.5 rounded-2xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3.5 py-2 rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               is3DMode
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Switch between 3D Nautical Perspective and 2D Plan View"
           >
-            <Box className="w-3.5 h-3.5" />
+            <Box className="w-4 h-4" />
             <span>{is3DMode ? '3D View' : '2D Plan'}</span>
           </button>
         </div>
 
         {/* Departure Coordinate Badge */}
-        <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#161c27]/90 backdrop-blur-md border border-[#384959] shadow-xl pointer-events-auto">
-          <div className="w-2 h-2 rounded-full bg-[#0474c4] animate-pulse" />
-          <span className="text-xs font-mono text-[#BDDDFC] font-semibold">{activeLocationName}</span>
-          <span className="text-[10px] font-mono text-[#BDDDFC]/60">
+        <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-xl pointer-events-auto font-sans">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#0474c4] animate-pulse" />
+          <span className="text-xs sm:text-sm text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</span>
+          <span className="text-xs text-[#BDDDFC]/70 font-mono">
             {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
           </span>
         </div>
       </div>
 
-      {/* ── Marine Map NavIC Legend (Bottom Left) ── */}
-      <div className="absolute left-4 bottom-8 z-20 pointer-events-auto max-w-xs sm:max-w-sm p-3 rounded-2xl bg-[#161c27]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs font-mono">
-        <div className="flex items-center justify-between pb-1.5 border-b border-[#384959]/60 mb-2">
-          <div className="flex items-center gap-1.5">
-            <Radio className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-bold text-white text-[11px]">Nautical Positioning & Mesh</span>
+      {/* ── Marine Map NavIC Legend (Bottom Left) - Sleek UI matching other elements ── */}
+      <div className="absolute left-4 bottom-8 z-20 pointer-events-auto max-w-xs sm:max-w-sm p-4 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs sm:text-sm font-sans transition-all">
+        <div className="flex items-center justify-between pb-2.5 border-b border-[#384959] mb-2.5 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Radio className="w-4 h-4 text-[#88BDF2] flex-shrink-0" />
+            <span className="font-bold text-white text-xs sm:text-sm truncate">
+              {getTranslation('nautical_mesh_title', language)}
+            </span>
           </div>
-          <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30">
-            ISRO NavIC L5/S
+          <span className="text-xs font-semibold text-[#88BDF2] bg-[#384959] px-2.5 py-0.5 rounded-full border border-[#88BDF2]/40 whitespace-nowrap">
+            {getTranslation('navic_constellation_label', language)}
           </span>
         </div>
 
-        <div className="space-y-1.5 text-[10px] text-[#BDDDFC]/80">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#0474C4] border border-white"></span>
-            <span className="text-white font-medium">Your Vessel (Active Departure Fix)</span>
+        <div className="space-y-2 text-xs sm:text-sm text-[#BDDDFC]">
+          <div className="flex items-center gap-2.5">
+            <span className="w-3 h-3 rounded-full bg-[#0474C4] border-2 border-white shadow-sm flex-shrink-0"></span>
+            <span className="text-white font-medium">{getTranslation('active_vessel_fix', language)}</span>
           </div>
           {isNavicMeshActive && (
             <>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                <span>Peer Fishing Fleet Relays (3 vessels online)</span>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-[#88BDF2] flex-shrink-0"></span>
+                <span>{getTranslation('peer_fleet_relays', language)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-4 h-0.5 border-b border-dashed border-cyan-400"></span>
-                <span>LoRaWAN 868MHz Mesh Links (Zero-4G P2P)</span>
+              <div className="flex items-center gap-2.5">
+                <span className="w-4 h-0.5 border-b-2 border-dashed border-[#88BDF2] flex-shrink-0"></span>
+                <span>{getTranslation('lora_mesh_links', language)}</span>
               </div>
             </>
           )}
         </div>
 
-        <div className="mt-2 pt-1.5 border-t border-[#384959]/60 text-[9px] text-amber-300/90 leading-tight">
-          🛰️ NavIC Positioning · Zero GPS dependency · Vessel-to-vessel relay
+        <div className="mt-3 pt-2.5 border-t border-[#384959] text-xs text-amber-300 font-medium leading-relaxed">
+          {getTranslation('navic_legend_footnote', language)}
         </div>
       </div>
 

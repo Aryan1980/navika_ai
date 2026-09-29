@@ -34,56 +34,105 @@ import { ChatMessage } from '../../types/marine';
 import { AgentDAGFlowDiagram } from '../Observability/AgentDAGFlowDiagram';
 import { LiveTerminalTrace } from '../Observability/LiveTerminalTrace';
 import { ReasoningTerminal } from '../Observability/ReasoningTerminal';
+import { getLocalizedPortName } from '../../utils/locationTranslations';
 
 const BHASHINI_LANGUAGES = [
+  { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
+  { code: 'ml', name: 'Malayalam', native: 'മലയാളം' },
   { code: 'ta', name: 'Tamil', native: 'தமிழ்' },
   { code: 'te', name: 'Telugu', native: 'తెలుగు' },
-  { code: 'ml', name: 'Malayalam', native: 'മലയാളം' },
-  { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી' },
   { code: 'bn', name: 'Bengali', native: 'বাংলা' },
+  { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી' },
   { code: 'mr', name: 'Marathi', native: 'मराठी' },
-  { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
   { code: 'en', name: 'English', native: 'English' }
 ];
 
-const STARTER_PROMPTS = [
-  {
-    icon: Fish,
-    tag: 'PFZ DETECTION',
-    title: 'High-Yield Fishing Fronts',
-    prompt: 'Identify the best thermal chlorophyll convergence zones for sardine and tuna within 25 km of our active port.',
-    badge: 'OPTIMAL CATCH',
-    color: 'text-emerald-400',
-    border: 'hover:border-[#0474C4]/50'
-  },
-  {
-    icon: Waves,
-    tag: 'HYDRODYNAMICS',
-    title: 'Wave Swell & Hazard Risk',
-    prompt: 'Analyze current wave height, swell kinematics, sea state, and squall advisories for tonight.',
-    badge: 'SAFETY 1ST',
-    color: 'text-[#A8C4EC]',
-    border: 'hover:border-[#0474C4]/50'
-  },
-  {
-    icon: ShieldAlert,
-    tag: 'GEO-FENCING',
-    title: 'IMBL Sovereign Border Clearance',
-    prompt: 'Check our proximity to the International Maritime Boundary Line (IMBL) and ensure safe buffer clearance.',
-    badge: 'BORDER SAFETY',
-    color: 'text-[#e59883]',
-    border: 'hover:border-[#e59883]/40'
-  },
-  {
-    icon: Navigation,
-    tag: 'DISPATCH',
-    title: 'Fuel & Transit Planning',
-    prompt: 'Calculate the safest seaward route to Spot 1 with estimated transit time and fuel consumption.',
-    badge: 'WAYPOINTS',
-    color: 'text-[#5379AE]',
-    border: 'hover:border-[#5379AE]/50'
-  }
-];
+const GET_STARTER_PROMPTS = (lang: string) => {
+  const isHi = lang === 'hi';
+  const isMl = lang === 'ml';
+  const isTa = lang === 'ta';
+  const isTe = lang === 'te';
+  const isBn = lang === 'bn';
+
+  return [
+    {
+      icon: Fish,
+      tag: isHi ? 'मत्स्य क्षेत्र' : isMl ? 'മത്സ്യ മേഖല' : isTa ? 'மீன்பிடி மண்டலம்' : isTe ? 'చేపల వేట' : isBn ? 'মৎস্য জোন' : 'PFZ DETECTION',
+      title: isHi ? 'उच्च उत्पादक मत्स्य क्षेत्र' : isMl ? 'സമൃദ്ധമായ മത്സ്യ മേഖലകൾ' : isTa ? 'அதிக மகசூல் மீன்பிடி பகுதிகள்' : isTe ? 'అధిక దిగుబడి చేపల వేట' : isBn ? 'উচ্চ ফলনশীল মাছ ধরার ফ্রন্ট' : 'High-Yield Fishing Fronts',
+      prompt: isHi
+        ? 'सक्रिय बंदरगाह के 25 किमी के भीतर सार्डिन और टूना के लिए सर्वोत्तम थर्मल क्लोरोफिल कन्वर्जेंस ज़ोन खोजें।'
+        : isMl
+        ? 'തുറമുഖത്തിന് 25 കിലോമീറ്ററിനുള്ളിൽ മത്തി, ചൂര എന്നിവയ്ക്കുള്ള മികച്ച തെർമൽ ക്ലോറോഫിൽ മത്സ്യബന്ധന മേഖലകൾ കണ്ടെത്തുക.'
+        : isTa
+        ? 'எங்கள் துறைமுகத்திலிருந்து 25 கி.மீ எல்லைக்குள் மத்தி மற்றும் சூரை மீன்களுக்கான சிறந்த வெப்பமண்டல மீன்பிடி பகுதிகளைக் கண்டறியவும்.'
+        : isTe
+        ? 'మా పోర్టు నుండి 25 కి.మీ పరిధిలో సార్డిన్ మరియు ట్యూనా కోసం ఉత్తమ చేపల వేట మండలాలను గుర్తించండి.'
+        : isBn
+        ? 'আমাদের বন্দরের ২৫ কিমি মধ্যে সার্ডিন ও টুনা মাছের জন্য সর্বোত্তম থার্মাল ক্লোরোফিল ফ্রন্ট অঞ্চল চিহ্নিত করুন।'
+        : 'Identify the best thermal chlorophyll convergence zones for sardine and tuna within 25 km of our active port.',
+      badge: isHi ? 'इष्टतम कैच' : 'OPTIMAL CATCH',
+      color: 'text-emerald-400',
+      border: 'hover:border-[#0474C4]/50'
+    },
+    {
+      icon: Waves,
+      tag: isHi ? 'जलगतिकी' : isMl ? 'കടൽ സ്ഥിതി' : isTa ? 'கடல் இயக்கம்' : isTe ? 'హైడ్రోడైనమిక్స్' : isBn ? 'হাইড্রোডাইনামিক্স' : 'HYDRODYNAMICS',
+      title: isHi ? 'लहर की ऊंचाई व जोखिम' : isMl ? 'തിരമാല ഉയരവും അപകട സാധ്യതയും' : isTa ? 'அலை உயரம் & ஆபத்து பகுப்பாய்வு' : isTe ? 'అలల ఎత్తు & ప్రమాద హెచ్చరిక' : isBn ? 'ঢেউয়ের উচ্চতা ও ঝুঁকির ঝুঁকি' : 'Wave Swell & Hazard Risk',
+      prompt: isHi
+        ? 'आज रात के लिए वर्तमान लहर ऊंचाई, तरंग गतिशीलता, समुद्र की स्थिति और तूफान संबंधी सलाह का विश्लेषण करें।'
+        : isMl
+        ? 'ഇന്നത്തെ തിരമാല ഉയരം, കടൽ പ്രക്ഷുബ്ധത, ചുഴലിക്കാറ്റ് മുന്നറിയിപ്പുകൾ എന്നിവ വിശകലനം ചെയ്യുക.'
+        : isTa
+        ? 'இன்றைய அலை உயரம், கடல் கொந்தளிப்பு மற்றும் சூறாவளி எச்சரிக்கைகளை பகுப்பாய்வு செய்யவும்.'
+        : isTe
+        ? 'నేటి రాత్రికి ప్రస్తుత అలల ఎత్తు, సముద్ర స్థితి మరియు తుఫాను హెచ్చరికలను విశ్లేషించండి.'
+        : isBn
+        ? 'আজ রাতের জন্য বর্তমান ঢেউয়ের উচ্চতা, সমুদ্রের অবস্থা এবং ঝড়ের সতর্কতা বিশ্লেষণ করুন।'
+        : 'Analyze current wave height, swell kinematics, sea state, and squall advisories for tonight.',
+      badge: isHi ? 'सुरक्षा प्रथम' : 'SAFETY 1ST',
+      color: 'text-[#A8C4EC]',
+      border: 'hover:border-[#0474C4]/50'
+    },
+    {
+      icon: ShieldAlert,
+      tag: isHi ? 'जियो-फेंस' : isMl ? 'അതിർത്തി സുരക്ഷ' : isTa ? 'எல்லை வேலி' : isTe ? 'జియో ఫెన్సింగ్' : isBn ? 'জিও-ফেনসিং' : 'GEO-FENCING',
+      title: isHi ? 'आईएमबीएल संप्रभु सीमा दूरी' : isMl ? 'അന്താരാഷ്ട്ര സമുദ്രാതിർത്തി (IMBL)' : isTa ? 'சர்வதேச எல்லை (IMBL) பாதுகாப்பு' : isTe ? 'IMBL సరిహద్దు క్లియరెన్స్' : isBn ? 'আন্তর্জাতিক সীমান্ত (IMBL) ক্লিয়ারেন্স' : 'IMBL Sovereign Border Clearance',
+      prompt: isHi
+        ? 'अंतर्राष्ट्रीय समुद्री सीमा रेखा (IMBL) से हमारी दूरी की जांच करें और सुरक्षित बफर दूरी सुनिश्चित करें।'
+        : isMl
+        ? 'അന്താരാഷ്ട്ര സമുദ്രാതിർത്തിയിൽ (IMBL) നിന്നുള്ള അകലം പരിശോധിച്ച് സുരക്ഷിതമായ അകലം ഉറപ്പാക്കുക.'
+        : isTa
+        ? 'சர்வதேச கடல் எல்லைக் கோட்டிற்கான (IMBL) தூரத்தை சரிபார்த்து பாதுகாப்பான இடைவெளியை உறுதி செய்யவும்.'
+        : isTe
+        ? 'అంతర్జాతీయ సముద్ర సరిహద్దు రేఖ (IMBL) నుండి దూరాన్ని తనిఖీ చేసి సురక్షిత క్లియరెన్స్ నిర్ధారించండి.'
+        : isBn
+        ? 'আন্তর্জাতিক সামুদ্রিক সীমানা রেখা (IMBL) থেকে দূরত্ব পরীক্ষা করুন এবং নিরাপদ বাফার দূরত্ব নিশ্চিত করুন।'
+        : 'Check our proximity to the International Maritime Boundary Line (IMBL) and ensure safe buffer clearance.',
+      badge: isHi ? 'सीमा सुरक्षा' : 'BORDER SAFETY',
+      color: 'text-[#e59883]',
+      border: 'hover:border-[#e59883]/40'
+    },
+    {
+      icon: Navigation,
+      tag: isHi ? 'नेविगेशन' : isMl ? 'യാത്രാ പ്ലാൻ' : isTa ? 'பயண வழிகாட்டல்' : isTe ? 'నావిగేషన్' : isBn ? 'ন্যাভিগেশন' : 'DISPATCH',
+      title: isHi ? 'ईंधन व सुरक्षित पारगमन योजना' : isMl ? 'ഇന്ധനവും യാത്രാ ആസൂത്രണവും' : isTa ? 'எரிபொருள் & பயணத் திட்டம்' : isTe ? 'ఇంధనం & ప్రయాణ ప్రణాళిక' : isBn ? 'জ্বালানী ও ট্রানজিট পরিকল্পনা' : 'Fuel & Transit Planning',
+      prompt: isHi
+        ? 'अनुमानित पारगमन समय और ईंधन खपत के साथ स्पॉट 1 के लिए सबसे सुरक्षित समुद्री मार्ग की गणना करें।'
+        : isMl
+        ? 'പ്രതീക്ഷിത യാത്രാ സമയവും ഇന്ധന ഉപഭോഗവും സഹിതം സ്പോട്ട് 1-ലേക്കുള്ള ഏറ്റവും സുരക്ഷിതമായ കടൽ പാത കണക്കാക്കുക.'
+        : isTa
+        ? 'மதிப்பிடப்பட்ட பயண நேரம் மற்றும் எரிபொருள் பயன்பாட்டுடன் பகுதி 1-க்கான பாதுகாப்பான கடல் வழியைக் கணக்கிடுங்கள்.'
+        : isTe
+        ? 'అంచనా ప్రయాణ సమయం మరియు ఇంధన వినియోగంతో స్పాట్ 1 కి అత్యంత సురక్షితమైన సముద్ర మార్గాన్ని లెక్కించండి.'
+        : isBn
+        ? 'আনুমানিক যাত্রার সময় এবং জ্বালানী খরচ সহ স্পট ১-এর নিরাপদ সামুদ্রিক রুট গণনা করুন।'
+        : 'Calculate the safest seaward route to Spot 1 with estimated transit time and fuel consumption.',
+      badge: isHi ? 'वेपॉइंट्स' : 'WAYPOINTS',
+      color: 'text-[#5379AE]',
+      border: 'hover:border-[#5379AE]/50'
+    }
+  ];
+};
 
 export const AIAssistantView: React.FC = () => {
   const {
@@ -168,9 +217,11 @@ export const AIAssistantView: React.FC = () => {
       // 2. Execute on-device WebLLM inference via WebGPU
       setIsAnalyzingLocal(true);
       try {
+        const localizedPort = getLocalizedPortName(activeLocationName, language);
         const localReply = await mobileWebLLM.generateOfflineAdvice(
           text,
-          `Vessel Departure Fix: ${activeLocationName} (${activeLocation.latitude.toFixed(4)}°N, ${activeLocation.longitude.toFixed(4)}°E).`
+          `Vessel Departure Fix: ${localizedPort} (${activeLocation.latitude.toFixed(4)}°N, ${activeLocation.longitude.toFixed(4)}°E).`,
+          language
         );
 
         const assistantMsg: ChatMessage = {
@@ -450,10 +501,27 @@ export const AIAssistantView: React.FC = () => {
 
                   <div className="space-y-2">
                     <h1 className="font-editorial text-4xl sm:text-5xl font-normal text-white leading-tight">
-                      Ask the <span className="italic text-[#88BDF2] font-editorial">Helmsman</span>.
+                      {language === 'hi' ? 'नाविक ' : language === 'ml' ? 'നാവിഗേഷൻ ' : language === 'ta' ? 'மாலுமி ' : language === 'te' ? 'నావిగేషన్ ' : language === 'bn' ? 'ন্যাভিগেশন ' : 'Ask the '}
+                      <span className="italic text-[#88BDF2] font-editorial">
+                        {language === 'hi' ? 'सहायक से पूछें' : language === 'ml' ? 'സഹായിയോട് ചോദിക്കുക' : language === 'ta' ? 'உதவியாளரிடம் கேளுங்கள்' : language === 'te' ? 'సహాయకుడిని అడగండి' : language === 'bn' ? 'সহকারীকে জিজ্ঞাসা করুন' : 'Helmsman'}
+                      </span>
+                      {language === 'hi' ? '।' : '.'}
                     </h1>
                     <p className="text-sm sm:text-base text-[#A8C4EC]/85 max-w-xl mx-auto font-light leading-relaxed">
-                      Autonomous multi-agent intelligence synthesizing satellite telemetry, physical wave kinematics, and biological fishing zones off <span className="text-white font-medium">{activeLocationName.split(',')[0]}</span>.
+                      {language === 'hi' ? (
+                        <>
+                          <span className="text-white font-medium">{getLocalizedPortName(activeLocationName, language).split(',')[0]}</span> के तट पर उपग्रह टेलीमेट्री, तरंग गतिशीलता और जैविक मत्स्य क्षेत्रों का समन्वय।
+                        </>
+                      ) : language === 'ml' ? (
+                        <>
+                          <span className="text-white font-medium">{getLocalizedPortName(activeLocationName, language).split(',')[0]}</span> തീരത്തെ ഉപഗ്രഹ നിരീക്ഷണം, തിരമാല വിവരങ്ങൾ, മത്സ്യബന്ധന മേഖലകൾ എന്നിവ ലഭ്യമാണ്.
+                        </>
+                      ) : (
+                        <>
+                          Autonomous multi-agent intelligence synthesizing satellite telemetry, physical wave kinematics, and biological fishing zones off{' '}
+                          <span className="text-white font-medium">{getLocalizedPortName(activeLocationName, language).split(',')[0]}</span>.
+                        </>
+                      )}
                     </p>
                     {inferenceMode === 'offline' && (
                       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-mono">
@@ -465,7 +533,7 @@ export const AIAssistantView: React.FC = () => {
 
                   {/* 4 Clean Starter Prompt Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-left max-w-2xl mx-auto">
-                    {STARTER_PROMPTS.map((starter, i) => {
+                    {GET_STARTER_PROMPTS(language).map((starter, i) => {
                       const Icon = starter.icon;
                       return (
                         <button
@@ -478,19 +546,21 @@ export const AIAssistantView: React.FC = () => {
                               <div className="w-8 h-8 rounded-xl bg-[#262B40] border border-[#5379AE]/30 flex items-center justify-center">
                                 <Icon className={`w-4 h-4 ${starter.color}`} />
                               </div>
-                              <span className="px-2 py-0.5 rounded text-[9px] font-mono tracking-wider bg-[#262B40] text-[#5379AE] border border-[#5379AE]/25 uppercase">
+                              <span className="px-2 py-0.5 rounded text-xs font-mono font-bold tracking-wider bg-[#262B40] text-[#5379AE] border border-[#5379AE]/25 uppercase">
                                 {starter.tag}
                               </span>
                             </div>
-                            <h3 className="font-editorial text-lg text-white font-normal group-hover:text-[#A8C4EC] transition-colors">
+                            <h3 className="font-editorial text-xl text-white font-normal group-hover:text-[#A8C4EC] transition-colors">
                               {starter.title}
                             </h3>
-                            <p className="text-xs text-[#A8C4EC]/80 font-light mt-1.5 leading-relaxed">
+                            <p className="text-xs sm:text-sm text-[#A8C4EC]/85 font-light mt-1.5 leading-relaxed">
                               {starter.prompt}
                             </p>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-[#5379AE]/15 flex items-center justify-between text-[11px] font-mono text-[#A8C4EC] group-hover:text-white uppercase tracking-wider">
-                            <span>Execute inquiry</span>
+                          <div className="mt-4 pt-3 border-t border-[#5379AE]/15 flex items-center justify-between text-xs font-mono text-[#A8C4EC] group-hover:text-white uppercase tracking-wider">
+                            <span>
+                              {language === 'hi' ? 'पूछताछ शुरू करें' : language === 'ml' ? 'ചോദിക്കുക' : language === 'ta' ? 'கேளுங்கள்' : language === 'te' ? 'ప్రశ్నించండి' : language === 'bn' ? 'জিজ্ঞাসা করুন' : 'Execute inquiry'}
+                            </span>
                             <span className="transition-transform duration-200 group-hover:translate-x-1 font-sans">→</span>
                           </div>
                         </button>
@@ -534,7 +604,7 @@ export const AIAssistantView: React.FC = () => {
                       {!isUser && (
                         <div className="flex items-center justify-between pb-2.5 border-b border-[#384959]/40">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                               msg.safety_verdict === 'SAFE'
                                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                                 : msg.safety_verdict === 'CAUTION'
@@ -543,30 +613,30 @@ export const AIAssistantView: React.FC = () => {
                             }`}
                           >
                             {msg.safety_verdict === 'SAFE' ? (
-                              <CheckCircle2 className="w-3 h-3" />
+                              <CheckCircle2 className="w-3.5 h-3.5" />
                             ) : (
-                              <AlertTriangle className="w-3 h-3" />
+                              <AlertTriangle className="w-3.5 h-3.5" />
                             )}
                             Operational Status: {msg.safety_verdict || 'ACTIVE'}
                           </span>
 
                           <button
                             onClick={() => setActiveTab('observability')}
-                            className="text-[10px] font-mono text-[#88BDF2] hover:text-white flex items-center gap-1 cursor-pointer underline"
+                            className="text-xs font-mono text-[#88BDF2] hover:text-white flex items-center gap-1 cursor-pointer underline"
                             title="Inspect LangGraph State Traces"
                           >
-                            <GitCommit className="w-3 h-3" />
+                            <GitCommit className="w-3.5 h-3.5" />
                             <span>Inspect LangGraph Trace</span>
                           </button>
                         </div>
                       )}
 
                       {/* Message Content */}
-                      <div className="text-[#f1f5fb] whitespace-pre-line text-xs sm:text-sm leading-relaxed font-sans font-light">
+                      <div className="text-[#f1f5fb] whitespace-pre-line text-sm sm:text-base leading-relaxed font-sans font-light">
                         {msg.content}
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-[#5379AE]/15 text-[10px] text-[#5379AE] font-mono">
+                      <div className="flex items-center justify-between pt-2 border-t border-[#5379AE]/15 text-xs text-[#88BDF2] font-mono">
                         <span>{msg.timestamp}</span>
                         {!isUser && (
                           <span>{isOffline ? 'On-Device Mobile Inference' : 'ISRO MOSDAC • INCOIS Telemetry'}</span>
@@ -583,7 +653,7 @@ export const AIAssistantView: React.FC = () => {
                   <div className="w-8 h-8 rounded-xl bg-[#1d2334] border border-[#0474C4]/50 flex items-center justify-center">
                     <Loader2 className="w-4 h-4 text-[#0474C4] animate-spin" />
                   </div>
-                  <span className="font-mono text-xs text-[#A8C4EC]">
+                  <span className="font-mono text-xs sm:text-sm text-[#A8C4EC]">
                     {inferenceMode === 'offline'
                       ? 'Executing on-device WebGPU inference on mobile hardware...'
                       : 'Executing LangGraph agent DAG: Ocean, Meteo, Kinematics & Conflict Resolution Engine...'}
@@ -609,9 +679,17 @@ export const AIAssistantView: React.FC = () => {
                   onKeyDown={handleKeyDown}
                   disabled={isAnalyzing}
                   placeholder={
-                    inferenceMode === 'offline'
-                      ? 'Ask offline helmsman (runs 100% on phone GPU with 0 internet)...'
-                      : 'Ask anything about fishing spots, sea state, cyclone warnings, or route safety...'
+                    language === 'hi'
+                      ? (inferenceMode === 'offline'
+                          ? 'ऑफ़लाइन नाविक से पूछें (0% इंटरनेट, सीधे फ़ोन GPU पर चलता है)...'
+                          : 'मत्स्य क्षेत्र, मौसम, समुद्री स्थिति, चक्रवात या सुरक्षित मार्ग के बारे में पूछें...')
+                      : language === 'ml'
+                      ? (inferenceMode === 'offline'
+                          ? 'ഓഫ്‌ലൈൻ നാവിക സഹായിയോട് ചോദിക്കുക (0% ഇന്റർനെറ്റ്)...'
+                          : 'മത്സ്യ മേഖലകൾ, കാലാവസ്ഥ, തിരമാല, അല്ലെങ്കിൽ റൂട്ട് വിവരങ്ങൾ ചോദിക്കുക...')
+                      : (inferenceMode === 'offline'
+                          ? 'Ask offline helmsman (runs 100% on phone GPU with 0 internet)...'
+                          : 'Ask anything about fishing spots, sea state, cyclone warnings, or route safety...')
                   }
                   className="flex-1 bg-transparent border-none outline-none text-[#f1f5fb] placeholder-[#8fa2bf] text-sm sm:text-base px-3 py-1 font-normal"
                 />

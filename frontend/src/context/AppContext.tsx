@@ -87,6 +87,15 @@ const DEFAULT_LAYERS = ['pfz', 'waves', 'imbl', 'risk_zones'];
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const WELCOME_MESSAGES: Record<string, string> = {
+  hi: 'समुद्र एआई में आपका स्वागत है। संभावित मत्स्य पालन क्षेत्रों (PFZ), समुद्री मौसम पूर्वानुमान, सुरक्षित मार्ग या संप्रभु समुद्री सीमा (IMBL) के बारे में कोई भी प्रश्न पूछें।',
+  ml: 'സമുദ്ര എഐയിലേക്ക് സ്വാഗതം. മത്സ്യബന്ധന മേഖലകൾ, കാലാവസ്ഥാ പ്രവചനം, സുരക്ഷിത പാത, സമുദ്രാതിർത്തി (IMBL) എന്നിവയെക്കുറിച്ച് എന്തും ചോദിക്കാം.',
+  ta: 'சமுத்ரா ஏஐ-க்கு வரவேற்கிறோம். மீன்பிடி மண்டலங்கள், கடல் வானிலை முன்னறிவிப்பு, பாதுகாப்பான வழிகள் அல்லது சர்வதேச கடல் எல்லை (IMBL) பற்றி ஏதேனும் கேளுங்கள்.',
+  te: 'సముద్ర AI కి స్వాగతం. చేపల వేట మండలాలు, సముద్ర వాతావరణ సూచనలు, సురక్షిత మార్గాలు లేదా అంతర్జాతీయ సరిహద్దు (IMBL) గురించి ఏదైనా అడగండి.',
+  bn: 'সমুদ্র এআই-তে স্বাগতম। সম্ভাব্য মাছ ধরার অঞ্চল, সামুদ্রিক আবহাওয়ার পূর্বাভাস, নিরাপদ নৌপথ বা আন্তর্জাতিক সীমান্ত (IMBL) সম্পর্কে যেকোনো প্রশ্ন জিজ্ঞাসা করুন।',
+  en: 'Welcome to SamudraAI. Ask any question about potential fishing zones, marine weather forecasts, safe routing, or sovereign boundary geofences.'
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLocationSelected, setIsLocationSelected] = useState<boolean>(() => {
     return localStorage.getItem('samudra_location_confirmed') === 'true';
@@ -107,12 +116,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     {
       id: 'welcome-msg',
       role: 'assistant',
-      content: 'Welcome to SamudraAI. Ask any question about potential fishing zones, marine weather forecasts, safe routing, or sovereign boundary geofences.',
+      content: WELCOME_MESSAGES.en,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       risk_level: 'LOW',
       safety_verdict: 'SAFE'
     }
   ]);
+
+  // Synchronize initial welcome message reactively when language changes
+  useEffect(() => {
+    setChatMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === 'welcome-msg') {
+        return [
+          {
+            ...prev[0],
+            content: WELCOME_MESSAGES[language] || WELCOME_MESSAGES.en
+          }
+        ];
+      }
+      return prev;
+    });
+  }, [language]);
   const [activeEvidence, setActiveEvidence] = useState<EvidenceDetails | null>(null);
   const [agentTraces, setAgentTraces] = useState<AgentTrace[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -369,10 +393,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (err) {
       console.error('Chat error:', err);
+      const errorMessages: Record<string, string> = {
+        hi: 'एजेंट ऑर्केस्ट्रेशन पाइपलाइन से कनेक्ट करने में सिस्टम त्रुटि। कृपया सुनिश्चित करें कि बैकएंड सेवा सक्रिय है।',
+        ml: 'ഏജന്റ് ഓർക്കസ്ട്രേഷൻ പൈപ്പ്‌ലൈനിലേക്ക് കണക്റ്റുചെയ്യുന്നതിൽ സിസ്റ്റം പിശക്. ബാക്കെൻഡ് പ്രവർത്തിക്കുന്നുണ്ടെന്ന് ഉറപ്പാക്കുക.',
+        ta: 'கணினி பிழை. பின்னணி சேவை செயலில் உள்ளதா என்பதை உறுதிப்படுத்தவும்.',
+        te: 'సిస్టమ్ ఎర్రర్. దయచేసి బ్యాకెండ్ సేవ సక్రియంగా ఉందో లేదో తనిఖీ చేయండి.',
+        bn: 'সিস্টেম ত্রুটি। অনুগ্রহ করে ব্যাকএন্ড পরিষেবা সক্রিয় আছে কিনা তা পরীক্ষা করুন।',
+        en: 'System error connecting to agent orchestration pipeline. Please verify the backend service is active.'
+      };
       const errMsg: ChatMessage = {
         id: `err_${Date.now()}`,
         role: 'assistant',
-        content: 'System error connecting to agent orchestration pipeline. Please verify the backend service is active.',
+        content: errorMessages[language] || errorMessages.en,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         risk_level: 'HIGH',
         safety_verdict: 'UNSAFE'
@@ -418,7 +450,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       {
         id: 'welcome-msg',
         role: 'assistant',
-        content: 'Welcome to SamudraAI. Ask any question about potential fishing zones, marine weather forecasts, safe routing, or sovereign boundary geofences.',
+        content: WELCOME_MESSAGES[language] || WELCOME_MESSAGES.en,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         risk_level: 'LOW',
         safety_verdict: 'SAFE'

@@ -723,15 +723,36 @@ export function getFallbackGeofences() {
 
 // ── Fallback Chat Response ──
 
-export function getFallbackChatResponse(coords: Coordinates): ChatResponse {
+export function getFallbackChatResponse(coords: Coordinates, lang: string = 'en'): ChatResponse {
   const pfzs = getFallbackPFZs(coords);
   const nearest = pfzs[0];
+  const safeCount = pfzs.filter((p) => p.safety_rating === 'SAFE').length;
+
+  let directAnswer = `Identified ${safeCount} Safe Zones offshore from your current departure point. The nearest safe zone is ${nearest?.name} located ${nearest?.distance_km} km away bearing ${nearest?.bearing_compass} (${nearest?.bearing_deg}°). Sea surface temperature is ${nearest?.sst_c}°C with elevated chlorophyll-a at ${nearest?.chlorophyll_mg_m3} mg/m³. Transit corridor is clear.`;
+  let recommendation = `Proceed seaward on compass heading ${nearest?.bearing_compass}. All nearshore and mid-shelf zones are verified clear of restricted boundaries.`;
+
+  if (lang === 'hi') {
+    directAnswer = `आपके वर्तमान प्रस्थान बिंदु से समुद्र में ${safeCount} सुरक्षित मत्स्य क्षेत्र (PFZ) पहचाने गए हैं। निकटतम सुरक्षित क्षेत्र ${nearest?.name} है, जो ${nearest?.distance_km} किमी दूर दिशा ${nearest?.bearing_compass} (${nearest?.bearing_deg}°) पर स्थित है। समुद्र सतह का तापमान ${nearest?.sst_c}°C तथा क्लोरोफिल-ए ${nearest?.chlorophyll_mg_m3} mg/m³ है। पारगमन समुद्री मार्ग पूरी तरह सुरक्षित व बाधा-मुक्त है।`;
+    recommendation = `दिशा ${nearest?.bearing_compass} पर समुद्र की ओर आगे बढ़ें। सभी तटीय और मध्य-शेल्फ क्षेत्र संप्रभु सीमाओं व उथले पानी से मुक्त सत्यापित हैं।`;
+  } else if (lang === 'ml') {
+    directAnswer = `നിങ്ങളുടെ പ്രയാണ കേന്ദ്രത്തിൽ നിന്ന് ${safeCount} സുരക്ഷിത മത്സ്യബന്ധന മേഖലകൾ തിരിച്ചറിഞ്ഞു. ഏറ്റവും അടുത്തുള്ള മേഖല ${nearest?.name} ആണ്, അകലം ${nearest?.distance_km} കി.മീ, കോമ്പസ് ദിശ ${nearest?.bearing_compass} (${nearest?.bearing_deg}°). സമുദ്ര ഉപരിതല താപനില ${nearest?.sst_c}°C, ക്ലോറോഫിൽ ${nearest?.chlorophyll_mg_m3} mg/m³ ആണ്. യാത്രാ പാത പൂർണ്ണമായും സുരക്ഷിതമാണ്.`;
+    recommendation = `കോമ്പസ് ദിശ ${nearest?.bearing_compass} ലേക്ക് മുന്നോട്ട് പോവുക. തീരദേശ ചാനലുകൾ സുരക്ഷിതമായി നിരീക്ഷിച്ചു.`;
+  } else if (lang === 'ta') {
+    directAnswer = `உங்கள் புறப்படும் புள்ளியிலிருந்து ${safeCount} பாதுகாப்பான மீன்பிடி மண்டலங்கள் கண்டறியப்பட்டுள்ளன. அருகிலுள்ள பாதுகாப்பான பகுதி ${nearest?.name} ஆகும், தூரம் ${nearest?.distance_km} கிமீ, திசை ${nearest?.bearing_compass} (${nearest?.bearing_deg}°). கடல் மேற்பரப்பு வெப்பநிலை ${nearest?.sst_c}°C மற்றும் குளோரோபில் ${nearest?.chlorophyll_mg_m3} mg/m³. கடல் வழி முற்றிலும் பாதுகாப்பானது.`;
+    recommendation = `திசை ${nearest?.bearing_compass} இல் கடலுக்குச் செல்லவும். தடைசெய்யப்பட்ட பகுதிகள் எதுவும் குறுக்கிடவில்லை.`;
+  } else if (lang === 'te') {
+    directAnswer = `మీ బయలుదేరే ప్రాంతం నుండి ${safeCount} సురక్షిత చేపల వేట ప్రాంతాలు గుర్తించబడ్డాయి. సమీప ప్రాంతం ${nearest?.name}, దూరం ${nearest?.distance_km} కి.మీ, దిక్సూచి దిశ ${nearest?.bearing_compass} (${nearest?.bearing_deg}°). సముద్ర ఉపరితల ఉష్ణోగ్రత ${nearest?.sst_c}°C, క్లోరోఫిల్ ${nearest?.chlorophyll_mg_m3} mg/m³. ప్రయాణ మార్గం సురక్షితంగా ఉంది.`;
+    recommendation = `దిక్సూచి దిశ ${nearest?.bearing_compass} లో ముందుకు సాగండి. అన్ని ప్రాంతాలు క్లియర్‌గా ఉన్నాయి.`;
+  } else if (lang === 'bn') {
+    directAnswer = `আপনার বর্তমান প্রস্থান বিন্দু থেকে সমুদ্রে ${safeCount}টি নিরাপদ মৎস্য অঞ্চল (PFZ) শনাক্ত করা হয়েছে। নিকটতম নিরাপদ অঞ্চল হল ${nearest?.name}, যা ${nearest?.distance_km} কিমি দূরে ${nearest?.bearing_compass} (${nearest?.bearing_deg}°) অভিমুখে অবস্থিত। সমুদ্রের পৃষ্ঠের তাপমাত্রা ${nearest?.sst_c}°C এবং ক্লোরোফিল ${nearest?.chlorophyll_mg_m3} mg/m³। ট্রানজিট করিডোর সম্পূর্ণ নিরাপদ।`;
+    recommendation = `কম্পাস দিক ${nearest?.bearing_compass}-এ সমুদ্রাভিমুখে এগিয়ে যান। সব নিকটবর্তী অঞ্চল ঝুঁকিহীন।`;
+  }
 
   return {
-    direct_answer: `Identified ${pfzs.filter((p) => p.safety_rating === 'SAFE').length} Safe Zones offshore from your current departure point. The nearest safe zone is ${nearest?.name} located ${nearest?.distance_km} km away bearing ${nearest?.bearing_compass} (${nearest?.bearing_deg}°). Sea surface temperature is ${nearest?.sst_c}°C with elevated chlorophyll-a at ${nearest?.chlorophyll_mg_m3} mg/m³. Transit corridor is clear.`,
+    direct_answer: directAnswer,
     risk_level: 'LOW',
     safety_verdict: 'SAFE',
-    recommendation: `Proceed seaward on compass heading ${nearest?.bearing_compass}. All nearshore and mid-shelf zones are verified clear of restricted boundaries.`,
+    recommendation: recommendation,
     conditions_summary: {
       temperature_c: 28.5,
       wind_kmh: 16.5,

@@ -12,10 +12,10 @@ export const DualSyncModeBanner: React.FC = () => {
         <div className="flex items-center rounded-xl bg-[#12161f] p-0.5 border border-[#384959]/80 shadow-sm">
           <button
             onClick={() => setSyncMode('edge')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs sm:text-sm font-sans font-bold transition-all cursor-pointer ${
               syncMode === 'edge'
                 ? 'bg-[#1E2632] text-[#88BDF2] border border-[#88BDF2]/40 shadow-sm'
-                : 'text-[#BDDDFC]/60 hover:text-white'
+                : 'text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Switch to NavIC / LoRaWAN Mesh Edge Sync"
           >
@@ -28,10 +28,10 @@ export const DualSyncModeBanner: React.FC = () => {
 
           <button
             onClick={() => setSyncMode('cloud')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs sm:text-sm font-sans font-bold transition-all cursor-pointer ${
               syncMode === 'cloud'
                 ? 'bg-[#0474C4] text-white shadow-sm'
-                : 'text-[#BDDDFC]/60 hover:text-white'
+                : 'text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Switch to ISRO MOSDAC / INCOIS Cloud Sync"
           >
@@ -44,24 +44,24 @@ export const DualSyncModeBanner: React.FC = () => {
         </div>
 
         {/* Live Ingestion / Relay Details */}
-        <div className="flex items-center gap-2 text-[11px] font-mono text-[#BDDDFC]/85 bg-[#1E2632]/50 px-2.5 py-1 rounded-lg border border-[#384959]/40">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-sans text-[#BDDDFC] bg-[#1E2632]/60 px-3 py-1 rounded-lg border border-[#384959]/50">
           {syncMode === 'edge' ? (
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-white font-medium">NavIC/LoRaWAN Mesh</span>
+              <span className="text-white font-semibold">NavIC/LoRaWAN Mesh</span>
               <span className="text-[#6A89A7]">·</span>
-              <span className="text-[#88BDF2]">Zero-4G Offshore</span>
+              <span className="text-[#88BDF2] font-medium">Zero-4G Offshore</span>
               <span className="text-[#6A89A7]">·</span>
-              <span className="text-emerald-300 font-medium hidden sm:inline">Peer-to-peer relay active</span>
+              <span className="text-emerald-300 font-semibold hidden sm:inline">Peer-to-peer relay active</span>
             </>
           ) : (
             <>
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="text-white font-medium">MOSDAC / INCOIS SSO</span>
+              <span className="text-white font-semibold">MOSDAC / INCOIS SSO</span>
               <span className="text-[#6A89A7]">·</span>
-              <span className="text-[#88BDF2]">Ingesting .nc grids</span>
+              <span className="text-[#88BDF2] font-medium">Ingesting .nc grids</span>
               <span className="text-[#6A89A7]">·</span>
-              <span className="text-cyan-300 font-medium hidden sm:inline">SST, Chl-a, Wave Period</span>
+              <span className="text-cyan-300 font-semibold hidden sm:inline">SST, Chl-a, Wave Period</span>
             </>
           )}
         </div>
@@ -71,15 +71,11 @@ export const DualSyncModeBanner: React.FC = () => {
       <div className="flex items-center gap-2.5">
         {/* Edge Hardware Badge */}
         <div 
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#1E2632] via-[#242E3B] to-[#1E2632] border border-[#88BDF2]/30 text-[11px] font-mono text-white shadow-sm"
-          title="Field-tested on Raspberry Pi 5 with local NPU acceleration"
+          className="flex items-center gap-2 px-3 py-1 rounded-xl bg-[#1E2632] border border-[#88BDF2]/30 text-xs sm:text-sm font-sans text-white shadow-sm"
+          title="Field-tested edge acceleration with 100% offline capability"
         >
-          <Zap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 animate-bounce" />
-          <span className="font-semibold text-[#88BDF2]">Edge-Ready</span>
-          <span className="text-[#6A89A7] hidden sm:inline">·</span>
-          <span className="text-slate-300 hidden sm:inline">Raspberry Pi 5</span>
-          <span className="text-[#6A89A7] hidden md:inline">·</span>
-          <span className="text-amber-300 font-medium hidden md:inline">₹18k Hardware</span>
+          <Zap className="w-4 h-4 text-amber-400 flex-shrink-0 animate-bounce" />
+          <span className="font-bold text-[#88BDF2]">Edge-Ready</span>
           <span className="text-[#6A89A7]">·</span>
           <span className="text-emerald-400 font-bold">100% Offline</span>
           <span className="text-[#6A89A7]">·</span>

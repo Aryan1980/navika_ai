@@ -182,7 +182,7 @@ export const ChatPanel: React.FC = () => {
                 {!isUser && msg.safety_verdict && (
                   <div className="mb-2 flex items-center justify-between gap-2 pb-1.5 border-b border-white/[0.05]">
                     <span
-                      className={`inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wide ${
+                      className={`inline-flex items-center gap-1.5 font-semibold text-xs px-2.5 py-0.5 rounded-md uppercase tracking-wide ${
                         msg.safety_verdict === 'SAFE'
                           ? 'bg-emerald-500/10 text-emerald-400'
                           : msg.safety_verdict === 'SAFE_WITH_CAUTION'
@@ -190,37 +190,37 @@ export const ChatPanel: React.FC = () => {
                           : 'bg-rose-500/10 text-rose-400'
                       }`}
                     >
-                      <Shield className="w-3 h-3" />
+                      <Shield className="w-3.5 h-3.5" />
                       {msg.safety_verdict.replace(/_/g, ' ')}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-500">{msg.timestamp}</span>
+                    <span className="text-xs font-mono text-slate-400">{msg.timestamp}</span>
                   </div>
                 )}
 
                 {/* Message Content */}
-                <div className="whitespace-pre-line leading-relaxed text-[11px] font-normal text-slate-300">
+                <div className="whitespace-pre-line leading-relaxed text-xs sm:text-sm font-normal text-slate-100">
                   {msg.content}
                 </div>
 
                 {/* Attached Actions */}
                 {!isUser && (
-                  <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between gap-2">
+                  <div className="mt-3 pt-2 border-t border-white/[0.06] flex items-center justify-between gap-2">
                     {msg.evidence ? (
                       <button
                         onClick={() => {
                           setActiveEvidence(msg.evidence || null);
                           setActiveTraces(msg.traces);
                         }}
-                        className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] px-2 py-1 rounded transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                       >
-                        <HelpCircle className="w-3 h-3 text-cyan-400" />
+                        <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
                         <span>Evidence & Reasoning</span>
                       </button>
                     ) : <div />}
 
                     <button
                       onClick={() => voiceService.speak(msg.content, language)}
-                      className="text-slate-400 hover:text-cyan-300 p-1 rounded transition-colors cursor-pointer flex items-center gap-1 text-[10px]"
+                      className="text-slate-300 hover:text-cyan-300 bg-white/[0.04] hover:bg-white/[0.08] px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 text-xs border border-white/[0.06]"
                       title="Listen aloud in Indian regional language"
                     >
                       <Volume2 className="w-3.5 h-3.5 text-cyan-400" />

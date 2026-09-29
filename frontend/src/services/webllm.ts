@@ -69,15 +69,40 @@ class MobileWebLLMService {
    */
   async generateOfflineAdvice(
     userPrompt: string,
-    maritimeContext?: string
+    maritimeContext?: string,
+    language: string = 'en'
   ): Promise<string> {
+    const langNames: Record<string, string> = {
+      en: 'English',
+      hi: 'Hindi (हिन्दी)',
+      ta: 'Tamil (தமிழ்)',
+      te: 'Telugu (తెలుగు)',
+      ml: 'Malayalam (മലയാളം)',
+      bn: 'Bengali (বাংলা)'
+    };
+    const targetLangName = langNames[language] || 'English';
+
     if (!this.isLoaded || !this.engine) {
-      // Deterministic marine offline fallback
+      if (language === 'hi') {
+        return `[ऑफलाइन हेल्म्समैन] गहरे समुद्र का ऑफलाइन मोड सक्रिय है। मानक समुद्री फेयरवे मार्ग पर आगे बढ़ें और VHF चैनल 16 पर निरंतर रेडियो सतर्कता बनाए रखें।`;
+      }
+      if (language === 'ml') {
+        return `[ഓഫ്‌ലൈൻ ഹെൽമ്‌സ്മാൻ] ഓഫ്‌ലൈൻ മോഡ് സജീവമാണ്. സാധാരണ ചാനൽ പാതയിലൂടെ സഞ്ചരിക്കുക, വിഎച്ച്എഫ് ചാനൽ 16 ൽ ശ്രദ്ധിക്കുക.`;
+      }
+      if (language === 'ta') {
+        return `[ஆஃப்லைன் ஹெல்ம்ஸ்மேன்] ஆஃப்லைன் முறை செயலில் உள்ளது. நிலையான கடல் பாதையில் செல்லவும், VHF சேனல் 16 ஐக் கண்காணிக்கவும்.`;
+      }
+      if (language === 'te') {
+        return `[ఆఫ్‌లైన్ హెల్మ్స్‌మన్] డీప్ సీ ఆఫ్‌లైన్ మోడ్ యాక్టివ్‌గా ఉంది. ప్రామాణిక మార్గంలో సాగండి మరియు VHF ఛానల్ 16 ని పర్యవేక్షించండి.`;
+      }
+      if (language === 'bn') {
+        return `[অফলাইন হেলমসম্যান] গভীর সমুদ্রের অফলাইন মোড সক্রিয়। স্ট্যান্ডার্ড ফেয়ারওয়ে ধরে এগিয়ে যান এবং VHF চ্যানেল ১৬ পর্যবেক্ষণ করুন।`;
+      }
       return `[OFFLINE HELM] Deep sea offline mode active. Steer standard fairway heading and maintain radio watch on VHF Ch 16.`;
     }
 
     try {
-      const systemPrompt = `You are SamudraAI Mobile Edge Helmsman. Provide concise, lifesaving nautical advice for skippers at sea. Ground responses in maritime navigation safety. ${maritimeContext || ''}`;
+      const systemPrompt = `You are SamudraAI Mobile Edge Helmsman. You MUST respond ONLY in ${targetLangName}. Do NOT use English except for coordinates and SI units (km, NM, °C, kts). Provide concise, lifesaving nautical advice for skippers at sea. Ground responses in maritime navigation safety. ${maritimeContext || ''}`;
 
       const reply = await this.engine.chat.completions.create({
         messages: [
@@ -88,10 +113,12 @@ class MobileWebLLMService {
         max_tokens: 150
       });
 
-      return reply.choices[0]?.message?.content || 'Navigation clear. Maintain safe vessel speed.';
+      return reply.choices[0]?.message?.content || (language === 'hi' ? 'नेविगेशन मार्ग सुरक्षित है। सुरक्षित पोत गति बनाए रखें।' : 'Navigation clear. Maintain safe vessel speed.');
     } catch (err) {
       console.error('WebLLM offline inference error:', err);
-      return 'Maintain standard coastal clearance. Monitor barometric pressure.';
+      return language === 'hi'
+        ? 'तटीय सीमा से सुरक्षित दूरी बनाए रखें। बैरोमीटर के दबाव पर नजर रखें।'
+        : 'Maintain standard coastal clearance. Monitor barometric pressure.';
     }
   }
 
