@@ -60,6 +60,7 @@ export interface PFZZone {
   avoids: boolean;
   source: string;
   is_demo: boolean;
+  target_species?: string[];
 }
 
 export interface FactorScore {

@@ -12,11 +12,20 @@ import {
   Activity,
   Gauge,
   CheckCircle2,
-  Anchor
+  Anchor,
+  FileText,
+  Cpu
 } from 'lucide-react';
 import { OceanDynamicsPanel } from './OceanDynamicsPanel';
+import { ImpactHeroPanel } from './ImpactHeroPanel';
+import { DeterministicRiskExplanation } from './DeterministicRiskExplanation';
 
-export const LocationAnalyticsView: React.FC = () => {
+interface LocationAnalyticsViewProps {
+  onOpenAdvisory?: () => void;
+  onOpenDAG?: () => void;
+}
+
+export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ onOpenAdvisory, onOpenDAG }) => {
   const { activeLocation, activeLocationName, weather, ocean, risk, pfzs } = useApp();
 
   const sstVal = ocean?.sst ?? 28.4;
@@ -62,13 +71,40 @@ export const LocationAnalyticsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Real-time Status Badge */}
-        <div className="flex items-center gap-3">
+        {/* Action Buttons & Status Badge */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {onOpenAdvisory && (
+            <button
+              onClick={onOpenAdvisory}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 font-mono text-xs font-semibold transition-all cursor-pointer shadow-sm"
+              title="Generate Official Marine Advisory Bulletin (PDF)"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Advisory PDF</span>
+            </button>
+          )}
+
+          {onOpenDAG && (
+            <button
+              onClick={onOpenDAG}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#182033] border border-[#5379AE]/30 hover:border-cyan-400 text-cyan-300 font-mono text-xs font-semibold transition-all cursor-pointer shadow-sm"
+              title="Inspect 11-Agent Autonomous DAG"
+            >
+              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+              <span>11-Agent DAG</span>
+            </button>
+          )}
+
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1d2334] border border-[#5379AE]/30 font-mono text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[#A8C4EC]">Oceansat-3 & INCOIS Synced</span>
           </div>
         </div>
+      </div>
+
+      {/* ── National Maritime Impact Statistics Panel (SIH 2026 / ISRO PS 26176) ── */}
+      <div className="relative z-10 w-full">
+        <ImpactHeroPanel onExploreDAG={onOpenDAG} />
       </div>
 
       {/* ── Row 1: Primary Telemetry Cards (Collectible Retro-Cartographic Style - Image 1) ── */}
@@ -438,6 +474,11 @@ export const LocationAnalyticsView: React.FC = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* ── Deterministic 7-Factor Mathematical Breakdown ('Why this score?') ── */}
+      <div className="relative z-10 w-full">
+        <DeterministicRiskExplanation />
       </div>
 
       {/* ── Row 3: 24h Swell Wave Elevation Curve & Sector Tracking ── */}
