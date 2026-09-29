@@ -8,7 +8,7 @@ export const ArchitectureView: React.FC = () => {
       {/* Title */}
       <div className="text-center space-y-2">
         <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-950 text-cyan-400 border border-cyan-800">
-          ISRO Marine Hackathon Architecture Specification
+          Autonomous Maritime AI Architecture Specification
         </span>
         <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-200 to-indigo-200">
           How SamudraAI Works: End-to-End Agentic AI Architecture

@@ -71,7 +71,7 @@ export const DataSourcesView: React.FC = () => {
               ISRO SAC AHMADABAD // MOSDAC STANDING ORDERS
             </span>
             <span className="text-[10px] font-mono font-bold text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full">
-              SIH 2026 EVALUATION READY
+              REAL-TIME SATELLITE FEEDS
             </span>
           </div>
           <h2 className="text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-200">

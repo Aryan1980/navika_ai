@@ -86,10 +86,10 @@ export const LiveStatusBar: React.FC<LiveStatusBarProps> = ({
       
       {/* Left: ISRO PS Branding + Data Sources */}
       <div className="flex items-center gap-2 flex-shrink-0 flex-nowrap md:flex-wrap">
-        {/* ISRO PS Badge */}
+        {/* Platform Status Badge */}
         <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-900/60 to-cyan-900/40 border border-cyan-500/40 text-cyan-200 font-mono text-[10.5px] font-semibold tracking-wide shadow-sm flex-shrink-0">
           <span>🛰️</span>
-          <span className="whitespace-nowrap">ISRO PS 26176 · SIH 2026</span>
+          <span className="whitespace-nowrap">MARITIME INTELLIGENCE LIVE</span>
         </div>
 
         <span className="text-[#5379AE]/50 hidden md:inline">|</span>

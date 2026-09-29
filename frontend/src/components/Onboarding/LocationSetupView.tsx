@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Compass,
   Anchor,
@@ -11,16 +11,20 @@ import {
   User,
   Globe,
   Radio,
-  CheckCircle2,
   X,
   ChevronRight,
   Search,
-  ExternalLink,
   ChevronDown
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Coordinates } from '../../types/marine';
 import { SUPPORTED_LANGUAGES, getTranslation } from '../../utils/translations';
+import {
+  getLocalizedPortName,
+  getLocalizedState,
+  getLocalizedSea,
+  getLocalizedSpecies
+} from '../../utils/locationTranslations';
 
 export interface HarborOption {
   id: string;
@@ -159,21 +163,24 @@ export const LocationSetupView: React.FC = () => {
   const [manualLon, setManualLon] = useState<string>('76.2220');
   const [manualError, setManualError] = useState<string>('');
 
-  // Active section tracker for right-hand progress indicator (Start, 01, 02, 03)
+  // Active section tracker for right-hand dynamic progress indicator (Start, 01, 02, 03)
   const [activeSection, setActiveSection] = useState<'hero' | '01' | '02' | '03'>('hero');
 
+  // Dynamic Scroll Observer for right-hand navigation indicator
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPos = window.scrollY + 350;
+      const scrollY = window.scrollY;
+      const vh = window.innerHeight;
+
       const f1 = document.getElementById('feature-01');
       const f2 = document.getElementById('feature-02');
       const f3 = document.getElementById('feature-03');
 
-      if (f3 && scrollPos >= f3.offsetTop) {
+      if (f3 && f3.getBoundingClientRect().top <= vh * 0.55) {
         setActiveSection('03');
-      } else if (f2 && scrollPos >= f2.offsetTop) {
+      } else if (f2 && f2.getBoundingClientRect().top <= vh * 0.55) {
         setActiveSection('02');
-      } else if (f1 && scrollPos >= f1.offsetTop) {
+      } else if (f1 && f1.getBoundingClientRect().top <= vh * 0.55) {
         setActiveSection('01');
       } else {
         setActiveSection('hero');
@@ -181,6 +188,7 @@ export const LocationSetupView: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Trigger initial check
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -286,11 +294,20 @@ export const LocationSetupView: React.FC = () => {
     setIsOnboardingModalOpen(false);
   };
 
-  const filteredHarbors = MAJOR_HARBORS.filter(h =>
-    h.name.toLowerCase().includes(harborSearch.toLowerCase()) ||
-    h.state.toLowerCase().includes(harborSearch.toLowerCase()) ||
-    h.sea.toLowerCase().includes(harborSearch.toLowerCase())
-  );
+  const filteredHarbors = MAJOR_HARBORS.filter(h => {
+    const search = harborSearch.toLowerCase();
+    const locName = getLocalizedPortName(h.id, language).toLowerCase();
+    const locState = getLocalizedState(h.state, language).toLowerCase();
+    const locSea = getLocalizedSea(h.sea, language).toLowerCase();
+    return (
+      h.name.toLowerCase().includes(search) ||
+      h.state.toLowerCase().includes(search) ||
+      h.sea.toLowerCase().includes(search) ||
+      locName.includes(search) ||
+      locState.includes(search) ||
+      locSea.includes(search)
+    );
+  });
 
   const openAuthFlow = () => {
     setIsOnboardingModalOpen(true);
@@ -300,65 +317,68 @@ export const LocationSetupView: React.FC = () => {
   const scrollToHero = (e: React.MouseEvent) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveSection('hero');
   };
 
-  const scrollToFeatures = (e: React.MouseEvent) => {
+  const scrollToSection = (e: React.MouseEvent, sectionId: string, sectionKey: 'hero' | '01' | '02' | '03') => {
     e.preventDefault();
-    const el = document.getElementById('feature-01');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (sectionId === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
+    setActiveSection(sectionKey);
   };
 
   return (
     <div id="top" className="min-h-screen bg-[#0B131F] text-[#f1f5fb] font-['Work_Sans',sans-serif] selection:bg-[#FBD784]/20 selection:text-[#FBD784] relative overflow-x-hidden">
       
       {/* ── Fixed Minimalist Top Navigation Bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B131F]/80 backdrop-blur-md border-b border-white/5 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-20 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B131F]/90 backdrop-blur-md border-b border-white/5 transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-18 sm:h-20 flex items-center justify-between">
           
-          {/* Brand Logo on Top Left */}
-          <div className="flex items-center gap-6">
+          {/* Brand Logo & Navigation on Left */}
+          <div className="flex items-center gap-4 sm:gap-8">
             <a
               href="#top"
               onClick={scrollToHero}
               className="flex items-center gap-2.5 text-white tracking-wider text-xl sm:text-2xl font-bold cursor-pointer group"
             >
-              <Compass className="w-5 h-5 text-[#FBD784] transition-transform duration-500 group-hover:rotate-45" />
+              <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-[#FBD784] transition-transform duration-500 group-hover:rotate-45 flex-shrink-0" />
               <span>SamudraAI</span>
-              <span className="hidden md:inline-block ml-1.5 px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-normal text-[#FBD784]/80 bg-[#FBD784]/10 border border-[#FBD784]/20">
-                ISRO PS 26176
-              </span>
             </a>
 
             {/* Navigation links: Home and Features */}
-            <nav className="hidden sm:flex items-center gap-6 text-sm font-normal text-slate-300">
+            <nav className="flex items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-slate-300">
               <a
                 href="#top"
                 onClick={scrollToHero}
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors cursor-pointer"
               >
-                Home
+                {t('nav_home', 'Home')}
               </a>
               <a
                 href="#feature-01"
-                onClick={scrollToFeatures}
-                className="hover:text-white transition-colors"
+                onClick={(e) => scrollToSection(e, 'feature-01', '01')}
+                className="hover:text-white transition-colors cursor-pointer"
               >
-                Features
+                {t('nav_features', 'Features')}
               </a>
             </nav>
           </div>
 
           {/* Top Actions: Language Selector, Sign In, Get Started */}
-          <div className="flex items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Minimalist Language Switcher */}
-            <div className="relative flex items-center gap-1.5 text-xs text-slate-300 hover:text-white">
-              <Globe className="w-3.5 h-3.5 text-[#FBD784]" />
+            <div className="relative flex items-center gap-1 text-xs sm:text-sm text-slate-300 hover:text-white bg-white/5 px-2.5 py-1.5 rounded-full border border-white/10">
+              <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FBD784] flex-shrink-0" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-transparent text-slate-300 hover:text-white text-xs font-medium focus:outline-none cursor-pointer py-1 pr-4 appearance-none"
+                className="bg-transparent text-slate-200 hover:text-white text-xs sm:text-sm font-medium focus:outline-none cursor-pointer pr-3 appearance-none"
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code} className="bg-[#0B131F] text-white">
@@ -366,31 +386,31 @@ export const LocationSetupView: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="w-3 h-3 text-slate-400 absolute right-0 pointer-events-none" />
+              <ChevronDown className="w-3 h-3 text-slate-400 pointer-events-none" />
             </div>
 
             {user ? (
               <button
                 onClick={openAuthFlow}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-medium text-xs sm:text-sm tracking-wide transition-all cursor-pointer"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-medium text-xs sm:text-sm tracking-wide transition-all cursor-pointer"
               >
                 <User className="w-3.5 h-3.5 text-[#FBD784]" />
-                <span className="truncate max-w-[130px]">{user.name}</span>
+                <span className="truncate max-w-[100px] sm:max-w-[140px]">{user.name}</span>
                 <span className="text-[#FBD784]">→</span>
               </button>
             ) : (
               <>
                 <button
                   onClick={openAuthFlow}
-                  className="text-xs sm:text-sm font-normal text-slate-300 hover:text-white px-2 py-1 transition-colors cursor-pointer"
+                  className="hidden sm:inline-block text-sm font-medium text-slate-300 hover:text-white px-2 py-1 transition-colors cursor-pointer"
                 >
-                  Sign In
+                  {t('sign_in_nav', 'Sign In')}
                 </button>
                 <button
                   onClick={openAuthFlow}
-                  className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-transparent hover:bg-[#FBD784] border border-[#FBD784] text-[#FBD784] hover:text-[#0B131F] font-medium text-xs sm:text-sm tracking-wide transition-all duration-300 cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full bg-transparent hover:bg-[#FBD784] border border-[#FBD784] text-[#FBD784] hover:text-[#0B131F] font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 cursor-pointer"
                 >
-                  <span>Get Started</span>
+                  <span>{t('get_started_nav', 'Get Started')}</span>
                   <span className="text-xs">→</span>
                 </button>
               </>
@@ -400,75 +420,120 @@ export const LocationSetupView: React.FC = () => {
         </div>
       </header>
 
-      {/* ── Floating Side Social / Mesh Telemetry (Left Margin, like MNTN) ── */}
-      <div className="hidden xl:flex fixed left-8 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-4 text-xs font-medium text-slate-400">
-        <span className="[writing-mode:vertical-lr] tracking-[0.2em] uppercase text-[11px] text-slate-400 font-medium">
-          NavIC · INSAT-3DR
+      {/* ── Floating Side Social / Telemetry (Left Margin) ── */}
+      <div className="hidden 2xl:flex fixed left-8 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-4 text-xs font-medium text-slate-400 select-none pointer-events-none">
+        <span className="[writing-mode:vertical-lr] tracking-[0.25em] uppercase text-xs text-slate-400 font-semibold">
+          {t('sidebar_navic_status', 'NavIC · INSAT-3DR')}
         </span>
-        <div className="w-[1px] h-12 bg-white/20 my-1" />
+        <div className="w-[1px] h-14 bg-white/20 my-1" />
         <Radio className="w-4 h-4 text-[#FBD784]" />
       </div>
 
-      {/* ── Floating Right Section Progress Indicator (Start, 01, 02, 03, like MNTN) ── */}
-      <div className="hidden xl:flex fixed right-8 top-1/2 -translate-y-1/2 z-40 flex-col items-end gap-5 text-xs font-semibold text-slate-400">
-        <a
-          href="#top"
-          onClick={scrollToHero}
-          className={`flex items-center gap-3 transition-colors ${
-            activeSection === 'hero' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-          }`}
+      {/* ── User Requested: Floating Right Section Progress Indicator (Start, 01, 02, 03) ── */}
+      {/* Prominently scaled, clear click targets, and dynamically tracked on scroll */}
+      <aside
+        aria-label="Section Navigation"
+        className="hidden md:flex fixed right-4 lg:right-8 xl:right-12 top-1/2 -translate-y-1/2 z-40 flex-col items-end gap-7 sm:gap-9 select-none"
+      >
+        {/* Item: Start */}
+        <button
+          type="button"
+          onClick={(e) => scrollToSection(e, 'top', 'hero')}
+          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
         >
-          <span>Start</span>
-          <div className={`w-[2px] transition-all ${
-            activeSection === 'hero' ? 'h-6 bg-white' : 'h-3 bg-white/20'
-          }`} />
-        </a>
-        <a
-          href="#feature-01"
-          onClick={scrollToFeatures}
-          className={`flex items-center gap-3 transition-colors ${
-            activeSection === '01' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-          }`}
+          <span
+            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+              activeSection === 'hero'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                : 'text-slate-400 group-hover:text-slate-200'
+            }`}
+          >
+            Start
+          </span>
+          <div
+            className={`rounded-full transition-all duration-300 ${
+              activeSection === 'hero'
+                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
+                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+            }`}
+          />
+        </button>
+
+        {/* Item: 01 */}
+        <button
+          type="button"
+          onClick={(e) => scrollToSection(e, 'feature-01', '01')}
+          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
         >
-          <span>01</span>
-          <div className={`w-[2px] transition-all ${
-            activeSection === '01' ? 'h-6 bg-white' : 'h-3 bg-white/20'
-          }`} />
-        </a>
-        <a
-          href="#feature-02"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById('feature-02')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className={`flex items-center gap-3 transition-colors ${
-            activeSection === '02' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-          }`}
+          <span
+            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+              activeSection === '01'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                : 'text-slate-400 group-hover:text-slate-200'
+            }`}
+          >
+            01
+          </span>
+          <div
+            className={`rounded-full transition-all duration-300 ${
+              activeSection === '01'
+                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
+                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+            }`}
+          />
+        </button>
+
+        {/* Item: 02 */}
+        <button
+          type="button"
+          onClick={(e) => scrollToSection(e, 'feature-02', '02')}
+          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
         >
-          <span>02</span>
-          <div className={`w-[2px] transition-all ${
-            activeSection === '02' ? 'h-6 bg-white' : 'h-3 bg-white/20'
-          }`} />
-        </a>
-        <a
-          href="#feature-03"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById('feature-03')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className={`flex items-center gap-3 transition-colors ${
-            activeSection === '03' ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-          }`}
+          <span
+            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+              activeSection === '02'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                : 'text-slate-400 group-hover:text-slate-200'
+            }`}
+          >
+            02
+          </span>
+          <div
+            className={`rounded-full transition-all duration-300 ${
+              activeSection === '02'
+                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
+                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+            }`}
+          />
+        </button>
+
+        {/* Item: 03 */}
+        <button
+          type="button"
+          onClick={(e) => scrollToSection(e, 'feature-03', '03')}
+          className="group flex items-center gap-3 sm:gap-4 py-1.5 px-2 cursor-pointer transition-all duration-300"
         >
-          <span>03</span>
-          <div className={`w-[2px] transition-all ${
-            activeSection === '03' ? 'h-6 bg-white' : 'h-3 bg-white/20'
-          }`} />
-        </a>
-      </div>
+          <span
+            className={`text-sm sm:text-base tracking-wider font-bold transition-all duration-300 ${
+              activeSection === '03'
+                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]'
+                : 'text-slate-400 group-hover:text-slate-200'
+            }`}
+          >
+            03
+          </span>
+          <div
+            className={`rounded-full transition-all duration-300 ${
+              activeSection === '03'
+                ? 'w-[3px] sm:w-[4px] h-9 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)]'
+                : 'w-[2px] h-5 sm:h-6 bg-white/25 group-hover:bg-white/50'
+            }`}
+          />
+        </button>
+      </aside>
 
       {/* ── 1. Full-Bleed Atmospheric Ocean Hero Section ── */}
-      <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-24 pb-20 overflow-hidden">
+      <section className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-24 sm:pt-28 pb-16 overflow-hidden">
         
         {/* Ocean Background Image with Smooth Fading Gradient Overlay */}
         <div className="absolute inset-0 z-0">
@@ -486,10 +551,10 @@ export const LocationSetupView: React.FC = () => {
         {/* Hero Narrative Content */}
         <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
           
-          {/* MNTN-Style Kicker with Leading Horizontal Line */}
-          <div className="flex items-center gap-3 sm:gap-4 text-[#FBD784] text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase mb-6 sm:mb-8">
-            <span className="w-10 sm:w-16 h-[2px] bg-[#FBD784]" />
-            <span>A MARITIME INTELLIGENCE PLATFORM · ISRO PS 26176</span>
+          {/* Kicker with Leading Horizontal Line */}
+          <div className="flex items-center gap-3 sm:gap-4 text-[#FBD784] text-xs sm:text-sm md:text-base font-bold tracking-[0.25em] uppercase mb-6 sm:mb-8">
+            <span className="w-8 sm:w-16 h-[2px] bg-[#FBD784]" />
+            <span>{t('kicker_maritime_intelligence', 'A MARITIME INTELLIGENCE PLATFORM')}</span>
           </div>
 
           {/* User Requested: Original Sovereign Headline */}
@@ -503,27 +568,18 @@ export const LocationSetupView: React.FC = () => {
           </h1>
 
           {/* User Requested: Original Sovereign Subtitle */}
-          <p className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl font-light leading-relaxed">
+          <p className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-slate-200 max-w-2xl font-normal leading-relaxed">
             {t('hero_desc', 'Harnessing real-time satellite oceanography, physical wave dynamics, and biological potential fishing zones for safe and high-yield Indian Ocean voyages.')}
           </p>
 
-          {/* Action Button & Scroll Down Indicator */}
-          <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
+          {/* Action Button (Scroll Down Button Removed as Requested) */}
+          <div className="mt-8 sm:mt-10">
             <button
               onClick={openAuthFlow}
-              className="px-8 py-3.5 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-semibold text-sm sm:text-base tracking-wide transition-all shadow-xl hover:scale-102 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base sm:text-lg tracking-wide transition-all shadow-xl hover:scale-102 active:scale-98 cursor-pointer"
             >
-              {user ? 'Select Port & Enter Bridge →' : 'Begin Voyage Setup →'}
+              {user ? `${t('change_port', 'Select Port & Enter Bridge')} →` : `${t('begin_voyage_btn', 'Begin Voyage Setup')} →`}
             </button>
-
-            <a
-              href="#feature-01"
-              onClick={scrollToFeatures}
-              className="inline-flex items-center gap-2.5 text-white/90 hover:text-[#FBD784] text-sm sm:text-base font-medium tracking-wide transition-colors group cursor-pointer"
-            >
-              <span>scroll down</span>
-              <span className="transform group-hover:translate-y-1 transition-transform">↓</span>
-            </a>
           </div>
 
         </div>
@@ -531,43 +587,43 @@ export const LocationSetupView: React.FC = () => {
       </section>
 
       {/* ── 2. Feature Story Sections (Alternating 2-Column MNTN Editorial Style) ── */}
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-24 space-y-28 sm:space-y-40">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-24 space-y-24 sm:space-y-36">
         
         {/* ── FEATURE 01: SATELLITE OCEANOGRAPHY & SENSORS ── */}
-        <section id="feature-01" className="relative grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center scroll-mt-28">
+        <section id="feature-01" className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center scroll-mt-24">
           
           {/* Left Column: Narrative with Large Ghost Numeral */}
           <div className="lg:col-span-6 relative">
             {/* Giant Ghost Numeral 01 */}
-            <span className="text-[120px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.04] leading-none absolute -top-16 sm:-top-24 -left-4 sm:-left-8 select-none pointer-events-none">
+            <span className="text-[100px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-12 sm:-top-24 -left-2 sm:-left-8 select-none pointer-events-none">
               01
             </span>
 
-            <div className="relative z-10 space-y-5">
+            <div className="relative z-10 space-y-4 sm:space-y-5">
               {/* Kicker Tag */}
-              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase">
-                <span className="w-10 h-[2px] bg-[#FBD784]" />
-                <span>01 · SATELLITE OCEANOGRAPHY</span>
+              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
+                <span className="w-8 sm:w-10 h-[2px] bg-[#FBD784]" />
+                <span>{t('feat_01_tag', '01 · SATELLITE OCEANOGRAPHY')}</span>
               </div>
 
               {/* Headline */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-white leading-[1.18] tracking-tight">
-                What level of ocean navigator are you?
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium text-white leading-[1.18] tracking-tight">
+                {t('feat_01_title', 'What level of ocean navigator are you?')}
               </h2>
 
               {/* Narrative Text */}
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-light">
-                Determining your voyage parameters and operational sea-state thresholds is critical before casting off. SamudraAI continuously synchronizes live INSAT-3DR thermal radiometry, Sentinel-3 altimetry, and coastal radar streams to map high-resolution sea surface temperatures, chlorophyll-a plumes, and tidal drift currents across India's Exclusive Economic Zone.
+              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
+                {t('feat_01_desc', 'Determining your voyage parameters and operational sea-state thresholds is critical before casting off. SamudraAI continuously synchronizes live INSAT-3DR thermal radiometry, Sentinel-3 altimetry, and coastal radar streams to map high-resolution sea surface temperatures, chlorophyll-a plumes, and tidal drift currents across India\'s Exclusive Economic Zone.')}
               </p>
 
               {/* Action Link */}
               <div className="pt-2">
                 <button
                   onClick={openAuthFlow}
-                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-sm sm:text-base font-semibold group cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-base sm:text-lg font-bold group cursor-pointer transition-colors"
                 >
-                  <span>explore live telemetry</span>
-                  <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">→</span>
+                  <span>{t('feat_01_cta', 'explore live telemetry')}</span>
+                  <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
                 </button>
               </div>
             </div>
@@ -575,18 +631,18 @@ export const LocationSetupView: React.FC = () => {
 
           {/* Right Column: Ocean Satellite Photography Card */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group aspect-[4/3] bg-gradient-to-br from-[#121c2c] to-[#080d15]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group aspect-[16/10] sm:aspect-[4/3] bg-gradient-to-br from-[#121c2c] to-[#080d15]">
               <img
                 src="/marine_ocean_satellite.jpg"
                 alt="Satellite oceanography and thermal front detection"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 filter brightness-95"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/70 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-300">
-                <span className="bg-[#0B131F]/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-200">
+                <span className="bg-[#0B131F]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
                   INSAT-3DR · Sea State 2 (Smooth)
                 </span>
-                <span className="text-[#FBD784] font-medium">100% Offline-Cached</span>
+                <span className="text-[#FBD784] font-bold">100% Offline-Cached</span>
               </div>
             </div>
           </div>
@@ -594,22 +650,22 @@ export const LocationSetupView: React.FC = () => {
         </section>
 
         {/* ── FEATURE 02: POTENTIAL FISHING ZONES & FUEL SAVINGS (REVERSED) ── */}
-        <section id="feature-02" className="relative grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center scroll-mt-28">
+        <section id="feature-02" className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center scroll-mt-24">
           
           {/* Left Column: Marine Vessel / Ocean Fronts Photography Card */}
           <div className="lg:col-span-6 order-2 lg:order-1">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group aspect-[4/3] bg-gradient-to-br from-[#121c2c] to-[#080d15]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group aspect-[16/10] sm:aspect-[4/3] bg-gradient-to-br from-[#121c2c] to-[#080d15]">
               <img
                 src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=85"
                 alt="Open sea vessel and thermal chlorophyll fronts"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 filter brightness-95"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/70 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-300">
-                <span className="bg-[#0B131F]/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-200">
+                <span className="bg-[#0B131F]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
                   Thermal Upwelling · Chlorophyll-a
                 </span>
-                <span className="text-emerald-400 font-medium">+30% Fuel Efficiency</span>
+                <span className="text-emerald-400 font-bold">+30% Fuel Savings</span>
               </div>
             </div>
           </div>
@@ -617,35 +673,35 @@ export const LocationSetupView: React.FC = () => {
           {/* Right Column: Narrative with Large Ghost Numeral */}
           <div className="lg:col-span-6 order-1 lg:order-2 relative">
             {/* Giant Ghost Numeral 02 */}
-            <span className="text-[120px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.04] leading-none absolute -top-16 sm:-top-24 -left-4 sm:-left-8 select-none pointer-events-none">
+            <span className="text-[100px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-12 sm:-top-24 -left-2 sm:-left-8 select-none pointer-events-none">
               02
             </span>
 
-            <div className="relative z-10 space-y-5">
+            <div className="relative z-10 space-y-4 sm:space-y-5">
               {/* Kicker Tag */}
-              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase">
-                <span className="w-10 h-[2px] bg-[#FBD784]" />
-                <span>02 · BIOGEOCHEMICAL DETECTION</span>
+              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
+                <span className="w-8 sm:w-10 h-[2px] bg-[#FBD784]" />
+                <span>{t('feat_02_tag', '02 · BIOGEOCHEMICAL DETECTION')}</span>
               </div>
 
               {/* Headline */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-white leading-[1.18] tracking-tight">
-                Picking the right Fishing Grounds!
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium text-white leading-[1.18] tracking-tight">
+                {t('feat_02_title', 'Picking the right Fishing Grounds!')}
               </h2>
 
               {/* Narrative Text */}
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-light">
-                Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. SamudraAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.
+              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
+                {t('feat_02_desc', 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. SamudraAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.')}
               </p>
 
               {/* Action Link */}
               <div className="pt-2">
                 <button
                   onClick={openAuthFlow}
-                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-sm sm:text-base font-semibold group cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-base sm:text-lg font-bold group cursor-pointer transition-colors"
                 >
-                  <span>discover fishing spots</span>
-                  <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">→</span>
+                  <span>{t('feat_02_cta', 'discover fishing spots')}</span>
+                  <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
                 </button>
               </div>
             </div>
@@ -654,40 +710,40 @@ export const LocationSetupView: React.FC = () => {
         </section>
 
         {/* ── FEATURE 03: DETERMINISTIC PHYSICAL SAFETY & NAVIC MESH ── */}
-        <section id="feature-03" className="relative grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center scroll-mt-28">
+        <section id="feature-03" className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center scroll-mt-24">
           
           {/* Left Column: Narrative with Large Ghost Numeral */}
           <div className="lg:col-span-6 relative">
             {/* Giant Ghost Numeral 03 */}
-            <span className="text-[120px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.04] leading-none absolute -top-16 sm:-top-24 -left-4 sm:-left-8 select-none pointer-events-none">
+            <span className="text-[100px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-12 sm:-top-24 -left-2 sm:-left-8 select-none pointer-events-none">
               03
             </span>
 
-            <div className="relative z-10 space-y-5">
+            <div className="relative z-10 space-y-4 sm:space-y-5">
               {/* Kicker Tag */}
-              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase">
-                <span className="w-10 h-[2px] bg-[#FBD784]" />
-                <span>03 · 100% NON-HALLUCINATORY SAFETY</span>
+              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
+                <span className="w-8 sm:w-10 h-[2px] bg-[#FBD784]" />
+                <span>{t('feat_03_tag', '03 · 100% NON-HALLUCINATORY SAFETY')}</span>
               </div>
 
               {/* Headline */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-white leading-[1.18] tracking-tight">
-                Understanding NavIC Mesh & Sovereign Geofences
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium text-white leading-[1.18] tracking-tight">
+                {t('feat_03_title', 'Understanding NavIC Mesh & Sovereign Geofences')}
               </h2>
 
               {/* Narrative Text */}
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-light">
-                Maritime safety cannot tolerate generative hallucinations. Our deterministic kinematic engine mathematically models wave breaking limits, shallow shoals, and sovereign International Maritime Boundary Line (IMBL) buffer zones with 0% AI hallucination. Off-grid packets propagate automatically via resilient NavIC LoRa edge mesh devices.
+              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
+                {t('feat_03_desc', 'Maritime safety cannot tolerate generative hallucinations. Our deterministic kinematic engine mathematically models wave breaking limits, shallow shoals, and sovereign International Maritime Boundary Line (IMBL) buffer zones with 0% AI hallucination. Off-grid packets propagate automatically via resilient NavIC LoRa edge mesh devices.')}
               </p>
 
               {/* Action Link */}
               <div className="pt-2">
                 <button
                   onClick={openAuthFlow}
-                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-sm sm:text-base font-semibold group cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-base sm:text-lg font-bold group cursor-pointer transition-colors"
                 >
-                  <span>inspect safety engine</span>
-                  <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">→</span>
+                  <span>{t('feat_03_cta', 'inspect safety engine')}</span>
+                  <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
                 </button>
               </div>
             </div>
@@ -695,18 +751,18 @@ export const LocationSetupView: React.FC = () => {
 
           {/* Right Column: Coastal Headland / Lighthouse Photography Card */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group aspect-[4/3] bg-gradient-to-br from-[#121c2c] to-[#080d15]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group aspect-[16/10] sm:aspect-[4/3] bg-gradient-to-br from-[#121c2c] to-[#080d15]">
               <img
                 src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=85"
                 alt="Coastal beacon and deterministic safe navigational fairway"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 filter brightness-95"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/70 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-300">
-                <span className="bg-[#0B131F]/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-200">
+                <span className="bg-[#0B131F]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
                   NavIC Mesh · LoRa Sync
                 </span>
-                <span className="text-[#FBD784] font-medium">IMBL 48.2 km Buffer</span>
+                <span className="text-[#FBD784] font-bold">IMBL 48.2 km Buffer</span>
               </div>
             </div>
           </div>
@@ -714,25 +770,25 @@ export const LocationSetupView: React.FC = () => {
         </section>
 
         {/* ── 3. Bottom Minimalist Call to Action ── */}
-        <section className="pt-10 pb-8 text-center border-t border-white/10">
+        <section className="pt-8 pb-4 text-center border-t border-white/10">
           <div className="max-w-2xl mx-auto space-y-6">
-            <div className="flex items-center justify-center gap-3 text-[#FBD784] text-xs font-semibold tracking-[0.25em] uppercase">
+            <div className="flex items-center justify-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
               <span className="w-8 h-[1px] bg-[#FBD784]" />
-              <span>READY TO CAST OFF?</span>
+              <span>{t('cta_ready_tag', 'READY TO CAST OFF?')}</span>
               <span className="w-8 h-[1px] bg-[#FBD784]" />
             </div>
-            <h3 className="text-3xl sm:text-4xl font-normal text-white">
-              Launch Your Vessel Setup
+            <h3 className="text-2xl sm:text-4xl font-medium text-white">
+              {t('cta_launch_title', 'Launch Your Vessel Setup')}
             </h3>
-            <p className="text-slate-400 text-sm sm:text-base font-light">
-              Select your coastal harbor, inspect real-time satellite telemetry, and evaluate safe waypoint routes.
+            <p className="text-slate-300 text-base sm:text-lg font-normal">
+              {t('cta_launch_desc', 'Select your coastal harbor, inspect real-time satellite telemetry, and evaluate safe waypoint routes.')}
             </p>
             <div className="pt-2">
               <button
                 onClick={openAuthFlow}
-                className="px-8 py-3.5 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-semibold text-sm sm:text-base tracking-wide transition-all shadow-xl hover:scale-102 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base sm:text-lg tracking-wide transition-all shadow-xl hover:scale-102 cursor-pointer"
               >
-                {user ? 'Select Port & Enter Dashboard →' : 'Sign In & Select Port →'}
+                {t('cta_launch_btn', 'Sign In & Select Port')} →
               </button>
             </div>
           </div>
@@ -741,25 +797,25 @@ export const LocationSetupView: React.FC = () => {
       </main>
 
       {/* ── Minimalist Clean Footer ── */}
-      <footer className="relative z-10 border-t border-white/5 bg-[#080d15] py-12 px-4 sm:px-8 lg:px-12 text-xs text-slate-400">
+      <footer className="relative z-10 border-t border-white/5 bg-[#080d15] py-10 px-4 sm:px-8 lg:px-12 text-sm text-slate-400">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <Compass className="w-5 h-5 text-[#FBD784]" />
             <span className="text-white font-bold text-base tracking-tight">SamudraAI</span>
             <span className="text-slate-600">|</span>
-            <span className="text-slate-400">ISRO Problem Statement 26176 · SIH 2026</span>
+            <span className="text-slate-300">Autonomous Marine Intelligence Platform</span>
           </div>
 
-          <div className="flex items-center gap-6 text-slate-400">
-            <a href="#top" onClick={scrollToHero} className="hover:text-white transition-colors">Home</a>
-            <a href="#feature-01" onClick={scrollToFeatures} className="hover:text-white transition-colors">Features</a>
+          <div className="flex items-center gap-6 text-sm font-medium text-slate-300">
+            <a href="#top" onClick={scrollToHero} className="hover:text-white transition-colors">{t('nav_home', 'Home')}</a>
+            <a href="#feature-01" onClick={(e) => scrollToSection(e, 'feature-01', '01')} className="hover:text-white transition-colors">{t('nav_features', 'Features')}</a>
             <button onClick={openAuthFlow} className="hover:text-white transition-colors cursor-pointer">
-              {user ? 'Dashboard' : 'Sign In'}
+              {user ? t('nav_dashboard', 'Dashboard') : t('sign_in_nav', 'Sign In')}
             </button>
           </div>
 
-          <div className="text-slate-500 font-mono text-[11px]">
-            Data Sources: MOSDAC · INCOIS · IMD Coastal AWS · Bhuvan
+          <div className="text-slate-400 font-mono text-xs">
+            Data Feeds: MOSDAC · INCOIS · Coastal AWS · Bhuvan
           </div>
         </div>
       </footer>
@@ -768,7 +824,7 @@ export const LocationSetupView: React.FC = () => {
       {/* ONBOARDING & SIGN-IN MODAL (2-STEP MINIMALIST FLOW)         */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {isOnboardingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           {/* Minimalist Backdrop */}
           <div
             className="fixed inset-0 bg-[#060a12]/85 backdrop-blur-md transition-opacity"
@@ -776,29 +832,29 @@ export const LocationSetupView: React.FC = () => {
           />
 
           {/* Modal Container */}
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0E1726] border border-white/15 rounded-3xl shadow-2xl p-6 sm:p-8 z-10 text-left font-['Work_Sans',sans-serif]">
+          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#0E1726] border border-white/15 rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-8 z-10 text-left font-['Work_Sans',sans-serif]">
             
             {/* Modal Close Button */}
             <button
               onClick={() => setIsOnboardingModalOpen(false)}
-              className="absolute top-6 right-6 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Step Indicators */}
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
                 onboardingStep === 'signin' ? 'bg-[#FBD784] text-[#0B131F]' : 'bg-emerald-500/20 text-emerald-300'
               }`}>
-                <span>Step 1: Captain Sign In</span>
+                <span>{t('step_1_captain_signin', 'Step 1: Captain Sign In')}</span>
                 {user && <Check className="w-3.5 h-3.5" />}
               </div>
               <ChevronRight className="w-4 h-4 text-slate-500" />
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
                 onboardingStep === 'port' ? 'bg-[#FBD784] text-[#0B131F]' : 'bg-slate-800 text-slate-400'
               }`}>
-                <span>Step 2: Select Port</span>
+                <span>{t('step_2_select_port', 'Step 2: Select Port')}</span>
               </div>
             </div>
 
@@ -806,16 +862,16 @@ export const LocationSetupView: React.FC = () => {
             {onboardingStep === 'signin' && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-2xl font-normal text-white tracking-tight">
-                    Captain Authentication & Vessel Registration
+                  <h3 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
+                    {t('mobile_sign_in_card_title', 'Captain Authentication & Vessel Registration')}
                   </h3>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Enter your mobile number to sign in or select one of the demo coastal captains below.
+                  <p className="text-sm sm:text-base text-slate-300 mt-1">
+                    {t('mobile_sign_in_card_desc', 'Enter your mobile number to sign in or select one of the demo coastal captains below.')}
                   </p>
                 </div>
 
                 {authError && (
-                  <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs sm:text-sm flex items-center gap-2">
+                  <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-sm flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
                     <span>{authError}</span>
                   </div>
@@ -825,11 +881,11 @@ export const LocationSetupView: React.FC = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-medium text-slate-300 mb-1.5 uppercase tracking-wider">
-                        Captain Mobile Number
+                      <label className="block text-xs sm:text-sm font-semibold text-slate-200 mb-1.5 uppercase tracking-wider">
+                        {t('phone_number_label', 'Captain Mobile Number (+91)')}
                       </label>
                       <div className="relative flex items-center">
-                        <span className="absolute left-3.5 text-sm font-mono text-[#FBD784] border-r border-white/10 pr-2.5 font-bold">
+                        <span className="absolute left-3.5 text-base font-mono text-[#FBD784] border-r border-white/10 pr-2.5 font-bold">
                           +91
                         </span>
                         <input
@@ -837,81 +893,81 @@ export const LocationSetupView: React.FC = () => {
                           value={phoneInput}
                           onChange={(e) => setPhoneInput(e.target.value)}
                           placeholder="98470 12345"
-                          className="w-full pl-16 pr-4 py-2.5 bg-[#0B131F] border border-white/10 rounded-xl text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#FBD784]"
+                          className="w-full pl-16 pr-4 py-3 bg-[#0B131F] border border-white/10 rounded-xl text-base font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#FBD784]"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1.5 uppercase tracking-wider">
-                        OTP Code
+                      <label className="block text-xs sm:text-sm font-semibold text-slate-200 mb-1.5 uppercase tracking-wider">
+                        {t('otp_code_label', 'OTP Code')}
                       </label>
                       <input
                         type="text"
                         value={otpInput}
                         onChange={(e) => setOtpInput(e.target.value)}
                         placeholder="1234"
-                        className="w-full px-3 py-2.5 bg-[#0B131F] border border-white/10 rounded-xl text-sm font-mono text-center tracking-widest text-[#FBD784] font-bold focus:outline-none focus:border-[#FBD784]"
+                        className="w-full px-3 py-3 bg-[#0B131F] border border-white/10 rounded-xl text-base font-mono text-center tracking-widest text-[#FBD784] font-bold focus:outline-none focus:border-[#FBD784]"
                       />
                     </div>
                   </div>
 
                   {/* 1-Click Quick Demo Captain Profiles */}
                   <div>
-                    <span className="text-xs uppercase text-slate-400 tracking-wider font-semibold block mb-2">
-                      Quick Demo Captain Profiles (1-Click Selection)
+                    <span className="text-xs sm:text-sm uppercase text-slate-300 tracking-wider font-semibold block mb-2">
+                      {t('quick_captains_label', 'Quick Demo Captain Profiles (1-Click Selection)')}
                     </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <button
                         type="button"
                         onClick={() => selectQuickSkipper('9847012345', "Capt. Xavier D'Souza", 'Matsya Sagar I', 'kochi')}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                           captainNameInput.includes('Xavier')
                             ? 'bg-[#152238] border-[#FBD784] text-white'
                             : 'bg-[#0B131F] border-white/10 text-slate-300 hover:border-white/30'
                         }`}
                       >
-                        <div className="font-semibold text-sm text-white">Capt. Xavier D'Souza</div>
-                        <div className="text-xs text-slate-400 mt-0.5">Fort Kochi · Matsya Sagar I (Trawler)</div>
+                        <div className="font-bold text-sm sm:text-base text-white">Capt. Xavier D'Souza</div>
+                        <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Fort Kochi · Matsya Sagar I (Trawler)</div>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => selectQuickSkipper('9444012345', 'Capt. K. Murugan', 'Meenavan 3', 'chennai')}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                           captainNameInput.includes('Murugan')
                             ? 'bg-[#152238] border-[#FBD784] text-white'
                             : 'bg-[#0B131F] border-white/10 text-slate-300 hover:border-white/30'
                         }`}
                       >
-                        <div className="font-semibold text-sm text-white">Capt. K. Murugan</div>
-                        <div className="text-xs text-slate-400 mt-0.5">Royapuram, Chennai · Meenavan 3</div>
+                        <div className="font-bold text-sm sm:text-base text-white">Capt. K. Murugan</div>
+                        <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Royapuram, Chennai · Meenavan 3</div>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => selectQuickSkipper('9820012345', 'Capt. Ramesh Patil', 'Sagar Ratna', 'mumbai')}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                           captainNameInput.includes('Ramesh')
                             ? 'bg-[#152238] border-[#FBD784] text-white'
                             : 'bg-[#0B131F] border-white/10 text-slate-300 hover:border-white/30'
                         }`}
                       >
-                        <div className="font-semibold text-sm text-white">Capt. Ramesh Patil</div>
-                        <div className="text-xs text-slate-400 mt-0.5">Sassoon Dock, Mumbai · Sagar Ratna</div>
+                        <div className="font-bold text-sm sm:text-base text-white">Capt. Ramesh Patil</div>
+                        <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Sassoon Dock, Mumbai · Sagar Ratna</div>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => selectQuickSkipper('9437012345', 'Capt. Somnath Jena', 'Kalinga Sea', 'paradip')}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                           captainNameInput.includes('Somnath')
                             ? 'bg-[#152238] border-[#FBD784] text-white'
                             : 'bg-[#0B131F] border-white/10 text-slate-300 hover:border-white/30'
                         }`}
                       >
-                        <div className="font-semibold text-sm text-white">Capt. Somnath Jena</div>
-                        <div className="text-xs text-slate-400 mt-0.5">Paradip Harbor · Kalinga Sea</div>
+                        <div className="font-bold text-sm sm:text-base text-white">Capt. Somnath Jena</div>
+                        <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Paradip Harbor · Kalinga Sea</div>
                       </button>
                     </div>
                   </div>
@@ -922,7 +978,7 @@ export const LocationSetupView: React.FC = () => {
                   <button
                     onClick={handleCaptainSignIn}
                     disabled={isAuthenticating}
-                    className="w-full py-3.5 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-semibold text-sm sm:text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-4 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isAuthenticating ? (
                       <>
@@ -931,7 +987,7 @@ export const LocationSetupView: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <span>Authenticate & Proceed to Port Selection</span>
+                        <span>{t('enter_app_button', 'Authenticate & Proceed to Port Selection')}</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
@@ -945,18 +1001,18 @@ export const LocationSetupView: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-normal text-white tracking-tight">
-                      Select Departure Port / Coastal Harbor
+                    <h3 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
+                      {t('port_selection_heading', 'Select Departure Port / Coastal Harbor')}
                     </h3>
                     <button
                       onClick={() => setOnboardingStep('signin')}
-                      className="text-xs text-[#FBD784] hover:underline"
+                      className="text-xs sm:text-sm text-[#FBD784] hover:underline cursor-pointer"
                     >
-                      ← Switch Captain
+                      ← {t('switch_captain', 'Switch Captain')}
                     </button>
                   </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Calibrates local bathymetric depth, tidal curves, and coastal radar stations.
+                  <p className="text-sm sm:text-base text-slate-300 mt-1">
+                    {t('port_selection_sub', 'Calibrate departure harbor or acquire live GPS coordinates.')}
                   </p>
                 </div>
 
@@ -964,27 +1020,27 @@ export const LocationSetupView: React.FC = () => {
                 <div className="flex items-center gap-2 p-1 rounded-xl bg-[#0B131F] border border-white/10 max-w-md">
                   <button
                     onClick={() => setPortTab('harbors')}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                       portTab === 'harbors' ? 'bg-[#FBD784] text-[#0B131F]' : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    Major Harbors
+                    {t('select_harbor', 'Major Harbors')}
                   </button>
                   <button
                     onClick={() => setPortTab('gps')}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                       portTab === 'gps' ? 'bg-[#FBD784] text-[#0B131F]' : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    Detect Live GPS
+                    {t('use_gps', 'Detect Live GPS')}
                   </button>
                   <button
                     onClick={() => setPortTab('manual')}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                       portTab === 'manual' ? 'bg-[#FBD784] text-[#0B131F]' : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    Manual Coords
+                    {t('custom_coords', 'Manual Coords')}
                   </button>
                 </div>
 
@@ -998,13 +1054,17 @@ export const LocationSetupView: React.FC = () => {
                         placeholder="Search harbor name, state, or sea basin..."
                         value={harborSearch}
                         onChange={(e) => setHarborSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-[#0B131F] border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FBD784]"
+                        className="w-full pl-10 pr-4 py-3 bg-[#0B131F] border border-white/10 rounded-xl text-base text-white placeholder-slate-500 focus:outline-none focus:border-[#FBD784]"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
                       {filteredHarbors.map((h) => {
                         const isSelected = selectedHarbor.id === h.id;
+                        const localizedPort = getLocalizedPortName(h.id, language);
+                        const localizedState = getLocalizedState(h.state, language);
+                        const localizedSea = getLocalizedSea(h.sea, language);
+
                         return (
                           <div
                             key={h.id}
@@ -1016,17 +1076,17 @@ export const LocationSetupView: React.FC = () => {
                             }`}
                           >
                             <div className="flex items-center justify-between gap-1">
-                              <span className="font-semibold text-sm text-white">{h.name}</span>
-                              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/40 text-[#FBD784]">
-                                {h.state}
+                              <span className="font-bold text-sm sm:text-base text-white">{localizedPort}</span>
+                              <span className="text-xs font-mono px-2 py-0.5 rounded bg-black/40 text-[#FBD784]">
+                                {localizedState}
                               </span>
                             </div>
-                            <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-                              <MapPin className="w-3 h-3 text-[#FBD784]" />
-                              <span>{h.sea} · {h.latitude.toFixed(2)}°N, {h.longitude.toFixed(2)}°E</span>
+                            <div className="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-[#FBD784]" />
+                              <span>{localizedSea} · {h.latitude.toFixed(2)}°N, {h.longitude.toFixed(2)}°E</span>
                             </div>
-                            <div className="text-[11px] text-slate-500 mt-2 truncate">
-                              Species: {h.species.join(', ')}
+                            <div className="text-xs text-slate-400 mt-2 truncate">
+                              Species: {getLocalizedSpecies(h.species, language).join(', ')}
                             </div>
                           </div>
                         );
@@ -1035,10 +1095,10 @@ export const LocationSetupView: React.FC = () => {
 
                     <button
                       onClick={() => handleConfirmPort(selectedHarbor)}
-                      className="w-full py-3.5 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-semibold text-sm sm:text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+                      className="w-full py-4 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
                     >
                       <Anchor className="w-5 h-5" />
-                      <span>Confirm {selectedHarbor.name} & Enter Platform Bridge</span>
+                      <span>{t('launch_navigation_button', 'Confirm Port & Launch Navigation')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -1049,7 +1109,7 @@ export const LocationSetupView: React.FC = () => {
                   <div className="p-6 rounded-2xl bg-[#0B131F] border border-white/10 text-center space-y-4">
                     <Crosshair className="w-10 h-10 text-[#FBD784] mx-auto animate-pulse" />
                     <h4 className="text-lg font-semibold text-white">Acquire Satellite GPS Fix</h4>
-                    <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+                    <p className="text-sm text-slate-300 max-w-md mx-auto">
                       Query your device's GPS hardware for live coastal latitude and longitude coordinates.
                     </p>
 
@@ -1075,7 +1135,7 @@ export const LocationSetupView: React.FC = () => {
                     <div className="flex items-center justify-center gap-3 pt-2">
                       <button
                         onClick={handleDetectGPS}
-                        className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium text-xs sm:text-sm cursor-pointer"
+                        className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium text-sm cursor-pointer"
                       >
                         Detect Location
                       </button>
@@ -1083,7 +1143,7 @@ export const LocationSetupView: React.FC = () => {
                       {gpsCoords && (
                         <button
                           onClick={handleConfirmGPS}
-                          className="px-5 py-2.5 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
+                          className="px-5 py-2.5 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-sm cursor-pointer shadow-md"
                         >
                           Use GPS Location & Enter Bridge →
                         </button>
@@ -1096,7 +1156,7 @@ export const LocationSetupView: React.FC = () => {
                 {portTab === 'manual' && (
                   <div className="p-6 rounded-2xl bg-[#0B131F] border border-white/10 space-y-4">
                     <h4 className="text-lg font-semibold text-white">Enter Custom Coordinates</h4>
-                    <p className="text-xs sm:text-sm text-slate-400">
+                    <p className="text-sm text-slate-300">
                       Specify exact decimal coordinates within the Indian Exclusive Economic Zone.
                     </p>
 
@@ -1108,7 +1168,7 @@ export const LocationSetupView: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-3 font-mono">
                       <div>
-                        <label className="text-xs text-slate-400 block mb-1">Latitude (°N)</label>
+                        <label className="text-xs text-slate-300 block mb-1">Latitude (°N)</label>
                         <input
                           type="text"
                           value={manualLat}
@@ -1117,7 +1177,7 @@ export const LocationSetupView: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-slate-400 block mb-1">Longitude (°E)</label>
+                        <label className="text-xs text-slate-300 block mb-1">Longitude (°E)</label>
                         <input
                           type="text"
                           value={manualLon}
@@ -1129,7 +1189,7 @@ export const LocationSetupView: React.FC = () => {
 
                     <button
                       onClick={handleConfirmManual}
-                      className="w-full py-3 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-semibold text-sm cursor-pointer shadow-md"
+                      className="w-full py-3.5 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base cursor-pointer shadow-md"
                     >
                       Confirm Coordinates & Enter Bridge →
                     </button>

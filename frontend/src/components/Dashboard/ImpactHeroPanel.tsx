@@ -91,10 +91,7 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase">
-              NATIONAL MARITIME IMPACT · SIH 2026
-            </span>
-            <span className="text-xs text-slate-300 font-mono hidden sm:inline">
-              ISRO Problem Statement 26176
+              NATIONAL MARITIME INTELLIGENCE
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2">
