@@ -396,76 +396,65 @@ export const AIAssistantView: React.FC = () => {
         )}
       </div>
 
-      {/* ── Bhashini Audio UX Panel ── */}
-      <div className="relative z-15 px-4 py-2 bg-gradient-to-r from-[#21160e] via-[#1a1f2c] to-[#12161f] border-b border-amber-500/25 flex-shrink-0">
-        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+      {/* ── Bhashini Audio UX Panel (Streamlined Single Row) ── */}
+      <div className="relative z-15 px-3 sm:px-4 py-1.5 bg-gradient-to-r from-[#1c1813] via-[#161a24] to-[#12161f] border-b border-amber-500/20 flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2.5">
           
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            
-            {/* Left: Saffron Bhashini Badge & Voice Input Action */}
-            <div className="flex items-center flex-wrap gap-2.5">
-              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-amber-600 text-white font-bold text-[11px] font-mono shadow-sm">
-                <span>🇮🇳</span>
-                <span>Bhashini</span>
-              </div>
-
-              {/* Hands-Free Vernacular Input Mic Button */}
-              <button
-                onClick={toggleVoice}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                  isListening
-                    ? 'bg-rose-600 text-white border-rose-400 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.5)]'
-                    : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/40 shadow-sm'
-                }`}
-                title="Tap to speak hands-free in your native maritime dialect"
-              >
-                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-amber-400" />}
-                <span>{isListening ? 'Listening (Speak now)...' : 'Hands-Free Vernacular Input'}</span>
-              </button>
-
-              {/* Active TTS Badge */}
-              <button
-                onClick={() => setTtsEnabled(!ttsEnabled)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-mono cursor-pointer border transition-colors ${
-                  ttsEnabled
-                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                    : 'bg-white/5 text-slate-400 border-white/10'
-                }`}
-                title="Toggle Natural Vernacular Voice Synthesis"
-              >
-                {ttsEnabled ? <Volume2 className="w-3 h-3 text-emerald-400" /> : <VolumeX className="w-3 h-3" />}
-                <span>{ttsEnabled ? 'TTS Active: Natural Indian Accent' : 'TTS Muted'}</span>
-              </button>
+          {/* Left: Saffron Bhashini Badge & Voice Input Action */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-amber-600 text-white font-bold text-[10px] font-mono shadow-sm cursor-help"
+              title="Digital India Bhashini (National Language Translation Mission, MeitY) • Local Vernacular Offshore Acoustic Engine"
+            >
+              <span>🇮🇳</span>
+              <span>Bhashini</span>
             </div>
 
-            {/* Language Chips (Tamil, Telugu, Malayalam, Gujarati, Bengali, Marathi) */}
-            <div className="flex items-center gap-1 overflow-x-auto py-0.5 text-[11px]">
-              {BHASHINI_LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => setLanguage(lang.code)}
-                  className={`px-2 py-0.5 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
-                    language === lang.code
-                      ? 'bg-amber-500 text-[#12161f] font-bold shadow-sm'
-                      : 'bg-white/5 hover:bg-white/10 text-slate-300'
-                  }`}
-                  title={`Switch to ${lang.name}`}
-                >
-                  <span>{lang.native}</span>
-                </button>
-              ))}
-            </div>
+            {/* Hands-Free Vernacular Input Mic Button */}
+            <button
+              onClick={toggleVoice}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                isListening
+                  ? 'bg-rose-600 text-white border-rose-400 animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.5)]'
+                  : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/40 shadow-sm'
+              }`}
+              title="Tap to speak hands-free in your native maritime dialect"
+            >
+              {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-amber-400" />}
+              <span>{isListening ? 'Listening...' : 'Voice Input'}</span>
+            </button>
 
+            {/* Active TTS Badge */}
+            <button
+              onClick={() => setTtsEnabled(!ttsEnabled)}
+              className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-mono cursor-pointer border transition-colors ${
+                ttsEnabled
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                  : 'bg-white/5 text-slate-400 border-white/10'
+              }`}
+              title="Toggle Natural Vernacular Voice Synthesis"
+            >
+              {ttsEnabled ? <Volume2 className="w-3 h-3 text-emerald-400" /> : <VolumeX className="w-3 h-3" />}
+              <span className="hidden sm:inline">{ttsEnabled ? 'TTS On' : 'TTS Off'}</span>
+            </button>
           </div>
 
-          {/* Official GoI Bhashini Mission Disclaimer */}
-          <div className="text-[10px] text-amber-200/70 font-mono flex items-center justify-between border-t border-amber-500/15 pt-1">
-            <span>
-              Bhashini (National Language Translation Mission, MeitY, Govt of India) · Voice recognition running local offshore fallback models
-            </span>
-            <span className="hidden md:inline text-slate-500">
-              Zero cloud telemetry required for acoustic features
-            </span>
+          {/* Right: Language Chips (Single Row Horizontal Scroll) */}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 text-[11px]">
+            {BHASHINI_LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => setLanguage(lang.code)}
+                className={`px-2 py-0.5 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
+                  language === lang.code
+                    ? 'bg-amber-500 text-[#12161f] font-bold shadow-sm'
+                    : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                }`}
+                title={`Switch to ${lang.name}`}
+              >
+                <span>{lang.native}</span>
+              </button>
+            ))}
           </div>
 
         </div>

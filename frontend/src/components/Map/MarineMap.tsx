@@ -6,7 +6,7 @@ import { Search, Plus, Minus, Crosshair, Navigation, X, Volume2, Compass, Shield
 import { PFZZone } from '../../types/marine';
 import { RoutePlannerPanel } from '../Navigation/RoutePlannerPanel';
 import { getTranslation } from '../../utils/translations';
-import { getLocalizedPortName } from '../../utils/locationTranslations';
+import { getLocalizedPortName, localizeDestination } from '../../utils/locationTranslations';
 
 export const MarineMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -372,29 +372,39 @@ export const MarineMap: React.FC = () => {
       markerEl.onclick = () => {
         if (activePopupRef.current) activePopupRef.current.remove();
 
+        // Smoothly center the map view with an offset so the popup is completely visible without manual scrolling
+        map.easeTo({
+          center: [pfz.location.longitude, pfz.location.latitude],
+          offset: [0, 80],
+          duration: 450
+        });
+
         const suitabilityScore = Math.round(Number(pfz.suitability_score || 85));
+        const localizedSpotName = localizeDestination(pfz.name, language);
+        const safetyRatingText = `${pfz.safety_rating} ${getTranslation('zone_suffix', language)}`;
+
         const popupDiv = document.createElement('div');
-        popupDiv.className = 'p-5 text-white font-sans w-[320px] sm:w-[350px] bg-[#161c27] rounded-3xl border border-[#384959] shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative select-none';
+        popupDiv.className = 'p-5 text-white font-sans w-[320px] sm:w-[350px] max-h-[75vh] overflow-y-auto custom-scrollbar bg-[#161c27] rounded-3xl border border-[#384959] shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative select-none';
         popupDiv.innerHTML = `
           <!-- Header with 36px clearance for close button to prevent overlap -->
           <div class="mb-3 pr-9">
             <div class="flex items-center gap-2 mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#384959] text-white border border-[#88BDF2]/40 flex items-center gap-1.5 shadow-sm">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#88BDF2]"></span>
-                <span>● ${pfz.safety_rating} ZONE</span>
+                <span>● ${safetyRatingText}</span>
               </span>
-              <span class="text-[11px] text-[#BDDDFC]/80 font-mono font-medium">High-Yield Zone</span>
+              <span class="text-[11px] text-[#BDDDFC]/80 font-mono font-medium">${getTranslation('high_yield_zone', language)}</span>
             </div>
-            <span class="font-extrabold text-sm sm:text-base text-white tracking-tight block leading-snug">${pfz.name}</span>
-            <span class="text-xs text-[#BDDDFC]/70 font-medium leading-tight block mt-0.5">ISRO / Oceansat-3 Marine Observation</span>
+            <span class="font-extrabold text-sm sm:text-base text-white tracking-tight block leading-snug">${localizedSpotName}</span>
+            <span class="text-xs text-[#BDDDFC]/70 font-medium leading-tight block mt-0.5">${getTranslation('isro_marine_observation', language)}</span>
           </div>
 
           <!-- Catch Potential -->
           <div class="mb-3.5 pt-2.5 border-t border-[#384959]/60">
             <div class="flex items-baseline justify-between mb-1.5">
               <div>
-                <span class="font-bold text-xs text-white block leading-tight">Catch Potential</span>
-                <span class="text-[10px] text-[#BDDDFC]/70 leading-tight">Random Forest ML Model (R² = 0.871)</span>
+                <span class="font-bold text-xs text-white block leading-tight">${getTranslation('catch_potential', language)}</span>
+                <span class="text-[10px] text-[#BDDDFC]/70 leading-tight">${getTranslation('rf_ml_model', language)}</span>
               </div>
               <span class="text-3xl font-extrabold text-[#88BDF2] font-mono leading-none tracking-tight">
                 ${suitabilityScore}%
@@ -404,8 +414,8 @@ export const MarineMap: React.FC = () => {
               <div class="h-full bg-gradient-to-r from-[#6A89A7] via-[#88BDF2] to-[#BDDDFC] rounded-full transition-all duration-500" style="width: ${suitabilityScore}%"></div>
             </div>
             <div class="flex items-center justify-between text-xs font-medium text-[#BDDDFC]">
-              <span><strong class="text-white font-bold">${suitabilityScore}%</strong> predicted catch</span>
-              <span><strong class="text-white font-bold">${pfz.model_confidence_pct ?? 92}%</strong> confidence</span>
+              <span><strong class="text-white font-bold">${suitabilityScore}%</strong> ${getTranslation('predicted_catch', language)}</span>
+              <span><strong class="text-white font-bold">${pfz.model_confidence_pct ?? 92}%</strong> ${getTranslation('confidence', language)}</span>
             </div>
           </div>
 
@@ -415,19 +425,19 @@ export const MarineMap: React.FC = () => {
               <div>
                 <div class="flex items-center gap-1.5 text-xs font-bold text-[#BDDDFC] mb-1.5">
                   <span>🌡️</span>
-                  <span>SST Thermal</span>
+                  <span>${getTranslation('sst_thermal', language)}</span>
                 </div>
                 <div class="w-full h-1.5 bg-[#1a222f] rounded-full overflow-hidden mb-2">
                   <div class="h-full bg-[#88BDF2] rounded-full" style="width: 78%"></div>
                 </div>
                 <div class="flex items-baseline justify-between">
                   <span class="text-base font-bold text-white font-mono">${pfz.sst_c}°C</span>
-                  <span class="text-xs font-bold text-[#88BDF2]">Optimal</span>
+                  <span class="text-xs font-bold text-[#88BDF2]">${getTranslation('optimal', language)}</span>
                 </div>
               </div>
               <div class="flex items-end justify-between mt-2 pt-1.5 border-t border-[#384959]/50">
                 <div>
-                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">Front</span>
+                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">${getTranslation('front', language)}</span>
                   <span class="text-xs sm:text-sm font-bold text-white">ΔT 0.45°C</span>
                 </div>
                 <span class="text-[#88BDF2] text-xs font-bold">ılıll</span>
@@ -438,7 +448,7 @@ export const MarineMap: React.FC = () => {
               <div>
                 <div class="flex items-center gap-1.5 text-xs font-bold text-[#BDDDFC] mb-1.5">
                   <span>🌿</span>
-                  <span>Chlorophyll</span>
+                  <span>${getTranslation('chlorophyll', language)}</span>
                 </div>
                 <div class="w-full h-1.5 bg-[#1a222f] rounded-full overflow-hidden mb-2">
                   <div class="h-full bg-[#88BDF2] rounded-full" style="width: 84%"></div>
@@ -450,8 +460,8 @@ export const MarineMap: React.FC = () => {
               </div>
               <div class="flex items-end justify-between mt-2 pt-1.5 border-t border-[#384959]/50">
                 <div>
-                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">Plume</span>
-                  <span class="text-xs sm:text-sm font-bold text-white">Upwelling</span>
+                  <span class="text-xs text-[#BDDDFC]/70 uppercase block font-semibold">${getTranslation('plume', language)}</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">${getTranslation('upwelling', language)}</span>
                 </div>
                 <span class="text-[#88BDF2] text-xs font-bold">ılıll</span>
               </div>
@@ -461,11 +471,11 @@ export const MarineMap: React.FC = () => {
           <!-- Coordinates and Telemetry Bar -->
           <div class="p-3 rounded-2xl bg-[#12161f] border border-[#384959] text-xs font-mono text-[#BDDDFC] mb-3.5 flex items-center justify-between">
             <div>
-              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">Target Fix</span>
+              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">${getTranslation('target_fix', language)}</span>
               <span class="font-bold text-white text-xs sm:text-sm">${pfz.location.latitude.toFixed(4)}°N, ${pfz.location.longitude.toFixed(4)}°E</span>
             </div>
             <div class="text-right">
-              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">Distance & Heading</span>
+              <span class="text-[#BDDDFC]/70 block text-xs uppercase font-semibold">${getTranslation('distance_heading', language)}</span>
               <span class="font-bold text-[#88BDF2] text-xs sm:text-sm">${pfz.distance_km} km · ${pfz.bearing_compass} (${pfz.bearing_deg}°)</span>
             </div>
           </div>
@@ -486,11 +496,16 @@ export const MarineMap: React.FC = () => {
           className: 'premium-maplibre-popup',
           closeButton: true,
           closeOnClick: false,
-          offset: [0, -14]
+          offset: [0, -14],
+          anchor: 'bottom'
         })
           .setLngLat([pfz.location.longitude, pfz.location.latitude])
           .setDOMContent(popupDiv)
           .addTo(map);
+
+        popup.on('close', () => {
+          activePopupRef.current = null;
+        });
 
         activePopupRef.current = popup;
       };
@@ -509,7 +524,7 @@ export const MarineMap: React.FC = () => {
       filtered.forEach((p) => bounds.extend([p.location.longitude, p.location.latitude]));
       map.fitBounds(bounds, { padding: 90, maxZoom: 12, duration: 1000 });
     }
-  }, [pfzs, activeMapLayers, searchQuery, activeLocation.latitude, activeLocation.longitude, routeComparison]);
+  }, [pfzs, activeMapLayers, searchQuery, activeLocation.latitude, activeLocation.longitude, routeComparison, language]);
 
   // 6. Update Geofences (IMBL, MPAs, Restricted Zones)
   useEffect(() => {

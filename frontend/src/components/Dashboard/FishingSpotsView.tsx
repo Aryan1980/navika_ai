@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PFZZone } from '../../types/marine';
 import { getTranslation } from '../../utils/translations';
+import { getLocalizedPortName, localizeDestination, getLocalizedRecommendation } from '../../utils/locationTranslations';
 
 interface FishingSpotsViewProps {
   onViewOnMap: () => void;
@@ -68,7 +69,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                 {getTranslation('spots_header_title', language)}
               </h1>
               <p className="text-xs sm:text-sm text-[#BDDDFC] font-mono mt-1 flex items-center gap-2">
-                <span>{getTranslation('departure_fix_label', language)}: <strong className="text-white font-semibold">{activeLocationName}</strong></span>
+                <span>{getTranslation('departure_fix_label', language)}: <strong className="text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</strong></span>
                 <span className="text-[#88BDF2]">·</span>
                 <span className="text-[#88BDF2] font-semibold">
                   {pfzs.length} {getTranslation('fronts_detected', language)}
@@ -124,14 +125,14 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                         {idx + 1}
                       </span>
                       <span className="font-sans text-sm font-semibold text-white truncate">
-                        {getTranslation('spot_prefix', language)} {idx + 1}: {pfz.name.replace(`Spot ${idx + 1}: `, '')}
+                        {localizeDestination(pfz.name, language)}
                       </span>
                     </div>
 
                     {/* Smooth, high-contrast badge */}
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#384959] text-white border border-[#88BDF2]/40 flex-shrink-0 flex items-center gap-1.5 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#88BDF2]" />
-                      <span>{pfz.safety_rating}</span>
+                      <span>{getTranslation(pfz.safety_rating.toLowerCase(), language) || pfz.safety_rating}</span>
                     </span>
                   </div>
 
@@ -145,17 +146,17 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                     <div>
                       <span className="text-[#BDDDFC]/75 block text-[10px] uppercase font-semibold">{getTranslation('sst_front_label', language)}</span>
                       <span className="text-white font-bold text-xs sm:text-sm mt-0.5 block">{pfz.sst_c}°C</span>
-                      <span className="text-[#88BDF2] text-[10px]">Optimal</span>
+                      <span className="text-[#88BDF2] text-[10px]">{getTranslation('optimal', language)}</span>
                     </div>
                     <div>
                       <span className="text-[#BDDDFC]/75 block text-[10px] uppercase font-semibold">{getTranslation('feasibility_label', language)}</span>
                       <span className="text-[#88BDF2] font-extrabold text-xs sm:text-sm mt-0.5 block">{Math.round(pfz.suitability_score)}%</span>
-                      <span className="text-[#BDDDFC] text-[10px]">Match</span>
+                      <span className="text-[#BDDDFC] text-[10px]">{getTranslation('match', language)}</span>
                     </div>
                   </div>
 
                   <p className="text-xs sm:text-sm text-[#F1F5F9] font-normal leading-relaxed line-clamp-2">
-                    {pfz.recommendation}
+                    {getLocalizedRecommendation(pfz.recommendation, language)}
                   </p>
                 </div>
               );
@@ -175,7 +176,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                     {getTranslation('selected_front_route', language)}
                   </span>
                   <h2 className="font-editorial text-xl sm:text-2xl text-white font-normal mt-1">
-                    {selected.name}
+                    {localizeDestination(selected.name, language)}
                   </h2>
                 </div>
 
@@ -246,7 +247,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                       {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
                     </span>
                     <span className="text-[#BDDDFC]/90 text-xs font-medium block mt-1">
-                      {activeLocationName} {getTranslation('harbor_suffix', language)}
+                      {getLocalizedPortName(activeLocationName, language)} {getTranslation('harbor_suffix', language)}
                     </span>
                   </div>
                 </div>

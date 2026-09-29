@@ -41,7 +41,7 @@ export const RoutePlannerPanel: React.FC = () => {
           {getTranslation('nav_route', language)}
         </h3>
         <p className="text-xs sm:text-sm text-[#BDDDFC] mt-2 max-w-md leading-relaxed">
-          {getTranslation('route_planner_title', language)}. Select any dynamic Potential Fishing Zone (PFZ) or issue a natural language query to plot an evidence-based nautical voyage route with turn-by-turn guidance and dynamic hazard avoidance.
+          {getTranslation('route_planner_empty_desc', language)}
         </p>
 
         <button
@@ -169,7 +169,7 @@ export const RoutePlannerPanel: React.FC = () => {
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-[#384959] text-xs text-[#F1F5F9] leading-relaxed font-sans">
-              {safe_route.description}
+              {localizeInstruction(safe_route.description, language)}
             </div>
           </div>
 
@@ -283,11 +283,11 @@ export const RoutePlannerPanel: React.FC = () => {
             <span className="text-xs sm:text-sm font-bold text-white">{getTranslation('navigation_rationale', language)}</span>
           </div>
           <p className="text-xs sm:text-sm text-[#F1F5F9] leading-relaxed">
-            {recommendation}
+            {localizeInstruction(recommendation, language)}
           </p>
           {reasoning && (
             <div className="mt-2.5 text-xs text-[#BDDDFC] font-mono bg-[#1E2632] p-3 rounded-lg border border-[#384959] leading-relaxed">
-              {reasoning}
+              {localizeInstruction(reasoning, language)}
             </div>
           )}
         </div>
@@ -315,9 +315,9 @@ export const RoutePlannerPanel: React.FC = () => {
                     {idx + 1}
                   </span>
                   <div>
-                    <span className="text-white font-sans text-xs sm:text-sm font-semibold">{wp.name}</span>
+                    <span className="text-white font-sans text-xs sm:text-sm font-semibold">{localizeDestination(wp.name, language)}</span>
                     {wp.instruction && (
-                      <span className="block text-xs text-[#88BDF2] font-mono mt-0.5">{wp.instruction}</span>
+                      <span className="block text-xs text-[#88BDF2] font-mono mt-0.5">{localizeInstruction(wp.instruction, language)}</span>
                     )}
                   </div>
                 </div>

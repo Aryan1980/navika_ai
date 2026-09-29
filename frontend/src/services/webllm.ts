@@ -14,7 +14,7 @@ class MobileWebLLMService {
   private engine: any = null;
   private isInitializing: boolean = false;
   private isLoaded: boolean = false;
-  private selectedModel: string = 'SmolLM2-360M-Instruct-q4f16-MLC';
+  private selectedModel: string = 'SmolLM2-360M-Instruct-q4f16_1-MLC';
 
   /**
    * Checks whether the current browser / mobile hardware supports WebGPU.
