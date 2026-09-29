@@ -292,29 +292,29 @@ export const AgentStreamingDAGView: React.FC = () => {
     <div className="h-full w-full flex flex-col bg-[#0e1320] text-slate-100 font-sans overflow-hidden">
       
       {/* ── Top Bar: Orchestration Status & Actions ── */}
-      <div className="px-6 py-3.5 bg-[#141b2a] border-b border-[#5379AE]/30 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+      <div className="px-3 sm:px-6 py-2.5 sm:py-3.5 bg-[#141b2a] border-b border-[#5379AE]/30 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 rounded-xl bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 flex-shrink-0">
             <Cpu className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-white tracking-tight">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
                 11-Agent Autonomous Orchestration DAG
               </h2>
               <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 text-[10px] font-mono font-bold">
                 SIH 2026 · PS 26176
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] sm:text-xs text-slate-400">
               Deterministic topological task execution graph with physical consensus verification.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Stream Mode Indicator */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0e1422] border border-[#5379AE]/30 font-mono text-[11px] text-slate-300">
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-[#0e1422] border border-[#5379AE]/30 font-mono text-[10.5px] sm:text-[11px] text-slate-300">
             <span className={`w-2 h-2 rounded-full ${isStreaming ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`} />
             <span className="text-slate-400">Mode:</span>
             <span className="font-semibold text-cyan-300">{streamMode}</span>
@@ -324,12 +324,12 @@ export const AgentStreamingDAGView: React.FC = () => {
           <button
             onClick={triggerDAGExecution}
             disabled={isStreaming}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isStreaming ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Executing DAG...</span>
+                <span>Executing...</span>
               </>
             ) : (
               <>
@@ -342,10 +342,10 @@ export const AgentStreamingDAGView: React.FC = () => {
       </div>
 
       {/* ── Main Viewport Split (DAG Visualizer + Live Stream Console + Inspector) ── */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-0">
         
         {/* Left / Center Area: 11-Agent Interactive Topological Network (7 Cols) */}
-        <div className="lg:col-span-7 p-5 overflow-y-auto flex flex-col justify-between border-r border-[#5379AE]/25 bg-[#0e1320] space-y-4">
+        <div className="lg:col-span-7 p-3.5 sm:p-5 overflow-visible lg:overflow-y-auto flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#5379AE]/25 bg-[#0e1320] space-y-4">
           
           <div className="flex items-center justify-between pb-2 border-b border-white/5">
             <span className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
@@ -481,7 +481,7 @@ export const AgentStreamingDAGView: React.FC = () => {
         </div>
 
         {/* Right Area: Streaming Event Console & Agent Inspector (5 Cols) */}
-        <div className="lg:col-span-5 flex flex-col h-full bg-[#111726] overflow-hidden">
+        <div className="lg:col-span-5 flex flex-col min-h-0 lg:h-full bg-[#111726] overflow-visible lg:overflow-hidden">
           
           {/* Agent Node Inspector (Top Half) */}
           <div className="p-5 border-b border-[#5379AE]/25 space-y-3.5 bg-[#141b2e] flex-shrink-0">

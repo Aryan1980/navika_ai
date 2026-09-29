@@ -44,7 +44,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
   const isModerate = riskLevel === 'MODERATE';
 
   return (
-    <div className="h-full min-h-0 flex-1 flex flex-col overflow-y-auto bg-[#151926] text-[#f1f5fb] p-6 sm:p-8 space-y-8 relative selection:bg-[#0474C4]/30 selection:text-[#A8C4EC]">
+    <div className="h-full min-h-0 flex-1 flex flex-col overflow-y-auto bg-[#151926] text-[#f1f5fb] p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 space-y-5 sm:space-y-8 relative selection:bg-[#0474C4]/30 selection:text-[#A8C4EC]">
       
       {/* ── Ambient Sapphire Nightfall Glow ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">

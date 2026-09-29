@@ -15,8 +15,9 @@ import { RoutePlannerPanel } from './components/Navigation/RoutePlannerPanel';
 import { PhoneAuthModal } from './components/Auth/PhoneAuthModal';
 import { CaptainProfileModal } from './components/Profile/CaptainProfileModal';
 import { DualSyncModeBanner } from './components/Navigation/DualSyncModeBanner';
+import { MobileBottomNav } from './components/Navigation/MobileBottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Sun, MapPin, Layers, ShieldAlert, FileText, Cpu, User, Phone, Globe } from 'lucide-react';
+import { Sun, MapPin, Layers, ShieldAlert, FileText, Cpu, User, Phone, Globe, Menu } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getTranslation } from './utils/translations';
 import { getLocalizedPortName } from './utils/locationTranslations';
 
@@ -37,6 +38,7 @@ const DashboardView: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isSOSOpen, setIsSOSOpen] = useState<boolean>(false);
   const [isAdvisoryOpen, setIsAdvisoryOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -47,12 +49,40 @@ const DashboardView: React.FC = () => {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#1E2632] text-[#F8FAFC] selection:bg-[#88BDF2]/30 selection:text-[#BDDDFC] font-sans">
       
-      {/* ── 1. Left Vertical Navigation Rail ── */}
-      <Sidebar
-        activeNav={activeNav}
-        setActiveNav={setActiveNav}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-      />
+      {/* ── 1. Left Vertical Navigation Rail (Desktop) ── */}
+      <div className="hidden md:flex flex-shrink-0 h-full">
+        <Sidebar
+          activeNav={activeNav}
+          setActiveNav={setActiveNav}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
+      </div>
+
+      {/* ── 1b. Mobile Off-Canvas Drawer (Slide-Over) ── */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Dark Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          {/* Drawer Container */}
+          <div className="relative w-[280px] max-w-[85vw] h-full bg-[#1E2632] z-10 shadow-2xl flex flex-col animate-in slide-in-from-left duration-200">
+            <Sidebar
+              activeNav={activeNav}
+              setActiveNav={(nav) => {
+                setActiveNav(nav);
+                setIsMobileMenuOpen(false);
+              }}
+              onOpenSettings={() => {
+                setIsSettingsOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              onClose={() => setIsMobileMenuOpen(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── 2. Modals (Settings, SOS Emergency, Advisory Bulletin) ── */}
       <SettingsModal
@@ -73,13 +103,20 @@ const DashboardView: React.FC = () => {
       <div className="flex-1 h-screen flex flex-col overflow-hidden relative">
 
         {/* ── Top Shared Minimalist Header Bar ── */}
-        <header className="h-14 px-6 bg-[#242E3B] border-b border-[#384959] flex items-center justify-between z-20 flex-shrink-0 shadow-sm">
+        <header className="h-14 px-3 sm:px-6 bg-[#242E3B] border-b border-[#384959] flex items-center justify-between z-20 flex-shrink-0 shadow-sm gap-2">
           
-          {/* Breadcrumb Path */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#BDDDFC]/75 font-medium">SamudraAI</span>
-            <span className="text-[#6A89A7]">/</span>
-            <span className="text-white font-semibold tracking-tight">
+          {/* Left: Mobile Hamburger & Breadcrumb */}
+          <div className="flex items-center gap-2 text-xs min-w-0">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-1.5 rounded-xl bg-[#1E2632] border border-[#384959] text-[#BDDDFC] hover:text-white transition-colors cursor-pointer flex-shrink-0"
+              title="Open Navigation Menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <span className="text-[#BDDDFC]/75 font-medium hidden sm:inline">SamudraAI</span>
+            <span className="text-[#6A89A7] hidden sm:inline">/</span>
+            <span className="text-white font-semibold tracking-tight truncate max-w-[130px] sm:max-w-none">
               {activeNav === 'map' && (getTranslation('nav_dashboard', language) || 'Satellite Recon & Navigation')}
               {activeNav === 'route' && (getTranslation('nav_route', language) || 'Route Planner')}
               {activeNav === 'analytics' && (getTranslation('nav_analytics', language) || 'Port & Ocean Telemetry')}
@@ -90,7 +127,7 @@ const DashboardView: React.FC = () => {
           </div>
 
           {/* Right Header Controls */}
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-1.5 sm:gap-3 text-xs flex-shrink-0">
             
             {/* Quick Action: Advisory PDF */}
             <button
@@ -105,7 +142,7 @@ const DashboardView: React.FC = () => {
             {/* Quick Action: SOS 1554 */}
             <button
               onClick={() => setIsSOSOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/60 hover:border-rose-400 text-rose-200 font-mono font-bold transition-all shadow-[0_0_10px_rgba(244,63,94,0.25)] cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/60 hover:border-rose-400 text-rose-200 font-mono font-bold transition-all shadow-[0_0_10px_rgba(244,63,94,0.25)] cursor-pointer text-[11px] sm:text-xs"
               title="Indian Coast Guard Emergency (1554)"
             >
               <ShieldAlert className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
@@ -113,12 +150,12 @@ const DashboardView: React.FC = () => {
             </button>
 
             {/* Language Selector Dropdown */}
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-xs">
+            <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-xs">
               <Globe className="w-3.5 h-3.5 text-[#88BDF2]" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-transparent text-[#BDDDFC] text-xs font-medium focus:outline-none cursor-pointer"
+                className="bg-transparent text-[#BDDDFC] text-xs font-medium focus:outline-none cursor-pointer max-w-[70px] sm:max-w-none"
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code} className="bg-[#1E2632] text-white">
@@ -129,10 +166,10 @@ const DashboardView: React.FC = () => {
             </div>
 
             {/* Active Port Chip */}
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-[#BDDDFC]">
+            <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full bg-[#1E2632] border border-[#384959] text-[#BDDDFC]">
               <MapPin className="w-3.5 h-3.5 text-[#88BDF2] flex-shrink-0" />
-              <span className="truncate max-w-[150px] sm:max-w-[240px] font-medium text-white text-xs sm:text-sm">
-                {getLocalizedPortName(activeLocationName, language)}
+              <span className="truncate max-w-[80px] sm:max-w-[160px] md:max-w-[240px] font-medium text-white text-xs sm:text-sm">
+                {getLocalizedPortName(activeLocationName, language).split(',')[0]}
               </span>
             </div>
 
@@ -147,7 +184,7 @@ const DashboardView: React.FC = () => {
             {user ? (
               <button
                 onClick={() => setIsProfileModalOpen(true)}
-                className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E2632] hover:bg-[#2A3644] border border-[#6A89A7]/50 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer"
+                className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E2632] hover:bg-[#2A3644] border border-[#6A89A7]/50 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer"
               >
                 <span className="w-2 h-2 rounded-full bg-[#88BDF2]" />
                 <span className="font-medium text-white">{user.name.split(' ')[0]}</span>
@@ -158,7 +195,7 @@ const DashboardView: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#384959]/60 hover:bg-[#384959] border border-[#88BDF2]/40 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#384959]/60 hover:bg-[#384959] border border-[#88BDF2]/40 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer"
               >
                 <Phone className="w-3.5 h-3.5 text-[#88BDF2]" />
                 <span className="font-medium text-white">{getTranslation('captain_sign_in', language)}</span>
@@ -189,7 +226,7 @@ const DashboardView: React.FC = () => {
 
           {/* Option B: Dedicated Voyage Route Planner View */}
           {activeNav === 'route' && (
-            <div className="h-full w-full overflow-y-auto p-4 sm:p-6 bg-[#1E2632]">
+            <div className="h-full w-full overflow-y-auto p-3 sm:p-6 pb-24 md:pb-6 bg-[#1E2632]">
               <div className="max-w-4xl mx-auto h-full">
                 <RoutePlannerPanel />
               </div>
@@ -231,17 +268,25 @@ const DashboardView: React.FC = () => {
 
       </div>
 
-      {/* Floating Persistent Emergency SOS 1554 Button (Always Accessible in Bottom Right) */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* Floating Persistent Emergency SOS 1554 Button (Elevated above mobile bottom nav) */}
+      <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40">
         <button
           onClick={() => setIsSOSOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs shadow-[0_0_25px_rgba(244,63,94,0.45)] hover:shadow-[0_0_35px_rgba(244,63,94,0.65)] border border-rose-400/80 transition-all transform hover:scale-105 active:scale-95 cursor-pointer font-mono"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs shadow-[0_0_25px_rgba(244,63,94,0.45)] hover:shadow-[0_0_35px_rgba(244,63,94,0.65)] border border-rose-400/80 transition-all transform hover:scale-105 active:scale-95 cursor-pointer font-mono"
           title="Indian Coast Guard Emergency (1554)"
         >
           <ShieldAlert className="w-4 h-4 text-white animate-bounce" />
           <span>🆘 SOS 1554</span>
         </button>
       </div>
+
+      {/* ── Mobile Bottom Navigation Bar (Visible only on <md screens) ── */}
+      <MobileBottomNav
+        activeNav={activeNav}
+        setActiveNav={setActiveNav}
+        onOpenMobileDrawer={() => setIsMobileMenuOpen(true)}
+        isMobileDrawerOpen={isMobileMenuOpen}
+      />
 
     </div>
   );

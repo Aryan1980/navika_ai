@@ -11,7 +11,8 @@ import {
   User,
   Phone,
   Anchor,
-  Cpu
+  Cpu,
+  X
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { getTranslation } from '../../utils/translations';
@@ -20,9 +21,10 @@ interface SidebarProps {
   activeNav: string;
   setActiveNav: (nav: string) => void;
   onOpenSettings: () => void;
+  onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpenSettings }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpenSettings, onClose }) => {
   const {
     activeLocationName,
     resetLocation,
@@ -46,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
   ];
 
   return (
-    <aside className="w-64 bg-[#1E2632] border-r border-[#384959] flex flex-col justify-between p-3.5 select-none min-h-screen text-[#BDDDFC] flex-shrink-0 z-40 font-sans overflow-hidden">
+    <aside className="w-full md:w-64 bg-[#1E2632] border-r border-[#384959] flex flex-col justify-between p-3.5 select-none h-full md:min-h-screen text-[#BDDDFC] flex-shrink-0 z-40 font-sans overflow-y-auto">
       
       {/* ── Top Section ── */}
       <div className="space-y-3 min-w-0">
@@ -64,6 +66,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
               </span>
             </div>
           </div>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="md:hidden p-1.5 rounded-xl bg-[#2A3644] hover:bg-[#384959] text-[#BDDDFC] hover:text-white transition-colors cursor-pointer"
+              title="Close Menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Vessel Status Card */}
@@ -142,7 +154,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveNav(item.id)}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  onClose?.();
+                }}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-colors duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus:ring-0 select-none ${
                   isActive
                     ? 'bg-[#384959] text-white font-medium border border-[#88BDF2]/40 shadow-sm'
@@ -175,7 +190,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
         
         {/* Settings Button */}
         <button
-          onClick={onOpenSettings}
+          onClick={() => {
+            onOpenSettings();
+            onClose?.();
+          }}
           className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm border border-transparent text-[#BDDDFC]/80 hover:text-white hover:bg-[#384959]/40 transition-colors duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus:ring-0 select-none"
         >
           <Settings className="w-4 h-4 text-[#6A89A7] flex-shrink-0" />
@@ -184,7 +202,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
 
         {/* Option 1: Change Port / Location (keeps captain logged in, goes to Step 2) */}
         <button
-          onClick={resetLocation}
+          onClick={() => {
+            resetLocation();
+            onClose?.();
+          }}
           className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm border border-transparent text-[#BDDDFC]/85 hover:text-white hover:bg-[#384959]/50 transition-colors duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus:ring-0 select-none group"
           title={getTranslation('change_location_button', language)}
         >
@@ -194,7 +215,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
 
         {/* Option 2: Sign Out (clears session, returns to Step 1 Sign-in) */}
         <button
-          onClick={logout}
+          onClick={() => {
+            logout();
+            onClose?.();
+          }}
           className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm border border-transparent text-rose-300/80 hover:text-rose-200 hover:bg-rose-500/15 transition-colors duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus:ring-0 select-none group"
           title={getTranslation('sign_out_button', language)}
         >

@@ -51,7 +51,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
   const fuelEst = selected ? Math.round(selected.distance_km * 0.85) : 18;
 
   return (
-    <div className="h-full min-h-0 flex-1 flex flex-col overflow-hidden bg-[#151926] text-[#f1f5fb] p-6 sm:p-8 relative selection:bg-[#384959] selection:text-[#BDDDFC] font-sans">
+    <div className="h-full min-h-0 flex-1 flex flex-col overflow-y-auto lg:overflow-hidden bg-[#151926] text-[#f1f5fb] p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 relative selection:bg-[#384959] selection:text-[#BDDDFC] font-sans">
       
       {/* ── Ambient Glow (Stormy morning tones) ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -60,17 +60,17 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
       </div>
 
       {/* ── Top Header ── */}
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#384959]/60 flex-shrink-0">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 sm:pb-6 border-b border-[#384959]/60 flex-shrink-0">
         <div>
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-[#384959] border border-[#6A89A7]/50 flex items-center justify-center text-[#88BDF2] shadow-md">
-              <Fish className="w-6 h-6 text-[#88BDF2]" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#384959] border border-[#6A89A7]/50 flex items-center justify-center text-[#88BDF2] shadow-md flex-shrink-0">
+              <Fish className="w-5 h-5 sm:w-6 sm:h-6 text-[#88BDF2]" />
             </div>
             <div>
-              <h1 className="font-editorial text-2xl sm:text-3xl font-normal text-white tracking-tight">
+              <h1 className="font-editorial text-xl sm:text-3xl font-normal text-white tracking-tight">
                 {getTranslation('spots_header_title', language)}
               </h1>
-              <p className="text-xs sm:text-sm text-[#BDDDFC] font-mono mt-1 flex items-center gap-2">
+              <p className="text-xs sm:text-sm text-[#BDDDFC] font-mono mt-0.5 sm:mt-1 flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span>{getTranslation('departure_fix_label', language)}: <strong className="text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</strong></span>
                 <span className="text-[#88BDF2]">·</span>
                 <span className="text-[#88BDF2] font-semibold">
@@ -93,10 +93,10 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
       </div>
 
       {/* ── Main 2-Column Grid ── */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 pt-5 overflow-hidden">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 pt-4 sm:pt-5 overflow-visible lg:overflow-hidden">
         
         {/* Left Column (5 Cols): List of Spots with Crisp High-Contrast Cards */}
-        <div className="lg:col-span-5 flex flex-col min-h-0 bg-[#1a222f] border border-[#384959] rounded-2xl p-5 shadow-xl">
+        <div className="lg:col-span-5 flex flex-col min-h-0 max-h-[380px] lg:max-h-none bg-[#1a222f] border border-[#384959] rounded-2xl p-4 sm:p-5 shadow-xl">
           <div className="flex items-center justify-between pb-3.5 border-b border-[#384959]/60 flex-shrink-0">
             <span className="font-editorial text-lg text-white font-normal">
               {getTranslation('identified_thermal_fronts', language)}

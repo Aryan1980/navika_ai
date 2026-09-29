@@ -663,7 +663,7 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) =
           </div>
 
           {/* Bottom Floating Input Dock */}
-          <div className="relative z-20 pb-7 pt-2 px-4 bg-gradient-to-t from-[#151926] via-[#151926]/95 to-transparent flex-shrink-0">
+          <div className="relative z-20 pb-20 md:pb-7 pt-2 px-3 sm:px-4 bg-gradient-to-t from-[#151926] via-[#151926]/95 to-transparent flex-shrink-0">
             <div className="max-w-3xl mx-auto">
               
               {/* 12 Judge Presets Dock */}
