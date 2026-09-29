@@ -4,7 +4,10 @@ import time
 import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 
 logger = logging.getLogger("mosdac_client")
 
@@ -22,14 +25,24 @@ class MosdacClient:
         self.username = username or settings.MOSDAC_USERNAME or os.getenv("MOSDAC_USERNAME", "")
         self.password = password or settings.MOSDAC_PASSWORD or os.getenv("MOSDAC_PASSWORD", "")
         
-        # Cache directory
+        # Cache directory - resilient to read-only filesystems (Vercel, AWS Lambda)
+        import tempfile
         if cache_dir:
             self.cache_dir = cache_dir
+        elif os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("LAMBDA_TASK_ROOT"):
+            self.cache_dir = os.path.join(tempfile.gettempdir(), "mosdac")
         else:
             base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "mosdac"))
             self.cache_dir = base_dir
-        
-        os.makedirs(self.cache_dir, exist_ok=True)
+
+        try:
+            os.makedirs(self.cache_dir, exist_ok=True)
+        except (OSError, PermissionError):
+            self.cache_dir = os.path.join(tempfile.gettempdir(), "mosdac")
+            try:
+                os.makedirs(self.cache_dir, exist_ok=True)
+            except Exception as e:
+                logger.warning(f"Operating in ephemeral cache mode: {e}")
 
         self._access_token: Optional[str] = None
         self._refresh_token: Optional[str] = None

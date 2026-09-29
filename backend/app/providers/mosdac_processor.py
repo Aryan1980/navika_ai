@@ -3,7 +3,10 @@ import math
 import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, Tuple, List
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 logger = logging.getLogger("mosdac_processor")
 

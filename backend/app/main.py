@@ -1,7 +1,7 @@
 """SamudraAI - Agentic Marine Intelligence Platform FastAPI Application."""
 from contextlib import asynccontextmanager
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -26,6 +26,24 @@ app = FastAPI(
     description="Agentic Marine Intelligence Platform for ISRO Problem Statement. Supports autonomous multi-agent planning, deterministic marine risk calculation, PFZ intelligence, geospatial geofencing, and multilingual voice interaction.",
     lifespan=lifespan
 )
+
+# Vercel Path Rewrite Middleware: Restores the original path when Vercel rewrites to /api/index.py
+@app.middleware("http")
+async def vercel_path_rewrite_middleware(request: Request, call_next):
+    """Restores the original request path when Vercel rewrites to /api/index.py."""
+    if request.url.path.startswith("/api/index") or request.url.path == "/api":
+        orig_path = (
+            request.query_params.get("__path")
+            or request.headers.get("x-matched-path")
+            or request.headers.get("x-forwarded-uri")
+            or request.headers.get("x-original-url")
+            or request.headers.get("x-rewrite-url")
+        )
+        if orig_path and not orig_path.startswith("/api/index") and orig_path != "/api":
+            clean_path = orig_path.split("?")[0]
+            request.scope["path"] = clean_path
+            request.scope["raw_path"] = clean_path.encode("latin1")
+    return await call_next(request)
 
 # Configure CORS - allow all origins cleanly
 app.add_middleware(

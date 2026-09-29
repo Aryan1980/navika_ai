@@ -105,6 +105,7 @@ async def get_alerts(
     coords = Coordinates(latitude=lat, longitude=lon)
     return await provider.get_active_alerts(coords)
 
+@router.get("/zones")
 @router.get("/geofences")
 async def get_geofences():
     """Retrieve all official maritime boundaries, MPAs, restricted zones, and coastal hubs."""
