@@ -1,4 +1,4 @@
-# Samudra AI — Autonomous Multi-Agent Marine Intelligence Platform
+# Navika AI — Autonomous Multi-Agent Marine Intelligence Platform
 
 [![ISRO Problem Statement 26176](https://img.shields.io/badge/ISRO%20PS-26176%20%C2%B7%20SIH%202026-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
 [![Multi-Agent DAG](https://img.shields.io/badge/Architecture-11--Agent%20Deterministic%20DAG-0284c7?style=for-the-badge)](./docs/architecture.md)
@@ -7,7 +7,7 @@
 [![Live Deployment](https://img.shields.io/badge/Deployment-Vercel%20Live-black?style=for-the-badge&logo=vercel)](https://samudra-ai-xkdf.vercel.app/)
 
 > **🛰️ ISRO Problem Statement 26176 · Smart India Hackathon (SIH) 2026**  
-> **Samudra AI** is an operational, production-grade autonomous marine intelligence platform built for India's 4,000,000+ coastal fishermen, port authorities, and coast guard personnel across 7,516 km of coastline and 3,288 marine fishing villages.
+> **Navika AI** is an operational, production-grade autonomous marine intelligence platform built for India's 4,000,000+ coastal fishermen, port authorities, and coast guard personnel across 7,516 km of coastline and 3,288 marine fishing villages.
 
 ---
 
@@ -25,7 +25,7 @@
 
 ## 🧠 11-Agent Autonomous DAG Architecture
 
-Unlike naive wrapper chatbots, Samudra AI operates as an **autonomous multi-agent directed acyclic graph (DAG)** where physical safety scores are computed strictly by deterministic physics equations, completely insulated from LLM hallucinations:
+Unlike naive wrapper chatbots, Navika AI operates as an **autonomous multi-agent directed acyclic graph (DAG)** where physical safety scores are computed strictly by deterministic physics equations, completely insulated from LLM hallucinations:
 
 ```mermaid
 flowchart TD
@@ -124,7 +124,7 @@ The platform includes 12 pre-configured, deterministic judge scenarios accessibl
 
 ## 📥 Official Marine Advisory Bulletin (PDF Export)
 
-- Generates a government-standard marine advisory bulletin with unique reference code (`SAMUDRA-INCOIS-2026-XXXX`).
+- Generates a government-standard marine advisory bulletin with unique reference code (`NAVIKA-INCOIS-2026-XXXX`).
 - Displays 24-hour validity horizon, operational safety status, spaceborne telemetry table, ranked PFZs with bearings, and IMBL buffer clearances.
 - Features cryptographic provenance stamp (`SHA-256`) and printable `@media print` layout for single-page A4 export.
 
@@ -135,8 +135,8 @@ The platform includes 12 pre-configured, deterministic judge scenarios accessibl
 ### Backend (Python 3.11+)
 ```bash
 # Clone the repository
-git clone https://github.com/Aryan1980/samudra_ai.git
-cd samudra_ai
+git clone https://github.com/Aryan1980/navika_ai.git
+cd navika_ai
 
 # Install dependencies
 pip install -r backend/requirements.txt
@@ -167,7 +167,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ## 🚢 Live Deployment
 
 - **Production URL:** [https://samudra-ai-xkdf.vercel.app/](https://samudra-ai-xkdf.vercel.app/)
-- **Repository:** [https://github.com/Aryan1980/samudra_ai](https://github.com/Aryan1980/samudra_ai)
+- **Repository:** [https://github.com/Aryan1980/navika_ai](https://github.com/Aryan1980/navika_ai)
 - **CI/CD:** Automated GitHub Actions pipeline (`.github/workflows/ci.yml`) testing scientific Python suites and Vite frontend builds on every commit.
 
 ---

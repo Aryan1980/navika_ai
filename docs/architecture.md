@@ -1,7 +1,7 @@
-# SamudraAI Multi-Agent System Architecture
+# NavikaAI Multi-Agent System Architecture
 
 ## Overview
-SamudraAI is an operational marine intelligence platform designed to support traditional fishermen, coastal maritime authorities, and researchers. It implements an autonomous multi-agent swarm architecture where specialized agents decompose queries, extract satellite telemetry, compute forward dead-reckoning vessel trajectories, calculate deterministic mathematical safety scores, and synthesize multilingual localized voice advisories.
+NavikaAI is an operational marine intelligence platform designed to support traditional fishermen, coastal maritime authorities, and researchers. It implements an autonomous multi-agent swarm architecture where specialized agents decompose queries, extract satellite telemetry, compute forward dead-reckoning vessel trajectories, calculate deterministic mathematical safety scores, and synthesize multilingual localized voice advisories.
 
 ## Multi-Agent Swarm Components
 

@@ -1,4 +1,4 @@
-"""Centralized Real-Time MOSDAC Satellite Data Provider Architecture for SamudraAI.
+"""Centralized Real-Time MOSDAC Satellite Data Provider Architecture for NavikaAI.
 
 Implements MarineDataProvider interface with:
 1. MOSDACProvider (Live spaceborne telemetry from ISRO MOSDAC)
@@ -464,7 +464,7 @@ class ProxyNetCDFProvider(MarineDataProvider):
             "file": "PROXY_DEV_SAMPLE.nc",
             "processing_status": "PROXY_NETCDF_DEVELOPMENT",
             "provenance": {
-                "source_authority": "SamudraAI Scientific Proxy (Development / Testing Mode)",
+                "source_authority": "NavikaAI Scientific Proxy (Development / Testing Mode)",
                 "observation_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "is_synthetic": True,
                 "verified_satellite_products": []

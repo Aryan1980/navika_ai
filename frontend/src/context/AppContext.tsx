@@ -110,7 +110,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLanguageState(lang);
     try {
       localStorage.setItem('navika_language', lang);
-      localStorage.setItem('samudra_language', lang);
     } catch {}
   };
   const [activeCommandTab, setActiveCommandTab] = useState<'conditions' | 'pfz' | 'route' | 'chat'>('pfz');
@@ -179,7 +178,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (profile) {
           setUser(profile);
           localStorage.setItem('navika_captain_profile', JSON.stringify(profile));
-          localStorage.setItem('samudra_captain_profile', JSON.stringify(profile));
         }
       }).catch(console.error);
 
@@ -204,9 +202,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (res && res.user) {
         setUser(res.user);
         localStorage.setItem('navika_captain_phone', res.user.phone);
-        localStorage.setItem('samudra_captain_phone', res.user.phone);
         localStorage.setItem('navika_captain_profile', JSON.stringify(res.user));
-        localStorage.setItem('samudra_captain_profile', JSON.stringify(res.user));
         const vLogs = await api.getUserVoyages(res.user.phone);
         setVoyages(vLogs);
         setIsAuthModalOpen(false);
@@ -225,7 +221,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (res && res.user) {
         setUser(res.user);
         localStorage.setItem('navika_captain_profile', JSON.stringify(res.user));
-        localStorage.setItem('samudra_captain_profile', JSON.stringify(res.user));
         return true;
       }
       return false;
@@ -328,7 +323,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     setPfzs([]);
     localStorage.setItem('navika_location_confirmed', 'true');
-    localStorage.setItem('samudra_location_confirmed', 'true');
     setIsLocationSelected(true);
   };
 

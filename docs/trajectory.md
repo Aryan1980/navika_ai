@@ -3,7 +3,7 @@
 ## Overview
 Traditional marine decision support tools evaluate static conditions at a single point in space. However, fishing vessels operate dynamically: a vessel currently located in safe waters may cross into an International Maritime Boundary Line (IMBL) or a Marine Protected Area (MPA) within 20 minutes under engine propulsion and surface wind drift.
 
-SamudraAI includes a **Predictive Trajectory Engine** that projects forward vessel tracks and detects boundary crossings before they happen.
+NavikaAI includes a **Predictive Trajectory Engine** that projects forward vessel tracks and detects boundary crossings before they happen.
 
 ---
 

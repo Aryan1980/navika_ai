@@ -1,14 +1,14 @@
-# SamudraAI ? ISRO Hackathon Evaluation & Demo Guide
+# NavikaAI — ISRO Hackathon Evaluation & Demo Guide
 
-This guide enables judges to test the complete end-to-end capabilities of SamudraAI locally without external API configuration.
+This guide enables judges to test the complete end-to-end capabilities of NavikaAI locally without external API configuration.
 
 ---
 
-## ? 1-Minute Launch
+## ⚡ 1-Minute Launch
 
 1. **Start Backend**:
    ```bash
-   cd samudra-ai
+   cd navika_ai
    python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
    ```
 2. **Access Platform**:

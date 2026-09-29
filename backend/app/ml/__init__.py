@@ -1,1 +1,1 @@
-"""SamudraAI Oceanographic Machine Learning Package."""
+"""NavikaAI Oceanographic Machine Learning Package."""

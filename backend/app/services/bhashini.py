@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional
 import httpx
 from app.config import settings
 
-logger = logging.getLogger("samudra_ai.bhashini")
+logger = logging.getLogger("navika_ai.bhashini")
 
 # Standard ISO-639-1 / Bhashini language code mapping
 BHASHINI_LANG_MAP = {

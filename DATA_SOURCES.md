@@ -1,9 +1,9 @@
-# SamudraAI ? Data Sources & Integration Guide
+# NavikaAI — Data Sources & Integration Guide
 
 ## 1. Overview
-SamudraAI uses a modular **Provider Abstraction Layer** (`backend/app/providers/base.py`) separating the application logic from external data providers. 
+NavikaAI uses a modular **Provider Abstraction Layer** (`backend/app/providers/base.py`) separating the application logic from external data providers. 
 
-During evaluation and local installation, SamudraAI operates in **DEMO MODE**, serving high-fidelity, physically consistent synthetic datasets for Indian coastal waters without requiring external API credentials.
+During evaluation and local installation, NavikaAI operates in **DEMO MODE**, serving high-fidelity, physically consistent synthetic datasets for Indian coastal waters without requiring external API credentials.
 
 ---
 

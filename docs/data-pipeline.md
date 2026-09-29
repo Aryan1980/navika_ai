@@ -1,7 +1,7 @@
 # ISRO MOSDAC Scientific Data Ingestion Pipeline
 
 ## Overview
-SamudraAI ingests live spaceborne telemetry directly from the **ISRO Meteorological and Oceanographic Satellite Data Archival Centre (MOSDAC)** operated by the **Space Applications Centre (SAC), Ahmedabad**.
+NavikaAI ingests live spaceborne telemetry directly from the **ISRO Meteorological and Oceanographic Satellite Data Archival Centre (MOSDAC)** operated by the **Space Applications Centre (SAC), Ahmedabad**.
 
 All satellite data processing follows scientific protocols, preserving physical SI units without synthetic or hallucinated values.
 
@@ -23,7 +23,7 @@ All satellite data processing follows scientific protocols, preserving physical 
 >
 > In contrast, **`E06SCT_L2B_WV12`** (Level-2B 12.5 km Ku-band ocean wind vectors) is actively published and updated in real-time by SAC Ahmedabad.
 >
-> **SamudraAI explicitly ingests `E06SCT_L2B_WV12` and accurately labels it Level-2B across all interfaces, logs, and evidence trails.** It is never falsely labeled as Level-3.
+> **NavikaAI explicitly ingests `E06SCT_L2B_WV12` and accurately labels it Level-2B across all interfaces, logs, and evidence trails.** It is never falsely labeled as Level-3.
 
 ---
 

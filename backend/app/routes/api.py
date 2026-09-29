@@ -1,4 +1,4 @@
-"""FastAPI route handlers for SamudraAI marine intelligence services."""
+"""FastAPI route handlers for NavikaAI marine intelligence services."""
 import asyncio
 import random
 from datetime import datetime
@@ -167,7 +167,7 @@ async def health_check():
     """System health and readiness check."""
     return {
         "status": "healthy",
-        "service": "SamudraAI Marine Intelligence Platform",
+        "service": "NavikaAI Marine Intelligence Platform",
         "version": "1.0.0",
         "mode": "ISRO_MOSDAC_LIVE_OPERATIONAL",
         "agents": [

@@ -16,9 +16,9 @@ venv/
 ENV/
 *.db
 *.sqlite3
-samudra_marine.db
-backend/samudra_marine.db
-backend/samudra_ai.db
+navika_marine.db
+backend/navika_marine.db
+backend/navika_ai.db
 
 # Pytest & Coverage
 .pytest_cache/

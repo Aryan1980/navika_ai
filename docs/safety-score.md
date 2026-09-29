@@ -2,7 +2,7 @@
 
 ## 1. Mathematical Formulation
 
-Unlike black-box LLM systems that hallucinate navigational ratings, SamudraAI implements an authoritative, deterministic mathematical model grounded in physical oceanography and maritime regulations.
+Unlike black-box LLM systems that hallucinate navigational ratings, NavikaAI implements an authoritative, deterministic mathematical model grounded in physical oceanography and maritime regulations.
 
 ### Total Mathematical Risk
 $$\text{Total Risk} = \sum_{i=1}^{7} w_i \cdot r_i \quad \text{where} \quad \sum_{i=1}^{7} w_i = 1.00, \; r_i \in [0, 1]$$
@@ -44,7 +44,7 @@ $$\text{Total Risk} = \max(\text{Total Risk}, 0.80) \implies \text{Safety Score}
 ---
 
 ## 5. Missing Data & Sensor Cloud Penalty
-If a satellite parameter is unavailable (e.g. cloud cover masking optical radiometers), SamudraAI does **not** assume zero risk. It applies a transparent uncertainty penalty:
+If a satellite parameter is unavailable (e.g. cloud cover masking optical radiometers), NavikaAI does **not** assume zero risk. It applies a transparent uncertainty penalty:
 $$r_{\text{missing}} = 0.35$$
 The evidence log flags `is_missing_data_penalized = true` to alert navigators.
 

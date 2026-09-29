@@ -16,16 +16,21 @@ def get_db_path() -> str:
     if data_dir:
         try:
             os.makedirs(data_dir, exist_ok=True)
-            return os.path.join(data_dir, "samudra_ai.db")
+            return os.path.join(data_dir, "navika_ai.db")
         except Exception:
             pass
 
     # Serverless environments (Vercel, AWS Lambda, etc.) have read-only filesystems except /tmp
     if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("LAMBDA_TASK_ROOT"):
-        return os.path.join(tempfile.gettempdir(), "samudra_ai.db")
+        return os.path.join(tempfile.gettempdir(), "navika_ai.db")
 
     # Try local backend directory
-    local_db = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "samudra_ai.db"))
+    local_db = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "navika_ai.db"))
+    # Fallback to samudra_ai.db if navika_ai.db does not exist yet
+    legacy_db = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "samudra_ai.db"))
+    if not os.path.exists(local_db) and os.path.exists(legacy_db):
+        return legacy_db
+
     local_dir = os.path.dirname(local_db)
 
     # Test writability of directory
@@ -37,7 +42,7 @@ def get_db_path() -> str:
         return local_db
     except (OSError, IOError, PermissionError):
         # Local dir is read-only, fallback to temp directory
-        return os.path.join(tempfile.gettempdir(), "samudra_ai.db")
+        return os.path.join(tempfile.gettempdir(), "navika_ai.db")
 
 DB_FILE = get_db_path()
 
@@ -50,7 +55,7 @@ def get_db():
     except Exception as e:
         # Fallback to in-memory if disk file cannot be opened
         try:
-            temp_db = os.path.join(tempfile.gettempdir(), "samudra_ai.db")
+            temp_db = os.path.join(tempfile.gettempdir(), "navika_ai.db")
             conn = sqlite3.connect(temp_db, timeout=5.0)
             conn.row_factory = sqlite3.Row
             DB_FILE = temp_db

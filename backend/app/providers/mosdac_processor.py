@@ -350,7 +350,7 @@ class MosdacDataProcessor:
         processing_status: str,
         file_size_bytes: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Creates the normalized JSON format required by SamudraAI."""
+        """Creates the normalized JSON format required by NavikaAI."""
         now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         
         # Provenance block

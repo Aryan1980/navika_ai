@@ -28,4 +28,4 @@ class RiskAssessment(BaseModel):
     is_missing_data_penalized: bool = False
     timestamp: str
     calculation_method: str = "deterministic_weighted_matrix"
-    disclaimer: str = "SamudraAI is an operational decision-support tool. It does not replace official statutory advisories issued by INCOIS, IMD, or the Indian Coast Guard."
+    disclaimer: str = "NavikaAI is an operational decision-support tool. It does not replace official statutory advisories issued by INCOIS, IMD, or the Indian Coast Guard."

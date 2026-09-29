@@ -1,4 +1,4 @@
-# SamudraAI ? REST API Documentation
+# NavikaAI — REST API Documentation
 
 Base URL: `http://127.0.0.1:8000/api`
 Interactive Swagger Docs: `http://127.0.0.1:8000/docs`

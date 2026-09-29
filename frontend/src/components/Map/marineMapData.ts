@@ -436,7 +436,7 @@ export const AIS_VESSELS: AISVessel[] = [
   },
   {
     mmsi: '419077182',
-    name: 'RV Samudra Ratnakar',
+    name: 'RV Navika Ratnakar',
     callsign: 'IND-GSI',
     vessel_type: 'Oceanographic Research',
     color: '#06b6d4',

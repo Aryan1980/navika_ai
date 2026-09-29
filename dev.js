@@ -1,11 +1,11 @@
-// Cross-platform concurrent runner for SamudraAI Backend & Frontend
+// Cross-platform concurrent runner for NavikaAI Backend & Frontend
 const { spawn } = require('child_process');
 const path = require('path');
 
 const isWindows = process.platform === 'win32';
 
 console.log('\x1b[36m%s\x1b[0m', '═══════════════════════════════════════════════════════');
-console.log('\x1b[36m%s\x1b[0m', '  Starting SamudraAI Marine Intelligence Platform...  ');
+console.log('\x1b[36m%s\x1b[0m', '  Starting NavikaAI Marine Intelligence Platform...   ');
 console.log('\x1b[36m%s\x1b[0m', '═══════════════════════════════════════════════════════');
 
 // 1. Launch FastAPI Backend (prioritizing local venv)
@@ -61,7 +61,7 @@ frontend.stderr.on('data', (data) => {
 });
 
 function cleanup() {
-  console.log('\nStopping SamudraAI services...');
+  console.log('\nStopping NavikaAI services...');
   try { backend.kill(); } catch (e) {}
   try { frontend.kill(); } catch (e) {}
   process.exit(0);

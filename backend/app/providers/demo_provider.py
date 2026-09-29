@@ -360,7 +360,7 @@ class DemoDataProvider(MarineDataProvider):
             "file": "DEMO_SIMULATED",
             "processing_status": "SYNTHETIC_SIMULATION",
             "provenance": {
-                "source_authority": "SamudraAI Demo Simulator",
+                "source_authority": "NavikaAI Demo Simulator",
                 "observation_time": ocean.timestamp,
                 "processing_time": self._get_utc_now(),
                 "is_synthetic": True,

@@ -3,7 +3,7 @@
 ## Overview
 Traditional fishermen operate in remote coastal and oceanic waters far beyond 4G/5G cellular coverage. A marine intelligence platform that fails when disconnected from the cloud is non-viable in operational sea conditions.
 
-SamudraAI implements a **three-tier transparent fallback architecture**:
+NavikaAI implements a **three-tier transparent fallback architecture**:
 1. **Tier 1 (Live Spaceborne)**: Live telemetry ingested directly from ISRO MOSDAC standing orders.
 2. **Tier 2 (Cached Edge Mode)**: Local disk cache read from previous passes with explicit observation staleness provenance.
 3. **Tier 3 (Scientific Proxy Fallback)**: Deterministic scientific simulation conforming to realistic physical distributions for local development and CI testing.
@@ -12,7 +12,7 @@ SamudraAI implements a **three-tier transparent fallback architecture**:
 
 ## Explicit Staleness Provenance
 
-When operating in offline or edge mode, SamudraAI **never** masquerades cached data as live telemetry. The evidence drawer and UI badges explicitly report:
+When operating in offline or edge mode, NavikaAI **never** masquerades cached data as live telemetry. The evidence drawer and UI badges explicitly report:
 
 > **"MOSDAC unavailable. Using cached marine data from 2026-09-27T16:45:00Z."**
 

@@ -1,4 +1,4 @@
-﻿# Multi-stage Dockerfile for SamudraAI
+# Multi-stage Dockerfile for NavikaAI
 # Stage 1: Build Frontend
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend

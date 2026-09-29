@@ -391,7 +391,6 @@ export const api = {
         created_at: new Date().toISOString()
       };
       localStorage.setItem(`navika_user_${payload.phone}`, JSON.stringify(defaultUser));
-      localStorage.setItem(`samudra_user_${payload.phone}`, JSON.stringify(defaultUser));
       return { success: true, user: defaultUser };
     }
   },
@@ -411,11 +410,9 @@ export const api = {
     try {
       const res = await client.post<{ success: boolean; user: UserProfile }>('/user/profile', profile);
       localStorage.setItem(`navika_user_${profile.phone}`, JSON.stringify(res.data.user || profile));
-      localStorage.setItem(`samudra_user_${profile.phone}`, JSON.stringify(res.data.user || profile));
       return res.data;
     } catch (err) {
       localStorage.setItem(`navika_user_${profile.phone}`, JSON.stringify(profile));
-      localStorage.setItem(`samudra_user_${profile.phone}`, JSON.stringify(profile));
       return { success: true, user: profile };
     }
   },
@@ -490,7 +487,6 @@ export const api = {
         const list: VoyageLog[] = existing ? JSON.parse(existing) : [];
         list.unshift(newVoyage);
         localStorage.setItem(`navika_voyages_${payload.user_phone}`, JSON.stringify(list));
-        localStorage.setItem(`samudra_voyages_${payload.user_phone}`, JSON.stringify(list));
       }
       return { success: true, voyage: newVoyage };
     }

@@ -1,7 +1,7 @@
-# SamudraAI ? Technical Architecture Document
+# NavikaAI — Technical Architecture Document
 
 ## 1. Executive Summary
-SamudraAI is an operational agentic decision-support system designed to fuse remote sensing data (ISRO Oceansat-3, INSAT-3D), oceanographic models (INCOIS OSF), meteorological advisories (IMD), and statutory maritime boundaries (ICG GIS) into actionable guidance for Indian coastal communities.
+NavikaAI is an operational agentic decision-support system designed to fuse remote sensing data (ISRO Oceansat-3, INSAT-3D), oceanographic models (INCOIS OSF), meteorological advisories (IMD), and statutory maritime boundaries (ICG GIS) into actionable guidance for Indian coastal communities.
 
 ---
 

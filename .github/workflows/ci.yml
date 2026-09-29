@@ -1,4 +1,4 @@
-name: Samudra AI CI Pipeline
+name: Navika AI CI Pipeline
 
 on:
   push:
