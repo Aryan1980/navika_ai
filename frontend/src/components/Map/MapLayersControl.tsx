@@ -14,6 +14,7 @@ const AVAILABLE_LAYERS = [
   { id: 'mpas', label: 'Marine Protected Areas', icon: AlertTriangle, color: 'text-rose-400', activeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
   { id: 'restricted', label: 'Naval / Oil Geofences', icon: AlertTriangle, color: 'text-purple-400', activeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
   { id: 'route', label: 'Navigational Routes', icon: Navigation, color: 'text-cyan-300', activeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' },
+  { id: 'simulated_vessel', label: 'Simulated Vessel (AIS IND-8421)', icon: Navigation, color: 'text-amber-400', activeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
 ];
 
 export const MapLayersControl: React.FC = () => {

@@ -58,7 +58,7 @@ import { getFallbackPFZs } from '../services/fallbackData';
 
 const DEFAULT_COORDS: Coordinates = { latitude: 9.9312, longitude: 76.2673 };
 const DEFAULT_NAME = 'Kochi (Cochin), Kerala';
-const DEFAULT_LAYERS = ['pfz', 'waves', 'imbl', 'risk_zones'];
+const DEFAULT_LAYERS = ['pfz', 'waves', 'imbl', 'risk_zones', 'simulated_vessel'];
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 

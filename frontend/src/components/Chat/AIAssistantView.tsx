@@ -17,9 +17,11 @@ import {
   AlertTriangle,
   ArrowRight,
   MapPin,
-  Anchor
+  Anchor,
+  Cpu
 } from 'lucide-react';
 import { voiceService } from '../../services/voice';
+import { DemoQueries } from './DemoQueries';
 
 const STARTER_PROMPTS = [
   {
@@ -60,7 +62,11 @@ const STARTER_PROMPTS = [
   }
 ];
 
-export const AIAssistantView: React.FC = () => {
+interface AIAssistantViewProps {
+  onOpenDAG?: () => void;
+}
+
+export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ onOpenDAG }) => {
   const {
     activeLocation,
     activeLocationName,
@@ -286,6 +292,9 @@ export const AIAssistantView: React.FC = () => {
       <div className="relative z-20 pb-7 pt-2 px-4 bg-gradient-to-t from-[#151926] via-[#151926]/95 to-transparent flex-shrink-0">
         <div className="max-w-3xl mx-auto">
           
+          {/* 12 Judge Presets Dock */}
+          <DemoQueries />
+
           <div className="relative flex items-center bg-[#1d2334] border border-[#5379AE]/40 focus-within:border-[#0474C4] focus-within:shadow-[0_0_25px_rgba(4,116,196,0.3)] rounded-2xl px-3.5 py-2.5 transition-all shadow-2xl">
             
             {/* Input field */}

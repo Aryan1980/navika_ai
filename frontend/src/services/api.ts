@@ -216,7 +216,7 @@ export const api = {
       return res.data;
     } catch (err) {
       console.warn('Chat API unavailable, using calibrated local marine intelligence:', err);
-      return getFallbackChatResponse(coords);
+      return getFallbackChatResponse(coords, query, language);
     }
   },
 

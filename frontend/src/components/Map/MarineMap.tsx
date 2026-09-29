@@ -53,7 +53,7 @@ export const MarineMap: React.FC = () => {
       ).addTo(map);
 
       // Initialize LayerGroups
-      const layers = ['vessel', 'pfz', 'sst', 'chlorophyll', 'waves', 'wind', 'imbl', 'mpas', 'restricted', 'route'];
+      const layers = ['vessel', 'simulated_vessel', 'pfz', 'sst', 'chlorophyll', 'waves', 'wind', 'imbl', 'mpas', 'restricted', 'route'];
       layers.forEach((id) => {
         const group = L.layerGroup().addTo(map);
         layerGroupsRef.current[id] = group;
@@ -144,6 +144,57 @@ export const MarineMap: React.FC = () => {
 
     group.addLayer(blueDot);
   }, [activeLocation.latitude, activeLocation.longitude, activeLocationName]);
+
+  // 3b. Render Simulated Vessel Track (AIS IND-8421)
+  useEffect(() => {
+    const group = layerGroupsRef.current['simulated_vessel'];
+    if (!group) return;
+    group.clearLayers();
+
+    if (!activeMapLayers.includes('simulated_vessel')) return;
+
+    // Seaward track vector from activeLocation heading ~240°
+    const startLat = activeLocation.latitude - 0.04;
+    const startLon = activeLocation.longitude - 0.07;
+    const currentLat = activeLocation.latitude - 0.09;
+    const currentLon = activeLocation.longitude - 0.14;
+
+    // Breadcrumb trail
+    const breadcrumb = L.polyline([
+      [activeLocation.latitude, activeLocation.longitude],
+      [startLat, startLon],
+      [currentLat, currentLon]
+    ], {
+      color: '#f59e0b',
+      weight: 2.5,
+      dashArray: '5, 8',
+      opacity: 0.85
+    });
+    group.addLayer(breadcrumb);
+
+    // Simulated Boat Marker
+    const boatIcon = L.divIcon({
+      className: 'simulated-vessel-marker',
+      html: `
+        <div style="transform: rotate(240deg); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.25); border: 2px solid #f59e0b; border-radius: 50%; box-shadow: 0 0 14px rgba(245, 158, 11, 0.6);">
+          <span style="font-size: 14px;">⛵</span>
+        </div>
+      `,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const vesselMarker = L.marker([currentLat, currentLon], { icon: boatIcon })
+      .bindTooltip(`
+        <div style="font-family: monospace; font-size: 11px; padding: 2px 4px;">
+          <div style="font-weight: bold; color: #f59e0b;">SIMULATED VESSEL (AIS ID: IND-8421)</div>
+          <div>Course: 240° WSW | Speed: 8.2 knots</div>
+          <div>Status: Underway using engine</div>
+        </div>
+      `, { permanent: false, direction: 'top' });
+
+    group.addLayer(vesselMarker);
+  }, [activeLocation.latitude, activeLocation.longitude, activeMapLayers]);
 
   // 4. Render Spot Markers (ONLY Clean Green Dots - Clicking shows info)
   useEffect(() => {
