@@ -141,25 +141,25 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                   </div>
 
                   {/* Conditions Grid - Clean & High Contrast */}
-                  <div className="grid grid-cols-3 gap-2 bg-[#12161f] p-3 rounded-xl text-xs sm:text-sm font-mono mb-2.5 border border-[#384959]/60">
+                  <div className="grid grid-cols-3 gap-2 bg-[#12161f] p-3 sm:p-3.5 rounded-xl text-xs sm:text-sm font-mono mb-2.5 border border-[#384959]/60">
                     <div>
-                      <span className="text-[#BDDDFC]/75 block text-xs uppercase font-semibold">{getTranslation('transit_label', language)}</span>
+                      <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold">{getTranslation('transit_label', language)}</span>
                       <span className="text-white font-bold text-sm sm:text-base mt-0.5 block">{pfz.distance_km} km</span>
-                      <span className="text-[#BDDDFC] text-xs">{pfz.bearing_compass}</span>
+                      <span className="text-[#BDDDFC] text-xs sm:text-sm font-medium">{pfz.bearing_compass}</span>
                     </div>
                     <div>
-                      <span className="text-[#BDDDFC]/75 block text-xs uppercase font-semibold">{getTranslation('sst_front_label', language)}</span>
+                      <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold">{getTranslation('sst_front_label', language)}</span>
                       <span className="text-white font-bold text-sm sm:text-base mt-0.5 block">{pfz.sst_c}°C</span>
-                      <span className="text-[#88BDF2] text-xs">{getTranslation('optimal', language)}</span>
+                      <span className="text-[#88BDF2] text-xs sm:text-sm font-semibold">{getTranslation('optimal', language)}</span>
                     </div>
                     <div>
-                      <span className="text-[#BDDDFC]/75 block text-xs uppercase font-semibold">{getTranslation('feasibility_label', language)}</span>
+                      <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold">{getTranslation('feasibility_label', language)}</span>
                       <span className="text-[#88BDF2] font-extrabold text-sm sm:text-base mt-0.5 block">{Math.round(pfz.suitability_score)}%</span>
-                      <span className="text-[#BDDDFC] text-xs">{getTranslation('match', language)}</span>
+                      <span className="text-[#BDDDFC] text-xs sm:text-sm font-medium">{getTranslation('match', language)}</span>
                     </div>
                   </div>
 
-                  <p className="text-sm text-[#F1F5F9] font-normal leading-relaxed line-clamp-2">
+                  <p className="text-sm sm:text-base text-[#F1F5F9] font-normal leading-relaxed line-clamp-2">
                     {getLocalizedRecommendation(pfz.recommendation, language)}
                   </p>
                 </div>
@@ -305,22 +305,22 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                 </div>
 
                 {/* Safety Guidance Note - Consistent Dynamic Status Theme */}
-                <div className={`p-4 rounded-xl bg-[#1a222f] border ${selectedTheme.badgeBorder} space-y-1.5 shadow-sm`}>
-                  <div className={`flex items-center gap-2 ${selectedTheme.accentTextClass} font-bold text-sm sm:text-base`}>
+                <div className={`p-4 sm:p-5 rounded-xl bg-[#1a222f] border ${selectedTheme.badgeBorder} space-y-2 shadow-sm`}>
+                  <div className={`flex items-center gap-2 ${selectedTheme.accentTextClass} font-bold text-base sm:text-lg`}>
                     {selected.safety_rating === 'SAFE' ? (
-                      <CheckCircle2 className={`w-4 h-4 ${selectedTheme.iconColorClass}`} />
+                      <CheckCircle2 className={`w-5 h-5 ${selectedTheme.iconColorClass}`} />
                     ) : (
-                      <AlertTriangle className={`w-4 h-4 ${selectedTheme.iconColorClass}`} />
+                      <AlertTriangle className={`w-5 h-5 ${selectedTheme.iconColorClass}`} />
                     )}
                     <span>
                       {selected.safety_rating === 'SAFE'
-                        ? 'Safe Seaward Passage Verified'
+                        ? getTranslation('safe_seaward_passage', language, 'Safe Seaward Passage Verified')
                         : selected.safety_rating === 'CAUTION'
-                        ? getTranslation('areas_to_avoid', language) || 'Advisory Caution Zone'
-                        : 'Hazardous Boundary / Restricted Area - Avoid'}
+                        ? getTranslation('advisory_caution_zone', language, 'Advisory Caution Zone')
+                        : getTranslation('hazardous_boundary_avoid', language, 'Hazardous Boundary / Restricted Area - Avoid')}
                     </span>
                   </div>
-                  <p className="text-[#F1F5F9] text-sm leading-relaxed font-normal">
+                  <p className="text-[#F1F5F9] text-sm sm:text-base leading-relaxed font-normal">
                     {getLocalizedRecommendation(selected.recommendation, language)}
                   </p>
                 </div>

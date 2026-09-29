@@ -20,6 +20,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { getTranslation } from '../../utils/translations';
 
 export interface DAGAgentNode {
   id: string;
@@ -190,7 +191,7 @@ interface StreamingLogEntry {
 }
 
 export const AgentStreamingDAGView: React.FC = () => {
-  const { activeLocation, activeLocationName } = useApp();
+  const { activeLocation, activeLocationName, language } = useApp();
   const [selectedAgent, setSelectedAgent] = useState<DAGAgentNode>(DAG_AGENTS[0]);
   const [agentStates, setAgentStates] = useState<Record<string, 'IDLE' | 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR'>>(() => {
     const init: Record<string, any> = {};
@@ -299,24 +300,21 @@ export const AgentStreamingDAGView: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                11-Agent Autonomous Orchestration DAG
+              <h2 className="text-base sm:text-xl font-bold text-white tracking-tight">
+                {getTranslation('dag_header_title', language, '11-Agent Autonomous Orchestration DAG')}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 text-xs font-mono font-bold">
-                SIH 2026 · PS 26176
-              </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-              Deterministic topological task execution graph with physical consensus verification.
+              {getTranslation('dag_header_desc', language, 'Deterministic topological task execution graph with physical consensus verification.')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
           {/* Stream Mode Indicator */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0e1422] border border-[#5379AE]/30 font-mono text-xs text-slate-200">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0e1422] border border-[#5379AE]/30 font-mono text-xs sm:text-sm text-slate-200">
             <span className={`w-2.5 h-2.5 rounded-full ${isStreaming ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`} />
-            <span className="text-slate-400 font-medium">Mode:</span>
+            <span className="text-slate-400 font-medium">{getTranslation('dag_mode_label', language, 'Mode:')}</span>
             <span className="font-bold text-cyan-300">{streamMode}</span>
           </div>
 
@@ -324,17 +322,17 @@ export const AgentStreamingDAGView: React.FC = () => {
           <button
             onClick={triggerDAGExecution}
             disabled={isStreaming}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-sm tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs sm:text-sm tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isStreaming ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Executing Pipeline...</span>
+                <span>{getTranslation('executing_pipeline', language, 'Executing Pipeline...')}</span>
               </>
             ) : (
               <>
                 <Play className="w-4 h-4 fill-current" />
-                <span>Run Live DAG Pipeline</span>
+                <span>{getTranslation('run_live_dag', language, 'Run Live DAG Pipeline')}</span>
               </>
             )}
           </button>
@@ -348,12 +346,12 @@ export const AgentStreamingDAGView: React.FC = () => {
         <div className="lg:col-span-7 p-4 sm:p-6 overflow-visible lg:overflow-y-auto flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#5379AE]/25 bg-[#0e1320] space-y-5">
           
           <div className="flex items-center justify-between pb-2.5 border-b border-white/5">
-            <span className="text-xs sm:text-sm font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-wider text-slate-200 font-bold flex items-center gap-2">
               <Activity className="w-4 h-4 text-cyan-400" />
-              Interactive Agent Task Graph
+              {getTranslation('interactive_task_graph', language, 'Interactive Agent Task Graph')}
             </span>
-            <span className="text-xs text-slate-400 font-mono">
-              Click any agent to inspect rules & input/output payload
+            <span className="text-xs text-slate-300 font-mono">
+              {getTranslation('click_agent_inspect', language, 'Click any agent to inspect rules & input/output payload')}
             </span>
           </div>
 
@@ -363,7 +361,7 @@ export const AgentStreamingDAGView: React.FC = () => {
             {/* Level 1: Intent & Planning */}
             <div className="space-y-1.5">
               <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-wider font-bold">
-                STAGE 01 · QUERY DECOMPOSITION
+                {getTranslation('stage_01_title', language, 'STAGE 01 · QUERY DECOMPOSITION')}
               </div>
               <div className="grid grid-cols-1 gap-2.5">
                 {DAG_AGENTS.filter((a) => a.id === 'planner').map((agent) => (
@@ -373,6 +371,7 @@ export const AgentStreamingDAGView: React.FC = () => {
                     state={agentStates[agent.id] ?? 'COMPLETED'}
                     isSelected={selectedAgent.id === agent.id}
                     onClick={() => setSelectedAgent(agent)}
+                    language={language}
                   />
                 ))}
               </div>
@@ -380,13 +379,13 @@ export const AgentStreamingDAGView: React.FC = () => {
 
             {/* Connecting Flow Arrow */}
             <div className="flex items-center justify-center text-slate-400 text-xs sm:text-sm font-mono font-semibold">
-              <span>▼ Concurrent Telemetry Retrieval Fan-Out</span>
+              <span>{getTranslation('fanout_telemetry', language, '▼ Concurrent Telemetry Retrieval Fan-Out')}</span>
             </div>
 
             {/* Level 2: Concurrent Data Ingestion (Discovery, Weather, Ocean, Alert, GIS) */}
             <div className="space-y-1.5">
               <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-wider font-bold">
-                STAGE 02 · CONCURRENT SATELLITE & SENSOR INGESTION
+                {getTranslation('stage_02_title', language, 'STAGE 02 · CONCURRENT SATELLITE & SENSOR INGESTION')}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {DAG_AGENTS.filter((a) => ['discovery', 'weather', 'ocean', 'alert', 'gis'].includes(a.id)).map((agent) => (
@@ -396,6 +395,7 @@ export const AgentStreamingDAGView: React.FC = () => {
                     state={agentStates[agent.id] ?? 'COMPLETED'}
                     isSelected={selectedAgent.id === agent.id}
                     onClick={() => setSelectedAgent(agent)}
+                    language={language}
                   />
                 ))}
               </div>
@@ -403,13 +403,13 @@ export const AgentStreamingDAGView: React.FC = () => {
 
             {/* Connecting Flow Arrow */}
             <div className="flex items-center justify-center text-slate-400 text-xs sm:text-sm font-mono font-semibold">
-              <span>▼ Biogeochemical & Trajectory Convergence</span>
+              <span>{getTranslation('fanout_biogeochemical', language, '▼ Biogeochemical & Trajectory Convergence')}</span>
             </div>
 
             {/* Level 3: Ocean Modeling & Predictive Trajectory */}
             <div className="space-y-1.5">
               <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-wider font-bold">
-                STAGE 03 · OCEAN DYNAMICS & PREDICTIVE KINEMATICS
+                {getTranslation('stage_03_title', language, 'STAGE 03 · OCEAN DYNAMICS & PREDICTIVE KINEMATICS')}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {DAG_AGENTS.filter((a) => ['pfz', 'trajectory'].includes(a.id)).map((agent) => (
@@ -419,6 +419,7 @@ export const AgentStreamingDAGView: React.FC = () => {
                     state={agentStates[agent.id] ?? 'COMPLETED'}
                     isSelected={selectedAgent.id === agent.id}
                     onClick={() => setSelectedAgent(agent)}
+                    language={language}
                   />
                 ))}
               </div>
@@ -426,13 +427,13 @@ export const AgentStreamingDAGView: React.FC = () => {
 
             {/* Connecting Flow Arrow */}
             <div className="flex items-center justify-center text-slate-400 text-xs sm:text-sm font-mono font-semibold">
-              <span>▼ Deterministic Multi-Factor Safety Matrix</span>
+              <span>{getTranslation('fanout_safety_matrix', language, '▼ Deterministic Multi-Factor Safety Matrix')}</span>
             </div>
 
             {/* Level 4: Risk, Routing & Physical Verification */}
             <div className="space-y-1.5">
               <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-wider font-bold">
-                STAGE 04 · MULTI-FACTOR RISK, A* ROUTING & AUDIT GUARDRAILS
+                {getTranslation('stage_04_title', language, 'STAGE 04 · MULTI-FACTOR CONSENSUS & COMPLIANCE')}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {DAG_AGENTS.filter((a) => ['risk', 'route', 'verification'].includes(a.id)).map((agent) => (
@@ -442,6 +443,7 @@ export const AgentStreamingDAGView: React.FC = () => {
                     state={agentStates[agent.id] ?? 'COMPLETED'}
                     isSelected={selectedAgent.id === agent.id}
                     onClick={() => setSelectedAgent(agent)}
+                    language={language}
                   />
                 ))}
               </div>
@@ -449,13 +451,13 @@ export const AgentStreamingDAGView: React.FC = () => {
 
             {/* Connecting Flow Arrow */}
             <div className="flex items-center justify-center text-slate-400 text-xs sm:text-sm font-mono font-semibold">
-              <span>▼ Dynamic Visualization & Vernacular Evidence Synthesis</span>
+              <span>{getTranslation('fanout_synthesis', language, '▼ Multilingual Synthesis & Provenance Sign-Off')}</span>
             </div>
 
             {/* Level 5: Visualization & Vernacular Synthesis */}
             <div className="space-y-1.5">
               <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-wider font-bold">
-                STAGE 05 · VECTOR OVERLAYS & MULTILINGUAL ADVISORY
+                {getTranslation('stage_05_title', language, 'STAGE 05 · VERNACULAR EVIDENCE GENERATION')}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {DAG_AGENTS.filter((a) => ['visualization', 'explanation'].includes(a.id)).map((agent) => (
@@ -465,6 +467,7 @@ export const AgentStreamingDAGView: React.FC = () => {
                     state={agentStates[agent.id] ?? 'COMPLETED'}
                     isSelected={selectedAgent.id === agent.id}
                     onClick={() => setSelectedAgent(agent)}
+                    language={language}
                   />
                 ))}
               </div>
@@ -503,24 +506,30 @@ export const AgentStreamingDAGView: React.FC = () => {
 
             {/* Provider and Formula Details */}
             <div className="space-y-2.5 text-xs sm:text-sm font-mono">
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5">
-                <span className="text-xs text-slate-400 block uppercase font-semibold">DATA SOURCE / PROVIDER</span>
-                <span className="text-white text-sm flex items-center gap-2 mt-1 font-sans font-medium">
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
+                <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
+                  {getTranslation('data_source_provider', language, 'DATA SOURCE / PROVIDER')}
+                </span>
+                <span className="text-white text-sm sm:text-base flex items-center gap-2 mt-1.5 font-sans font-medium">
                   <Database className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                   {selectedAgent.provider}
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5">
-                <span className="text-xs text-slate-400 block uppercase font-semibold">GOVERNING EQUATION / HEURISTIC</span>
-                <code className="text-cyan-300 text-xs sm:text-sm block mt-1 overflow-x-auto leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
+                <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
+                  {getTranslation('governing_equation', language, 'GOVERNING EQUATION / HEURISTIC')}
+                </span>
+                <code className="text-cyan-300 text-xs sm:text-sm block mt-1.5 overflow-x-auto leading-relaxed font-semibold">
                   {selectedAgent.equation}
                 </code>
               </div>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5">
-                <span className="text-xs text-slate-400 block uppercase font-semibold">LIVE TELEMETRY OUTPUT</span>
-                <span className="text-emerald-300 text-xs sm:text-sm block mt-1 font-sans leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
+                <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
+                  {getTranslation('live_telemetry_output', language, 'LIVE TELEMETRY OUTPUT')}
+                </span>
+                <span className="text-emerald-300 text-xs sm:text-sm block mt-1.5 font-sans leading-relaxed font-medium">
                   {selectedAgent.sampleOutput}
                 </span>
               </div>
@@ -532,10 +541,10 @@ export const AgentStreamingDAGView: React.FC = () => {
             <div className="px-4 py-3 bg-[#121827] border-b border-white/5 flex items-center justify-between text-xs sm:text-sm font-mono">
               <div className="flex items-center gap-2 text-slate-200 font-semibold">
                 <Terminal className="w-4 h-4 text-emerald-400" />
-                <span>Live Event Stream Console</span>
+                <span>{getTranslation('live_event_console', language, 'Live Event Stream Console')}</span>
               </div>
               <span className="text-xs text-slate-400">
-                {streamLogs.length} events logged
+                {streamLogs.length} {getTranslation('events_logged', language, 'events logged')}
               </span>
             </div>
 
@@ -546,7 +555,7 @@ export const AgentStreamingDAGView: React.FC = () => {
               {streamLogs.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm space-y-2">
                   <Terminal className="w-8 h-8 text-slate-500" />
-                  <span>Click "Run Live DAG Pipeline" above to stream agent events.</span>
+                  <span>{getTranslation('click_to_stream_events', language, 'Click "Run Live DAG Pipeline" above to stream agent events.')}</span>
                 </div>
               ) : (
                 streamLogs.map((log) => (
@@ -587,7 +596,8 @@ const AgentNodeCard: React.FC<{
   state: 'IDLE' | 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR';
   isSelected: boolean;
   onClick: () => void;
-}> = ({ agent, state, isSelected, onClick }) => {
+  language?: string;
+}> = ({ agent, state, isSelected, onClick, language = 'en' }) => {
   const getBorder = () => {
     if (isSelected) return 'border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)] bg-[#1a2336]';
     if (state === 'RUNNING') return 'border-amber-400 bg-amber-950/20 shadow-[0_0_12px_rgba(251,191,36,0.3)]';
@@ -598,22 +608,22 @@ const AgentNodeCard: React.FC<{
   return (
     <div
       onClick={onClick}
-      className={`p-3 rounded-xl border transition-all duration-200 cursor-pointer select-none flex flex-col justify-between ${getBorder()}`}
+      className={`p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer select-none flex flex-col justify-between ${getBorder()}`}
     >
       <div className="flex items-center justify-between gap-1 mb-1">
-        <span className="font-bold text-sm text-white truncate">{agent.name}</span>
-        <span className="flex items-center gap-1.5 text-xs font-mono">
+        <span className="font-bold text-sm sm:text-base text-white truncate">{agent.name}</span>
+        <span className="flex items-center gap-1.5 text-xs sm:text-sm font-mono">
           {state === 'RUNNING' && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />}
           {state === 'COMPLETED' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
           <span className="text-slate-300 font-semibold">{agent.latencyMs}ms</span>
         </span>
       </div>
 
-      <div className="text-xs text-slate-300 truncate font-normal mb-1.5">
+      <div className="text-xs sm:text-sm text-slate-300 truncate font-normal mb-1.5 leading-snug">
         {agent.role}
       </div>
 
-      <div className="flex items-center justify-between text-xs font-mono text-slate-400 pt-1.5 border-t border-white/5">
+      <div className="flex items-center justify-between text-xs sm:text-sm font-mono text-slate-400 pt-1.5 border-t border-white/5">
         <span className="truncate max-w-[140px] text-slate-300">{agent.provider.split(' ')[0]}</span>
         <span className="text-cyan-400 font-bold uppercase">{agent.category}</span>
       </div>

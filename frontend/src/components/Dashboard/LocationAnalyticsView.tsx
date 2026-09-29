@@ -389,25 +389,25 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-xs text-[#A8C4EC]/75 font-mono block font-semibold">{getTranslation('composite_risk_score', language)}</span>
+            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 shadow-sm">
+              <span className="text-xs sm:text-sm text-[#A8C4EC] font-mono block font-bold uppercase tracking-wider">{getTranslation('composite_risk_score', language)}</span>
               <div className="flex items-baseline gap-1 mt-1.5 font-mono">
-                <span className="text-3xl font-bold text-emerald-300">{score}</span>
-                <span className="text-sm text-[#5379AE]">/ 100</span>
+                <span className="text-3xl sm:text-4xl font-extrabold text-emerald-300">{score}</span>
+                <span className="text-sm sm:text-base text-[#5379AE] font-bold">/ 100</span>
               </div>
-              <span className="text-xs text-[#A8C4EC]/75 block mt-1">{getTranslation('minimal_turbulence', language)}</span>
+              <span className="text-xs sm:text-sm text-[#A8C4EC] block mt-1 font-medium">{getTranslation('minimal_turbulence', language)}</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-xs text-[#A8C4EC]/75 font-mono block font-semibold">{getTranslation('craft_suitability', language)}</span>
-              <span className="text-base font-semibold text-white block mt-1.5">{getTranslation('all_vessel_classes', language)}</span>
-              <span className="text-xs text-emerald-400 block mt-1 font-medium">{getTranslation('canoe_obm_trawler', language)}</span>
+            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 shadow-sm">
+              <span className="text-xs sm:text-sm text-[#A8C4EC] font-mono block font-bold uppercase tracking-wider">{getTranslation('craft_suitability', language)}</span>
+              <span className="text-base sm:text-lg font-bold text-white block mt-1.5">{getTranslation('all_vessel_classes', language)}</span>
+              <span className="text-xs sm:text-sm text-emerald-400 block mt-1 font-semibold">{getTranslation('canoe_obm_trawler', language)}</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-xs text-[#A8C4EC]/75 font-mono block font-semibold">{getTranslation('cyclone_risk_title', language)}</span>
-              <span className="text-base font-semibold text-white block mt-1.5">{getTranslation('normal_level_0', language)}</span>
-              <span className="text-xs text-[#A8C4EC]/75 block mt-1 font-medium">{getTranslation('no_active_depression', language)}</span>
+            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 shadow-sm">
+              <span className="text-xs sm:text-sm text-[#A8C4EC] font-mono block font-bold uppercase tracking-wider">{getTranslation('cyclone_risk_title', language)}</span>
+              <span className="text-base sm:text-lg font-bold text-white block mt-1.5">{getTranslation('normal_level_0', language)}</span>
+              <span className="text-xs sm:text-sm text-[#A8C4EC] block mt-1 font-semibold">{getTranslation('no_active_depression', language)}</span>
             </div>
           </div>
 

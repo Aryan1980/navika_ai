@@ -138,7 +138,7 @@ export const LocationSetupView: React.FC = () => {
     setLanguage
   } = useApp();
 
-  const t = (key: string, fallback: string) => getTranslation(language, key, fallback);
+  const t = (key: string, fallback?: string) => getTranslation(key, language, fallback);
 
   // Onboarding Modal Open State
   const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState<boolean>(false);

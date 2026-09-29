@@ -518,6 +518,43 @@ export function getLocalizedRecommendation(rec: string, lang: string = 'en'): st
     }
   }
 
+  // Dynamic regex matching for backend generated thermal front recommendations
+  const sstMatch = rec.match(/([\d\.]+)\s*°?C/i);
+  const chlMatch = rec.match(/Chl:\s*([\d\.]+)/i);
+  const distMatch = rec.match(/([\d\.]+)\s*km/i);
+  const nmMatch = rec.match(/~?([\d\.]+)\s*NM/i);
+
+  if ((rec.toLowerCase().includes('thermal front') || rec.toLowerCase().includes('high-yield') || rec.toLowerCase().includes('minimizes transit')) && sstMatch && distMatch) {
+    const sst = sstMatch[1];
+    const chl = chlMatch ? chlMatch[1] : '2.85';
+    const dist = distMatch[1];
+    const nm = nmMatch ? nmMatch[1] : (parseFloat(dist) * 0.54).toFixed(1);
+
+    if (lang === 'hi') {
+      return `उच्च-उत्पादकता थर्मल फ्रंट (${sst}°C, क्लोरोफिल: ${chl} mg/m³)। निकट दूरी (${dist} किमी, ~${nm} NM) यात्रा समय व ईंधन की खपत कम करती है।`;
+    }
+    if (lang === 'ml') {
+      return `ഉയർന്ന വിളവ് നൽകുന്ന തെർമൽ ഫ്രണ്ട് (${sst}°C, ക്ലോറോഫിൽ: ${chl} mg/m³). കുറഞ്ഞ ദൂരം (${dist} കി.മീ, ~${nm} NM) യാത്രാ സമയവും ഇന്ധനച്ചെലവും കുറയ്ക്കുന്നു.`;
+    }
+    if (lang === 'ta') {
+      return `அதிக மீன்வளம் தரும் வெப்ப முகப்பு (${sst}°C, குளோரோபில்: ${chl} mg/m³). குறுகிய தூரம் (${dist} கி.மீ, ~${nm} NM) பயண நேரத்தையும் எரிபொருள் செலவையும் குறைக்கிறது.`;
+    }
+    if (lang === 'te') {
+      return `అధిక ఉత్పాదకత కలిగిన థర్మల్ ఫ్రంట్ (${sst}°C, క్లోరోఫిల్: ${chl} mg/m³). దగ్గరి పరిధి (${dist} కి.మీ, ~${nm} NM) ప్రయాణ సమయాన్ని మరియు ఇంధన వినియోగాన్ని తగ్గిస్తుంది.`;
+    }
+    if (lang === 'bn') {
+      return `উচ্চ ফলনশীল থার্মাল ফ্রন্ট (${sst}°C, ক্লোরোফিল: ${chl} mg/m³)। স্বল্প দূরত্ব (${dist} কিমি, ~${nm} নটিক্যাল মাইল) যাতায়াতের সময় ও জ্বালানি খরচ কমায়।`;
+    }
+  }
+
+  if (rec.toLowerCase().includes('minimizes transit time') || rec.toLowerCase().includes('fuel consumption')) {
+    if (lang === 'hi') return 'उच्च-उत्पादकता थर्मल फ्रंट। निकट दूरी यात्रा समय और ईंधन खपत को न्यूनतम करती है।';
+    if (lang === 'ml') return 'ഉയർന്ന വിളവ് നൽകുന്ന തെർമൽ ഫ്രണ്ട്. കുറഞ്ഞ ദൂരം യാത്രാ സമയവും ഇന്ധനച്ചെലവും കുറയ്ക്കുന്നു.';
+    if (lang === 'ta') return 'அதிக மீன்வளம் தரும் வெப்ப முகப்பு. குறுகிய தூரம் பயண நேரத்தையும் எரிபொருள் செலவையும் குறைக்கிறது.';
+    if (lang === 'te') return 'అధిక ఉత్పాదకత కలిగిన థర్మల్ ఫ్రంట్. దగ్గరి పరిధి ప్రయాణ సమయాన్ని మరియు ఇంధన వినియోగాన్ని తగ్గిస్తుంది.';
+    if (lang === 'bn') return 'উচ্চ ফলনশীল থার্মাল ফ্রন্ট। স্বল্প দূরত্ব যাতায়াতের সময় ও জ্বালানি খরচ কমায়।';
+  }
+
   return rec;
 }
 

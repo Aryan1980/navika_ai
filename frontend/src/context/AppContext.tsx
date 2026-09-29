@@ -102,7 +102,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [activeLocation, setActiveLocationState] = useState<Coordinates>(DEFAULT_COORDS);
   const [activeLocationName, setActiveLocationName] = useState<string>(DEFAULT_NAME);
-  const [language, setLanguage] = useState<string>('en');
+  const [language, setLanguageState] = useState<string>(() => {
+    return localStorage.getItem('samudra_language') || 'en';
+  });
+
+  const setLanguage = (lang: string) => {
+    setLanguageState(lang);
+    try {
+      localStorage.setItem('samudra_language', lang);
+    } catch {}
+  };
   const [activeCommandTab, setActiveCommandTab] = useState<'conditions' | 'pfz' | 'route' | 'chat'>('pfz');
   const [activeMapLayers, setActiveMapLayers] = useState<string[]>(DEFAULT_LAYERS);
   const [weather, setWeather] = useState<WeatherReport | null>(null);

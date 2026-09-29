@@ -123,7 +123,7 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono uppercase tracking-wider text-slate-300">
+                  <span className="text-xs sm:text-sm font-mono uppercase tracking-wider text-slate-300 font-bold">
                     {s.label}
                   </span>
                   <div className="p-1 rounded-md bg-white/5">
@@ -135,12 +135,12 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
                   {s.value}
                 </div>
 
-                <div className="text-sm font-semibold text-slate-100 mt-1">
+                <div className="text-sm sm:text-base font-bold text-slate-100 mt-1">
                   {s.metric}
                 </div>
               </div>
 
-              <div className="text-xs text-slate-300 leading-normal mt-3 pt-2 border-t border-white/10">
+              <div className="text-sm text-slate-200 leading-snug mt-3 pt-2 border-t border-white/10 font-normal">
                 {s.subtext}
               </div>
             </div>
