@@ -38,19 +38,19 @@ export const OceanDynamicsPanel: React.FC = () => {
         <div className="flex items-center justify-between pb-2">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-white tracking-tight font-sans">
+              <h3 className="text-base font-bold text-white tracking-tight font-sans">
                 {getTranslation('ocean_dynamics_title', language)}
               </h3>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#151926] border border-[#5379AE]/30 text-[10px] font-mono">
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#151926] border border-[#5379AE]/30 text-xs font-mono font-semibold">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
+                  className={`w-2 h-2 rounded-full ${
                     isLive ? 'bg-emerald-400 animate-pulse' : 'bg-cyan-400'
                   }`}
                 />
                 <span className="text-[#A8C4EC]">{freshnessText}</span>
               </div>
             </div>
-            <span className="text-[11px] text-[#A8C4EC]/75 font-mono">
+            <span className="text-xs text-[#A8C4EC]/85 font-mono">
               {getTranslation('ocean_dynamics_sub', language)}
             </span>
           </div>
@@ -59,14 +59,14 @@ export const OceanDynamicsPanel: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-1.5 bg-[#151926] hover:bg-[#1a2133] border border-[#5379AE]/30 hover:border-[#88BDF2]/50 rounded-lg px-2.5 py-1 text-[11px] text-[#A8C4EC] font-mono cursor-pointer transition-colors"
+              className="flex items-center gap-1.5 bg-[#151926] hover:bg-[#1a2133] border border-[#5379AE]/30 hover:border-[#88BDF2]/50 rounded-lg px-3 py-1.5 text-xs text-[#A8C4EC] font-mono cursor-pointer transition-colors"
             >
               <span className="font-semibold text-white">{mode}</span>
-              <ChevronDown className="w-3 h-3 text-[#5379AE]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#5379AE]" />
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 w-32 bg-[#151926] border border-[#5379AE]/40 rounded-xl shadow-2xl py-1 z-30 font-mono text-[11px]">
+              <div className="absolute right-0 top-full mt-1 w-36 bg-[#151926] border border-[#5379AE]/40 rounded-xl shadow-2xl py-1 z-30 font-mono text-xs">
                 {(['Live', 'Historical', 'Forecast'] as TimeframeMode[]).map((m) => (
                   <button
                     key={m}
@@ -74,12 +74,12 @@ export const OceanDynamicsPanel: React.FC = () => {
                       setMode(m);
                       setIsDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 hover:bg-[#1f283d] transition-colors flex items-center justify-between ${
+                    className={`w-full text-left px-3.5 py-2 hover:bg-[#1f283d] transition-colors flex items-center justify-between ${
                       mode === m ? 'text-cyan-300 font-bold bg-[#1d2334]' : 'text-slate-300'
                     }`}
                   >
                     <span>{m}</span>
-                    {mode === m && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                    {mode === m && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
                   </button>
                 ))}
               </div>
@@ -215,15 +215,15 @@ export const OceanDynamicsPanel: React.FC = () => {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-3 text-[10px] font-mono">
-            <span className="flex items-center gap-1 text-[#f1f5fb]">
-              <span className="w-2 h-2 rounded-sm bg-emerald-400"></span> {getTranslation('safe_status', language)} ({telemetry.safe_vessel_count})
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="flex items-center gap-1.5 text-[#f1f5fb]">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span> {getTranslation('safe_status', language)} ({telemetry.safe_vessel_count})
             </span>
-            <span className="flex items-center gap-1 text-[#f1f5fb]">
-              <span className="w-2 h-2 rounded-sm bg-amber-400"></span> {getTranslation('caution_status', language)} ({telemetry.caution_vessel_count})
+            <span className="flex items-center gap-1.5 text-[#f1f5fb]">
+              <span className="w-2.5 h-2.5 rounded-sm bg-amber-400"></span> {getTranslation('caution_status', language)} ({telemetry.caution_vessel_count})
             </span>
-            <span className="flex items-center gap-1 text-[#f1f5fb]">
-              <span className="w-2 h-2 rounded-sm bg-rose-500"></span> {getTranslation('avoid_status', language)} ({telemetry.avoid_vessel_count})
+            <span className="flex items-center gap-1.5 text-[#f1f5fb]">
+              <span className="w-2.5 h-2.5 rounded-sm bg-rose-500"></span> {getTranslation('avoid_status', language)} ({telemetry.avoid_vessel_count})
             </span>
           </div>
         </div>
@@ -231,20 +231,20 @@ export const OceanDynamicsPanel: React.FC = () => {
         {/* Fleet / Craft Counter */}
         <div className="col-span-5 flex items-center justify-between pl-3 border-l border-[#5379AE]/20">
           <div>
-            <span className="text-[10px] text-[#A8C4EC]/75 block font-sans font-medium">
+            <span className="text-xs text-[#A8C4EC]/85 block font-sans font-medium">
               {getTranslation('vessels_in_sector', language)}
             </span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-xs font-mono font-bold text-emerald-400">
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-xs sm:text-sm font-mono font-bold text-emerald-400">
                 +{telemetry.vessel_delta}
               </span>
-              <span className="text-2xl font-mono font-bold text-white leading-none">
+              <span className="text-2xl sm:text-3xl font-mono font-bold text-white leading-none">
                 {telemetry.vessel_count}
               </span>
             </div>
-            <div className="flex items-center gap-1 mt-1 text-[9px] font-mono">
+            <div className="flex items-center gap-1.5 mt-1 text-xs font-mono">
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
+                className={`w-2 h-2 rounded-full ${
                   isAisLive
                     ? 'bg-emerald-400 animate-pulse'
                     : isAisConnecting
@@ -266,7 +266,7 @@ export const OceanDynamicsPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-11 h-10 rounded-xl bg-[#151926] border border-[#5379AE]/30 flex items-center justify-center text-lg shadow-inner">
+          <div className="w-12 h-11 rounded-xl bg-[#151926] border border-[#5379AE]/30 flex items-center justify-center text-xl shadow-inner">
             🚢
           </div>
         </div>

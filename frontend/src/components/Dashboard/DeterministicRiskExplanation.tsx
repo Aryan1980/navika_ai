@@ -108,16 +108,16 @@ export const DeterministicRiskExplanation: React.FC = () => {
             <Calculator className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+            <div className="flex items-center gap-2.5">
+              <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
                 Why this score? Deterministic Mathematical Breakdown
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono font-semibold flex items-center gap-1">
-                <Lock className="w-2.5 h-2.5" />
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-semibold flex items-center gap-1.5">
+                <Lock className="w-3 h-3" />
                 Zero LLM Hallucination
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-300 mt-1">
               Strict multi-factor mathematical formulation — No generative AI hallucination on marine safety scores.
             </p>
           </div>
@@ -125,9 +125,9 @@ export const DeterministicRiskExplanation: React.FC = () => {
 
         <button
           type="button"
-          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 group-hover:text-white transition-colors"
+          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 group-hover:text-white transition-colors"
         >
-          {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         </button>
       </div>
 
@@ -135,16 +135,16 @@ export const DeterministicRiskExplanation: React.FC = () => {
         <div className="mt-4 pt-4 border-t border-[#5379AE]/20 space-y-4 animate-in fade-in duration-200">
           
           {/* Formula Display Box */}
-          <div className="p-3.5 rounded-xl bg-[#0d121e] border border-[#5379AE]/30 font-mono text-xs space-y-1.5">
-            <div className="text-[10px] text-cyan-400 uppercase tracking-widest font-semibold">
+          <div className="p-4 rounded-xl bg-[#0d121e] border border-[#5379AE]/30 font-mono space-y-2">
+            <div className="text-xs text-cyan-400 uppercase tracking-wider font-bold">
               MATHEMATICAL OBJECTIVE FORMULA:
             </div>
-            <div className="text-white text-xs leading-relaxed overflow-x-auto py-1">
+            <div className="text-white text-xs sm:text-sm leading-relaxed overflow-x-auto py-1">
               <code>
                 Risk = 0.20·S_wind + 0.25·S_wave + 0.15·S_weather + 0.15·S_border + 0.10·S_trajectory + 0.05·S_sst + 0.05·S_chlorophyll
               </code>
             </div>
-            <div className="text-slate-400 text-[11px] flex items-center justify-between pt-1 border-t border-white/5">
+            <div className="text-slate-300 text-xs sm:text-sm flex items-center justify-between pt-1.5 border-t border-white/5">
               <span>Safety Score = 100 - Risk Score</span>
               <span className="text-emerald-400 font-bold">
                 Computed Safety: {safetyScore}/100 ({risk.safety_verdict})
@@ -154,31 +154,31 @@ export const DeterministicRiskExplanation: React.FC = () => {
 
           {/* Interactive Factor Breakdown Table */}
           <div className="overflow-x-auto rounded-xl border border-[#5379AE]/25">
-            <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-[#0e1320] text-slate-400 text-[10.5px] uppercase border-b border-[#5379AE]/25">
+            <table className="w-full text-left text-sm font-mono">
+              <thead className="bg-[#0e1320] text-slate-300 text-xs uppercase border-b border-[#5379AE]/25">
                 <tr>
-                  <th className="py-2.5 px-3">Physical Factor</th>
-                  <th className="py-2.5 px-2">Weight</th>
-                  <th className="py-2.5 px-3">Measured Telemetry</th>
-                  <th className="py-2.5 px-2 text-center">Subscore</th>
-                  <th className="py-2.5 px-2 text-right">Contribution</th>
-                  <th className="py-2.5 px-3 text-center">Severity</th>
+                  <th className="py-3 px-3.5">Physical Factor</th>
+                  <th className="py-3 px-2.5">Weight</th>
+                  <th className="py-3 px-3.5">Measured Telemetry</th>
+                  <th className="py-3 px-2.5 text-center">Subscore</th>
+                  <th className="py-3 px-2.5 text-right">Contribution</th>
+                  <th className="py-3 px-3.5 text-center">Severity</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-2 px-3 font-medium text-slate-200">
+                    <td className="py-2.5 px-3.5 font-semibold text-slate-100">
                       <div>{row.name}</div>
-                      <div className="text-[9.5px] text-slate-500 font-sans">{row.formula}</div>
+                      <div className="text-xs text-slate-400 font-sans mt-0.5">{row.formula}</div>
                     </td>
-                    <td className="py-2 px-2 text-cyan-300 font-semibold">{row.weightLabel}</td>
-                    <td className="py-2 px-3 text-slate-300 font-sans">{row.measured}</td>
-                    <td className="py-2 px-2 text-center font-bold text-white">{row.subscore}</td>
-                    <td className="py-2 px-2 text-right font-bold text-cyan-400">+{row.contribution}</td>
-                    <td className="py-2 px-3 text-center">
+                    <td className="py-2.5 px-2.5 text-cyan-300 font-bold">{row.weightLabel}</td>
+                    <td className="py-2.5 px-3.5 text-slate-200 font-sans text-xs sm:text-sm">{row.measured}</td>
+                    <td className="py-2.5 px-2.5 text-center font-bold text-white text-base">{row.subscore}</td>
+                    <td className="py-2.5 px-2.5 text-right font-bold text-cyan-400 text-base">+{row.contribution}</td>
+                    <td className="py-2.5 px-3.5 text-center">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        className={`px-2.5 py-1 rounded text-xs font-bold ${
                           row.severity === 'LOW'
                             ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                             : row.severity === 'MODERATE'
@@ -192,15 +192,15 @@ export const DeterministicRiskExplanation: React.FC = () => {
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="bg-[#0e1320] font-bold text-white border-t border-[#5379AE]/30">
+              <tfoot className="bg-[#0e1320] font-bold text-white border-t border-[#5379AE]/30 text-sm">
                 <tr>
-                  <td className="py-2.5 px-3" colSpan={4}>
+                  <td className="py-3 px-3.5" colSpan={4}>
                     COMPOSITE RISK TOTAL (Weighted Sum):
                   </td>
-                  <td className="py-2.5 px-2 text-right text-rose-400 text-sm">
+                  <td className="py-3 px-2.5 text-right text-rose-400 text-base">
                     {score}/100
                   </td>
-                  <td className="py-2.5 px-3 text-center text-emerald-400">
+                  <td className="py-3 px-3.5 text-center text-emerald-400">
                     {risk.safety_verdict}
                   </td>
                 </tr>
@@ -209,8 +209,8 @@ export const DeterministicRiskExplanation: React.FC = () => {
           </div>
 
           {/* Verification Protocol Tag */}
-          <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-200">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 flex items-start gap-2.5 text-xs sm:text-sm text-emerald-200">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
             <div className="leading-relaxed">
               <strong>Physical Verification Guarantee:</strong> All weights sum to exactly 1.00 (100%). Scores are verified by the <em>Verification Agent</em> against multi-sensor consensus (ISRO Oceansat-3, INSAT-3DR, and IMD coastal stations).
             </div>

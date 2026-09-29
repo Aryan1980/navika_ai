@@ -70,15 +70,15 @@ export const ReasoningTerminal: React.FC = () => {
         className="px-4 py-3 bg-[#181e2e] border-b border-[#384959] flex items-center justify-between cursor-pointer hover:bg-[#1f2638] transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <BrainCircuit className="w-4 h-4 text-[#88BDF2]" />
+          <BrainCircuit className="w-5 h-5 text-[#88BDF2]" />
           <div>
-            <h3 className="font-bold text-white text-xs">Explainable AI Reasoning Terminal</h3>
-            <p className="text-[10px] text-[#BDDDFC]/70">Auditability, data provenance & deterministic veto checks</p>
+            <h3 className="font-bold text-white text-sm">Explainable AI Reasoning Terminal</h3>
+            <p className="text-xs text-[#BDDDFC]/80">Auditability, data provenance & deterministic veto checks</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold border ${
             isVetoed
               ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
               : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
@@ -86,40 +86,40 @@ export const ReasoningTerminal: React.FC = () => {
             {isVetoed ? 'CONFLICT: VETO' : 'CONFLICT: PASS'}
           </span>
           <button className="text-slate-400 hover:text-white">
-            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* ── Drawer Body ── */}
       {isOpen && (
-        <div className="p-4 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4">
           
           {/* Section 1: Color-Coded Agent Ingestion Matrix */}
           <div>
-            <span className="text-[10px] font-mono uppercase text-[#BDDDFC]/70 tracking-wider font-semibold block mb-2">
+            <span className="text-xs font-mono uppercase text-[#BDDDFC]/90 tracking-wider font-bold block mb-2.5">
               Multi-Agent Ingested Evidence & Provenance
             </span>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {DATA_SOURCES.map((item, idx) => (
                 <div 
                   key={idx}
-                  className={`p-3 rounded-xl border ${item.color} flex flex-col justify-between`}
+                  className={`p-3.5 rounded-xl border ${item.color} flex flex-col justify-between`}
                 >
                   <div>
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="font-bold text-xs">{item.agent}</span>
-                      <span className="text-[9px] font-mono opacity-80 flex items-center gap-1">
-                        <Clock className="w-2.5 h-2.5" />
+                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                      <span className="font-bold text-sm">{item.agent}</span>
+                      <span className="text-xs font-mono opacity-80 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
                         {item.timestamp}
                       </span>
                     </div>
-                    <div className="text-[11px] font-mono leading-tight mb-2 text-white">
+                    <div className="text-xs sm:text-sm font-mono leading-relaxed mb-2.5 text-white">
                       {item.data}
                     </div>
                   </div>
-                  <div className="text-[9px] font-mono opacity-70 flex items-center gap-1 pt-1.5 border-t border-white/10">
-                    <Database className="w-2.5 h-2.5 flex-shrink-0" />
+                  <div className="text-xs font-mono opacity-80 flex items-center gap-1.5 pt-2 border-t border-white/10">
+                    <Database className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="truncate">{item.source}</span>
                   </div>
                 </div>
@@ -128,35 +128,35 @@ export const ReasoningTerminal: React.FC = () => {
           </div>
 
           {/* Section 2: Deterministic Veto Safety Checks */}
-          <div className="p-3 rounded-xl bg-[#161c27] border border-[#384959] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-white flex items-center gap-1.5">
+          <div className="p-4 rounded-xl bg-[#161c27] border border-[#384959] space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="font-bold text-sm text-white flex items-center gap-2">
                 {isVetoed ? <ShieldAlert className="w-4 h-4 text-rose-400" /> : <ShieldCheck className="w-4 h-4 text-emerald-400" />}
                 Deterministic Safety Veto Threshold Evaluation
               </span>
-              <span className="text-[10px] font-mono text-[#88BDF2]">Formula: MinRisk(IMBL, Wave, Squall)</span>
+              <span className="text-xs font-mono text-[#88BDF2] font-semibold">Formula: MinRisk(IMBL, Wave, Squall)</span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px] font-mono pt-1">
-              <div className="p-2 rounded-lg bg-[#12161f] border border-[#384959]/60">
-                <span className="text-slate-400 block text-[9px]">Wave Threshold</span>
-                <span className={`font-bold ${waveHeight > 2.5 ? 'text-rose-400' : 'text-emerald-400'}`}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center text-xs font-mono pt-1">
+              <div className="p-2.5 rounded-lg bg-[#12161f] border border-[#384959]/60">
+                <span className="text-slate-400 block text-xs uppercase mb-0.5">Wave Threshold</span>
+                <span className={`font-bold text-xs sm:text-sm ${waveHeight > 2.5 ? 'text-rose-400' : 'text-emerald-400'}`}>
                   {waveHeight}m / 2.5m Max
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-[#12161f] border border-[#384959]/60">
-                <span className="text-slate-400 block text-[9px]">IMBL Buffer</span>
-                <span className="font-bold text-emerald-400">
+              <div className="p-2.5 rounded-lg bg-[#12161f] border border-[#384959]/60">
+                <span className="text-slate-400 block text-xs uppercase mb-0.5">IMBL Buffer</span>
+                <span className="font-bold text-xs sm:text-sm text-emerald-400">
                   {imblDistanceKm} km / 5.0km Min
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-[#12161f] border border-[#384959]/60">
-                <span className="text-slate-400 block text-[9px]">Squall Warning</span>
-                <span className="font-bold text-emerald-400">Clear (0 Hazards)</span>
+              <div className="p-2.5 rounded-lg bg-[#12161f] border border-[#384959]/60">
+                <span className="text-slate-400 block text-xs uppercase mb-0.5">Squall Warning</span>
+                <span className="font-bold text-xs sm:text-sm text-emerald-400">Clear (0 Hazards)</span>
               </div>
-              <div className="p-2 rounded-lg bg-[#12161f] border border-[#384959]/60">
-                <span className="text-slate-400 block text-[9px]">Veto Decision</span>
-                <span className={`font-bold ${isVetoed ? 'text-rose-400' : 'text-emerald-400'}`}>
+              <div className="p-2.5 rounded-lg bg-[#12161f] border border-[#384959]/60">
+                <span className="text-slate-400 block text-xs uppercase mb-0.5">Veto Decision</span>
+                <span className={`font-bold text-xs sm:text-sm ${isVetoed ? 'text-rose-400' : 'text-emerald-400'}`}>
                   {isVetoed ? 'VETO OVERRIDE' : 'PASSED'}
                 </span>
               </div>
