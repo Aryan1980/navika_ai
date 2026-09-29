@@ -181,10 +181,10 @@ export const OceanDynamicsPanel: React.FC = () => {
       </div>
 
       {/* ── Bottom Split: Status Overview & Vehicles in Transit ── */}
-      <div className="grid grid-cols-12 gap-3 pt-3 border-t border-[#5379AE]/20 mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-[#5379AE]/20 mt-2">
         
         {/* Status Overview with Segmented Progress Bar */}
-        <div className="col-span-7 space-y-2">
+        <div className="sm:col-span-7 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-white font-sans">
               {getTranslation('sector_safety_dist', language)}
@@ -215,7 +215,7 @@ export const OceanDynamicsPanel: React.FC = () => {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-3 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
             <span className="flex items-center gap-1.5 text-[#f1f5fb]">
               <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span> {getTranslation('safe_status', language)} ({telemetry.safe_vessel_count})
             </span>
@@ -229,7 +229,7 @@ export const OceanDynamicsPanel: React.FC = () => {
         </div>
 
         {/* Fleet / Craft Counter */}
-        <div className="col-span-5 flex items-center justify-between pl-3 border-l border-[#5379AE]/20">
+        <div className="sm:col-span-5 flex items-center justify-between pt-2 sm:pt-0 sm:pl-3 border-t sm:border-t-0 sm:border-l border-[#5379AE]/20">
           <div>
             <span className="text-xs text-[#A8C4EC]/85 block font-sans font-medium">
               {getTranslation('vessels_in_sector', language)}

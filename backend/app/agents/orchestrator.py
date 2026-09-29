@@ -25,7 +25,7 @@ from app.agents.trajectory import TrajectoryAgent
 from app.agents.verification import VerificationAgent
 
 class AgentOrchestrator:
-    """Central nervous system of SamudraAI, coordinating specialized agents with concurrent execution."""
+    """Central nervous system of Navika AI, coordinating specialized agents with concurrent execution."""
 
     def __init__(self):
         self.provider = CompositeMarineDataProvider()

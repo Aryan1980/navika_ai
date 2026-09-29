@@ -14,7 +14,8 @@ import {
   X,
   ChevronRight,
   Search,
-  ChevronDown
+  ChevronDown,
+  Menu
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Coordinates } from '../../types/marine';
@@ -143,6 +144,7 @@ export const LocationSetupView: React.FC = () => {
   // Onboarding Modal Open State
   const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState<boolean>(false);
   const [onboardingStep, setOnboardingStep] = useState<'signin' | 'port'>(user ? 'port' : 'signin');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
 
   // Step 1: Sign-In State
   const [phoneInput, setPhoneInput] = useState('9847012345');
@@ -433,7 +435,7 @@ export const LocationSetupView: React.FC = () => {
       
       {/* ── Fixed Minimalist Top Navigation Bar ── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B131F]/90 backdrop-blur-md border-b border-white/5 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-18 sm:h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between">
           
           {/* Brand Logo & Navigation on Left */}
           <div className="flex items-center gap-4 sm:gap-8">
@@ -446,8 +448,8 @@ export const LocationSetupView: React.FC = () => {
               <span>NavikaAI</span>
             </a>
 
-            {/* Navigation links: Home and Features */}
-            <nav className="flex items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-slate-300">
+            {/* Navigation links: Home and Features (Desktop only) */}
+            <nav className="hidden md:flex items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-slate-300">
               <a
                 href="#top"
                 onClick={scrollToHero}
@@ -465,7 +467,7 @@ export const LocationSetupView: React.FC = () => {
             </nav>
           </div>
 
-          {/* Top Actions: Language Selector, Sign In, Get Started */}
+          {/* Top Actions: Language Selector, Sign In, Get Started, Mobile Hamburger */}
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Minimalist Language Switcher */}
             <div className="relative flex items-center gap-1 text-xs sm:text-sm text-slate-300 hover:text-white bg-white/5 px-2.5 py-1.5 rounded-full border border-white/10">
@@ -473,7 +475,7 @@ export const LocationSetupView: React.FC = () => {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-transparent text-slate-200 hover:text-white text-xs sm:text-sm font-medium focus:outline-none cursor-pointer pr-3 appearance-none"
+                className="bg-transparent text-slate-200 hover:text-white text-xs sm:text-sm font-medium focus:outline-none cursor-pointer pr-3 appearance-none max-w-[85px] sm:max-w-none"
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code} className="bg-[#0B131F] text-white">
@@ -487,7 +489,7 @@ export const LocationSetupView: React.FC = () => {
             {user ? (
               <button
                 onClick={openAuthFlow}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-medium text-xs sm:text-sm tracking-wide transition-all cursor-pointer"
+                className="hidden sm:flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-medium text-xs sm:text-sm tracking-wide transition-all cursor-pointer"
               >
                 <User className="w-3.5 h-3.5 text-[#FBD784]" />
                 <span className="truncate max-w-[100px] sm:max-w-[140px]">{user.name}</span>
@@ -497,22 +499,98 @@ export const LocationSetupView: React.FC = () => {
               <>
                 <button
                   onClick={openAuthFlow}
-                  className="hidden sm:inline-block text-sm font-medium text-slate-300 hover:text-white px-2 py-1 transition-colors cursor-pointer"
+                  className="hidden md:inline-block text-sm font-medium text-slate-300 hover:text-white px-2 py-1 transition-colors cursor-pointer"
                 >
                   {t('sign_in_nav', 'Sign In')}
                 </button>
                 <button
                   onClick={openAuthFlow}
-                  className="flex items-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full bg-transparent hover:bg-[#FBD784] border border-[#FBD784] text-[#FBD784] hover:text-[#0B131F] font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 cursor-pointer"
+                  className="hidden sm:flex items-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full bg-transparent hover:bg-[#FBD784] border border-[#FBD784] text-[#FBD784] hover:text-[#0B131F] font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 cursor-pointer"
                 >
                   <span>{t('get_started_nav', 'Get Started')}</span>
                   <span className="text-xs">→</span>
                 </button>
               </>
             )}
+
+            {/* Mobile Hamburger Menu Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Toggle navigation drawer"
+            >
+              {isMobileNavOpen ? <X className="w-5 h-5 text-[#FBD784]" /> : <Menu className="w-5 h-5 text-[#FBD784]" />}
+            </button>
           </div>
 
         </div>
+
+        {/* ── Mobile Slide-Down Nav Drawer ── */}
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-white/10 bg-[#0B131F]/95 backdrop-blur-xl px-5 py-4 space-y-4 shadow-2xl animate-in slide-in-from-top duration-200">
+            <div className="flex flex-col gap-2 text-base font-medium text-slate-200">
+              <a
+                href="#top"
+                onClick={(e) => {
+                  scrollToHero(e);
+                  setIsMobileNavOpen(false);
+                }}
+                className="py-2.5 px-3 rounded-xl hover:bg-white/5 transition-colors flex items-center justify-between"
+              >
+                <span>{t('nav_home', 'Home')}</span>
+                <span className="text-xs text-slate-500 font-mono">00</span>
+              </a>
+              <a
+                href="#feature-01"
+                onClick={(e) => {
+                  scrollToSection(e, 'feature-01', '01');
+                  setIsMobileNavOpen(false);
+                }}
+                className="py-2.5 px-3 rounded-xl hover:bg-white/5 transition-colors flex items-center justify-between"
+              >
+                <span>{t('nav_features', 'Features')}</span>
+                <span className="text-xs text-slate-500 font-mono">01-03</span>
+              </a>
+              {user ? (
+                <button
+                  onClick={() => {
+                    openAuthFlow();
+                    setIsMobileNavOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl bg-white/5 text-white"
+                >
+                  <span className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-[#FBD784]" />
+                    <span className="font-semibold">{user.name}</span>
+                  </span>
+                  <span className="text-[#FBD784] font-bold">→</span>
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2.5 pt-3 border-t border-white/10">
+                  <button
+                    onClick={() => {
+                      openAuthFlow();
+                      setIsMobileNavOpen(false);
+                    }}
+                    className="w-full text-center py-3 text-slate-200 hover:text-white rounded-xl border border-white/15 bg-white/5 font-medium cursor-pointer"
+                  >
+                    {t('sign_in_nav', 'Sign In')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      openAuthFlow();
+                      setIsMobileNavOpen(false);
+                    }}
+                    className="w-full text-center py-3 rounded-xl bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold shadow-md cursor-pointer"
+                  >
+                    {t('get_started_nav', 'Get Started')} →
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── Floating Side Social / Telemetry (Left Margin) ── */}
@@ -528,18 +606,18 @@ export const LocationSetupView: React.FC = () => {
       {/* Prominently scaled, clear click targets, and dynamically tracked on scroll across desktop and mobile */}
       <aside
         aria-label="Section Navigation"
-        className="fixed right-2 sm:right-6 lg:right-10 top-1/2 -translate-y-1/2 z-40 flex flex-col items-end gap-5 sm:gap-8 select-none"
+        className="fixed right-1 sm:right-6 lg:right-10 top-1/2 -translate-y-1/2 z-40 flex flex-col items-end gap-3 sm:gap-8 select-none pointer-events-auto"
       >
         {/* Item: Start */}
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'hero-section', 'hero')}
-          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-1.5 sm:gap-4 py-1 sm:py-2 px-1 sm:px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-[10px] sm:text-base tracking-wider font-bold font-mono px-1 py-0.5 rounded bg-[#0B131F]/70 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none transition-all duration-300 ${
               activeSection === 'hero'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
+                ? 'text-white scale-105 sm:scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -548,8 +626,8 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === 'hero'
-                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
-                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[2.5px] sm:w-[4px] h-6 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-3.5 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
@@ -558,12 +636,12 @@ export const LocationSetupView: React.FC = () => {
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'feature-01', '01')}
-          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-1.5 sm:gap-4 py-1 sm:py-2 px-1 sm:px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-[10px] sm:text-base tracking-wider font-bold font-mono px-1 py-0.5 rounded bg-[#0B131F]/70 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none transition-all duration-300 ${
               activeSection === '01'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
+                ? 'text-white scale-105 sm:scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -572,8 +650,8 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === '01'
-                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
-                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[2.5px] sm:w-[4px] h-6 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-3.5 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
@@ -582,12 +660,12 @@ export const LocationSetupView: React.FC = () => {
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'feature-02', '02')}
-          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-1.5 sm:gap-4 py-1 sm:py-2 px-1 sm:px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-[10px] sm:text-base tracking-wider font-bold font-mono px-1 py-0.5 rounded bg-[#0B131F]/70 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none transition-all duration-300 ${
               activeSection === '02'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
+                ? 'text-white scale-105 sm:scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -596,8 +674,8 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === '02'
-                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
-                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[2.5px] sm:w-[4px] h-6 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-3.5 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
@@ -606,12 +684,12 @@ export const LocationSetupView: React.FC = () => {
         <button
           type="button"
           onClick={(e) => scrollToSection(e, 'feature-03', '03')}
-          className="group flex items-center gap-2.5 sm:gap-4 py-2 px-2.5 cursor-pointer transition-all duration-300"
+          className="group flex items-center gap-1.5 sm:gap-4 py-1 sm:py-2 px-1 sm:px-2.5 cursor-pointer transition-all duration-300"
         >
           <span
-            className={`text-xs sm:text-base tracking-wider font-bold transition-all duration-300 ${
+            className={`text-[10px] sm:text-base tracking-wider font-bold font-mono px-1 py-0.5 rounded bg-[#0B131F]/70 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none transition-all duration-300 ${
               activeSection === '03'
-                ? 'text-white scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
+                ? 'text-white scale-105 sm:scale-110 drop-shadow-[0_2px_8px_rgba(255,255,255,0.45)]'
                 : 'text-slate-400 group-hover:text-slate-200'
             }`}
           >
@@ -620,15 +698,15 @@ export const LocationSetupView: React.FC = () => {
           <div
             className={`rounded-full transition-all duration-300 ${
               activeSection === '03'
-                ? 'w-[3px] sm:w-[4px] h-8 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
-                : 'w-[2px] h-4 sm:h-6 bg-white/25 group-hover:bg-white/50'
+                ? 'w-[2.5px] sm:w-[4px] h-6 sm:h-12 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]'
+                : 'w-[2px] h-3.5 sm:h-6 bg-white/25 group-hover:bg-white/50'
             }`}
           />
         </button>
       </aside>
 
       {/* ── 1. Full-Bleed Atmospheric Ocean Hero Section ── */}
-      <section id="hero-section" className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-24 sm:pt-28 pb-16 overflow-hidden scroll-mt-20">
+      <section id="hero-section" className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-center items-center text-center pl-4 pr-12 sm:pr-16 md:px-6 pt-24 sm:pt-28 pb-16 overflow-hidden scroll-mt-20">
         
         {/* Ocean Background Image with Smooth Fading Gradient Overlay */}
         <div className="absolute inset-0 z-0">
@@ -647,13 +725,13 @@ export const LocationSetupView: React.FC = () => {
         <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
           
           {/* Kicker with Leading Horizontal Line */}
-          <div className="flex items-center gap-3 sm:gap-4 text-[#FBD784] text-xs sm:text-sm md:text-base font-bold tracking-[0.25em] uppercase mb-6 sm:mb-8">
-            <span className="w-8 sm:w-16 h-[2px] bg-[#FBD784]" />
-            <span>{t('kicker_maritime_intelligence', 'A MARITIME INTELLIGENCE PLATFORM')}</span>
+          <div className="flex items-center gap-2.5 sm:gap-4 text-[#FBD784] text-[11px] sm:text-sm md:text-base font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-5 sm:mb-8">
+            <span className="w-6 sm:w-16 h-[2px] bg-[#FBD784] flex-shrink-0" />
+            <span className="truncate sm:overflow-visible">{t('kicker_maritime_intelligence', 'A MARITIME INTELLIGENCE PLATFORM')}</span>
           </div>
 
           {/* User Requested: Original Sovereign Headline */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-white leading-[1.12] tracking-tight">
+          <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-white leading-[1.14] sm:leading-[1.12] tracking-tight break-words">
             {t('hero_headline_1', 'Oceans are')}{' '}
             <span className="italic text-[#e59883] font-serif font-normal">
               {t('hero_wild', 'wild')}
@@ -663,15 +741,15 @@ export const LocationSetupView: React.FC = () => {
           </h1>
 
           {/* User Requested: Original Sovereign Subtitle */}
-          <p className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-slate-200 max-w-2xl font-normal leading-relaxed">
+          <p className="mt-5 sm:mt-8 text-sm sm:text-lg md:text-xl text-slate-200 max-w-2xl font-normal leading-relaxed">
             {t('hero_desc', 'Harnessing real-time satellite oceanography, physical wave dynamics, and biological potential fishing zones for safe and high-yield Indian Ocean voyages.')}
           </p>
 
-          {/* Action Button (Scroll Down Button Removed as Requested) */}
-          <div className="mt-8 sm:mt-10">
+          {/* Action Button */}
+          <div className="mt-7 sm:mt-10 w-full flex justify-center">
             <button
               onClick={openAuthFlow}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base sm:text-lg tracking-wide transition-all shadow-xl hover:scale-102 active:scale-98 cursor-pointer"
+              className="w-full sm:w-auto max-w-[280px] sm:max-w-none px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-sm sm:text-lg tracking-wide transition-all shadow-xl hover:scale-102 active:scale-98 cursor-pointer"
             >
               {user ? `${t('change_port', 'Select Port & Enter Bridge')} →` : `${t('begin_voyage_btn', 'Begin Voyage Setup')} →`}
             </button>
@@ -682,7 +760,7 @@ export const LocationSetupView: React.FC = () => {
       </section>
 
       {/* ── 2. Feature Story Sections (Alternating 2-Column MNTN Editorial Style) ── */}
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-24 space-y-24 sm:space-y-36">
+      <main className="relative z-10 max-w-6xl mx-auto pl-4 pr-12 sm:pr-16 md:px-8 lg:px-12 py-16 sm:py-24 space-y-20 sm:space-y-36 overflow-x-hidden">
         
         {/* ── FEATURE 01: SATELLITE OCEANOGRAPHY & SENSORS ── */}
         <section id="feature-01" className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center scroll-mt-24">
@@ -690,32 +768,32 @@ export const LocationSetupView: React.FC = () => {
           {/* Left Column: Narrative with Large Ghost Numeral */}
           <div className="lg:col-span-6 relative">
             {/* Giant Ghost Numeral 01 */}
-            <span className="text-[100px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-12 sm:-top-24 -left-2 sm:-left-8 select-none pointer-events-none">
+            <span className="text-[72px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-8 sm:-top-24 left-0 sm:-left-8 select-none pointer-events-none max-w-full overflow-hidden">
               01
             </span>
 
-            <div className="relative z-10 space-y-4 sm:space-y-5">
+            <div className="relative z-10 space-y-3.5 sm:space-y-5">
               {/* Kicker Tag */}
-              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
-                <span className="w-8 sm:w-10 h-[2px] bg-[#FBD784]" />
+              <div className="flex items-center gap-2.5 sm:gap-3 text-[#FBD784] text-[11px] sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase">
+                <span className="w-6 sm:w-10 h-[2px] bg-[#FBD784] flex-shrink-0" />
                 <span>{t('feat_01_tag', '01 · SATELLITE OCEANOGRAPHY')}</span>
               </div>
 
               {/* Headline */}
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium text-white leading-[1.18] tracking-tight">
+              <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white leading-[1.2] tracking-tight">
                 {t('feat_01_title', 'What level of ocean navigator are you?')}
               </h2>
 
               {/* Narrative Text */}
-              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
+              <p className="text-slate-200 text-sm sm:text-base md:text-lg leading-relaxed font-normal">
                 {t('feat_01_desc', 'Determining your voyage parameters and operational sea-state thresholds is critical before casting off. NavikaAI continuously synchronizes live INSAT-3DR thermal radiometry, Sentinel-3 altimetry, and coastal radar streams to map high-resolution sea surface temperatures, chlorophyll-a plumes, and tidal drift currents across India\'s Exclusive Economic Zone.')}
               </p>
 
               {/* Action Link */}
-              <div className="pt-2">
+              <div className="pt-1 sm:pt-2">
                 <button
                   onClick={openAuthFlow}
-                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-base sm:text-lg font-bold group cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-2.5 sm:gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-sm sm:text-base md:text-lg font-bold group cursor-pointer transition-colors"
                 >
                   <span>{t('feat_01_cta', 'explore live telemetry')}</span>
                   <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
@@ -733,11 +811,11 @@ export const LocationSetupView: React.FC = () => {
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 filter brightness-95"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/80 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-200">
-                <span className="bg-[#0B131F]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-mono text-slate-200 pointer-events-none">
+                <span className="bg-[#0B131F]/90 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/15">
                   INSAT-3DR · Sea State 2 (Smooth)
                 </span>
-                <span className="text-[#FBD784] font-bold">100% Offline-Cached</span>
+                <span className="text-[#FBD784] font-bold bg-[#0B131F]/80 sm:bg-transparent px-2 py-0.5 sm:p-0 rounded">100% Offline-Cached</span>
               </div>
             </div>
           </div>
@@ -756,11 +834,11 @@ export const LocationSetupView: React.FC = () => {
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 filter brightness-95"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/80 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-200">
-                <span className="bg-[#0B131F]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-mono text-slate-200 pointer-events-none">
+                <span className="bg-[#0B131F]/90 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/15">
                   Thermal Upwelling · Chlorophyll-a
                 </span>
-                <span className="text-emerald-400 font-bold">+30% Fuel Savings</span>
+                <span className="text-emerald-400 font-bold bg-[#0B131F]/80 sm:bg-transparent px-2 py-0.5 sm:p-0 rounded">+30% Fuel Savings</span>
               </div>
             </div>
           </div>
@@ -768,32 +846,32 @@ export const LocationSetupView: React.FC = () => {
           {/* Right Column: Narrative with Large Ghost Numeral */}
           <div className="lg:col-span-6 order-1 lg:order-2 relative">
             {/* Giant Ghost Numeral 02 */}
-            <span className="text-[100px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-12 sm:-top-24 -left-2 sm:-left-8 select-none pointer-events-none">
+            <span className="text-[72px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-8 sm:-top-24 left-0 sm:-left-8 select-none pointer-events-none max-w-full overflow-hidden">
               02
             </span>
 
-            <div className="relative z-10 space-y-4 sm:space-y-5">
+            <div className="relative z-10 space-y-3.5 sm:space-y-5">
               {/* Kicker Tag */}
-              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
-                <span className="w-8 sm:w-10 h-[2px] bg-[#FBD784]" />
+              <div className="flex items-center gap-2.5 sm:gap-3 text-[#FBD784] text-[11px] sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase">
+                <span className="w-6 sm:w-10 h-[2px] bg-[#FBD784] flex-shrink-0" />
                 <span>{t('feat_02_tag', '02 · BIOGEOCHEMICAL DETECTION')}</span>
               </div>
 
               {/* Headline */}
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium text-white leading-[1.18] tracking-tight">
+              <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white leading-[1.2] tracking-tight">
                 {t('feat_02_title', 'Picking the right Fishing Grounds!')}
               </h2>
 
               {/* Narrative Text */}
-              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
+              <p className="text-slate-200 text-sm sm:text-base md:text-lg leading-relaxed font-normal">
                 {t('feat_02_desc', 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. NavikaAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.')}
               </p>
 
               {/* Action Link */}
-              <div className="pt-2">
+              <div className="pt-1 sm:pt-2">
                 <button
                   onClick={openAuthFlow}
-                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-base sm:text-lg font-bold group cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-2.5 sm:gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-sm sm:text-base md:text-lg font-bold group cursor-pointer transition-colors"
                 >
                   <span>{t('feat_02_cta', 'discover fishing spots')}</span>
                   <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
@@ -810,32 +888,32 @@ export const LocationSetupView: React.FC = () => {
           {/* Left Column: Narrative with Large Ghost Numeral */}
           <div className="lg:col-span-6 relative">
             {/* Giant Ghost Numeral 03 */}
-            <span className="text-[100px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-12 sm:-top-24 -left-2 sm:-left-8 select-none pointer-events-none">
+            <span className="text-[72px] sm:text-[180px] lg:text-[220px] font-bold text-white/[0.05] leading-none absolute -top-8 sm:-top-24 left-0 sm:-left-8 select-none pointer-events-none max-w-full overflow-hidden">
               03
             </span>
 
-            <div className="relative z-10 space-y-4 sm:space-y-5">
+            <div className="relative z-10 space-y-3.5 sm:space-y-5">
               {/* Kicker Tag */}
-              <div className="flex items-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
-                <span className="w-8 sm:w-10 h-[2px] bg-[#FBD784]" />
+              <div className="flex items-center gap-2.5 sm:gap-3 text-[#FBD784] text-[11px] sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase">
+                <span className="w-6 sm:w-10 h-[2px] bg-[#FBD784] flex-shrink-0" />
                 <span>{t('feat_03_tag', '03 · 100% NON-HALLUCINATORY SAFETY')}</span>
               </div>
 
               {/* Headline */}
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium text-white leading-[1.18] tracking-tight">
+              <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white leading-[1.2] tracking-tight">
                 {t('feat_03_title', 'Understanding NavIC Mesh & Sovereign Geofences')}
               </h2>
 
               {/* Narrative Text */}
-              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
+              <p className="text-slate-200 text-sm sm:text-base md:text-lg leading-relaxed font-normal">
                 {t('feat_03_desc', 'Maritime safety cannot tolerate generative hallucinations. Our deterministic kinematic engine mathematically models wave breaking limits, shallow shoals, and sovereign International Maritime Boundary Line (IMBL) buffer zones with 0% AI hallucination. Off-grid packets propagate automatically via resilient NavIC LoRa edge mesh devices.')}
               </p>
 
               {/* Action Link */}
-              <div className="pt-2">
+              <div className="pt-1 sm:pt-2">
                 <button
                   onClick={openAuthFlow}
-                  className="inline-flex items-center gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-base sm:text-lg font-bold group cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-2.5 sm:gap-3 text-[#FBD784] hover:text-[#ffe4a0] text-sm sm:text-base md:text-lg font-bold group cursor-pointer transition-colors"
                 >
                   <span>{t('feat_03_cta', 'inspect safety engine')}</span>
                   <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
@@ -853,11 +931,11 @@ export const LocationSetupView: React.FC = () => {
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 filter brightness-95"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B131F]/80 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-200">
-                <span className="bg-[#0B131F]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-mono text-slate-200 pointer-events-none">
+                <span className="bg-[#0B131F]/90 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/15">
                   NavIC Mesh · LoRa Sync
                 </span>
-                <span className="text-[#FBD784] font-bold">IMBL 48.2 km Buffer</span>
+                <span className="text-[#FBD784] font-bold bg-[#0B131F]/80 sm:bg-transparent px-2 py-0.5 sm:p-0 rounded">IMBL 48.2 km Buffer</span>
               </div>
             </div>
           </div>
@@ -866,22 +944,22 @@ export const LocationSetupView: React.FC = () => {
 
         {/* ── 3. Bottom Minimalist Call to Action ── */}
         <section className="pt-8 pb-4 text-center border-t border-white/10">
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="max-w-2xl mx-auto space-y-5 sm:space-y-6">
             <div className="flex items-center justify-center gap-3 text-[#FBD784] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase">
               <span className="w-8 h-[1px] bg-[#FBD784]" />
               <span>{t('cta_ready_tag', 'READY TO CAST OFF?')}</span>
               <span className="w-8 h-[1px] bg-[#FBD784]" />
             </div>
-            <h3 className="text-2xl sm:text-4xl font-medium text-white">
+            <h3 className="text-xl sm:text-3xl md:text-4xl font-medium text-white">
               {t('cta_launch_title', 'Launch Your Vessel Setup')}
             </h3>
-            <p className="text-slate-300 text-base sm:text-lg font-normal">
+            <p className="text-slate-300 text-sm sm:text-base md:text-lg font-normal">
               {t('cta_launch_desc', 'Select your coastal harbor, inspect real-time satellite telemetry, and evaluate safe waypoint routes.')}
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex justify-center">
               <button
                 onClick={openAuthFlow}
-                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-base sm:text-lg tracking-wide transition-all shadow-xl hover:scale-102 cursor-pointer"
+                className="w-full sm:w-auto max-w-[280px] sm:max-w-none px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#FBD784] hover:bg-[#ffe29a] text-[#0B131F] font-bold text-sm sm:text-lg tracking-wide transition-all shadow-xl hover:scale-102 cursor-pointer"
               >
                 {t('cta_launch_btn', 'Sign In & Select Port')} →
               </button>
@@ -892,16 +970,18 @@ export const LocationSetupView: React.FC = () => {
       </main>
 
       {/* ── Minimalist Clean Footer ── */}
-      <footer className="relative z-10 border-t border-white/5 bg-[#080d15] py-10 px-4 sm:px-8 lg:px-12 text-sm text-slate-400">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <Compass className="w-5 h-5 text-[#FBD784]" />
-            <span className="text-white font-bold text-base tracking-tight">NavikaAI</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-slate-300">Autonomous Marine Intelligence Platform</span>
+      <footer className="relative z-10 border-t border-white/5 bg-[#080d15] py-8 sm:py-10 px-4 sm:px-8 lg:px-12 text-sm text-slate-400">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 text-center md:text-left">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <Compass className="w-5 h-5 text-[#FBD784]" />
+              <span className="text-white font-bold text-base tracking-tight">NavikaAI</span>
+            </div>
+            <span className="text-slate-600 hidden sm:inline">|</span>
+            <span className="text-slate-300 text-xs sm:text-sm">Autonomous Marine Intelligence Platform</span>
           </div>
 
-          <div className="flex items-center gap-6 text-sm font-medium text-slate-300">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm font-medium text-slate-300">
             <a href="#top" onClick={scrollToHero} className="hover:text-white transition-colors">{t('nav_home', 'Home')}</a>
             <a href="#feature-01" onClick={(e) => scrollToSection(e, 'feature-01', '01')} className="hover:text-white transition-colors">{t('nav_features', 'Features')}</a>
             <button onClick={openAuthFlow} className="hover:text-white transition-colors cursor-pointer">
@@ -909,7 +989,7 @@ export const LocationSetupView: React.FC = () => {
             </button>
           </div>
 
-          <div className="text-slate-400 font-mono text-xs">
+          <div className="text-slate-400 font-mono text-xs text-center md:text-right">
             Data Feeds: MOSDAC · INCOIS · Coastal AWS · Bhuvan
           </div>
         </div>

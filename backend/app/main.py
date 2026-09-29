@@ -1,4 +1,4 @@
-"""SamudraAI - Agentic Marine Intelligence Platform FastAPI Application."""
+"""Navika AI - Agentic Marine Intelligence Platform FastAPI Application."""
 from contextlib import asynccontextmanager
 import os
 from fastapi import FastAPI, Request
@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     # Initialize SQLite schema safely
     try:
         init_db()
-        print("SamudraAI database initialized.")
+        print("Navika AI database initialized.")
     except Exception as e:
         print(f"Warning: SQLite database initialization notice ({e}). Continuing in resilient mode.")
     yield

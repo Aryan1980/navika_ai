@@ -9,7 +9,7 @@ from app.schemas.chat import EvidenceDetails
 
 GREETING_TEMPLATES = {
     "en": (
-        "Hello! I am SamudraAI, your ISRO-powered Marine Intelligence Assistant.\n\n"
+        "Hello! I am Navika AI, your ISRO-powered Marine Intelligence Assistant.\n\n"
         "I can help you with:\n"
         "• 🌊 Real-time Ocean State (Wave height, wind speed, swells)\n"
         "• 🐟 Potential Fishing Zones (PFZ) & Chlorophyll/SST intelligence\n"
@@ -18,7 +18,7 @@ GREETING_TEMPLATES = {
         "How can I assist your voyage or coastal operations today?"
     ),
     "hi": (
-        "नमस्ते! मैं समुद्राAI (SamudraAI) हूँ, आपका इसरो-संचालित समुद्री इंटेलिजेंस सहायक।\n\n"
+        "नमस्ते! मैं नाविका AI (Navika AI) हूँ, आपका इसरो-संचालित समुद्री इंटेलिजेंस सहायक।\n\n"
         "मैं आपकी इन विषयों में सहायता कर सकता हूँ:\n"
         "• 🌊 वास्तविक समय समुद्री स्थिति (तरंग ऊंचाई, हवा की गति, धाराएं)\n"
         "• 🐟 संभावित मत्स्य पालन क्षेत्र (PFZ) और क्लोरोफिल/SST जानकारी\n"
@@ -27,7 +27,7 @@ GREETING_TEMPLATES = {
         "आज मैं आपकी क्या सहायता कर सकता हूँ?"
     ),
     "ta": (
-        "வணக்கம்! நான் சமுத்ரா ஏஐ (SamudraAI), உங்கள் இஸ்ரோ கடல்சார் நுண்ணறிவு உதவியாளர்.\n\n"
+        "வணக்கம்! நான் நாவிகா ஏஐ (Navika AI), உங்கள் இஸ்ரோ கடல்சார் நுண்ணறிவு உதவியாளர்.\n\n"
         "நான் உங்களுக்கு உதவக்கூடியவை:\n"
         "• 🌊 நிகழ்நேர கடல் நிலை (அலை உயரம், காற்றின் வேகம்)\n"
         "• 🐟 சாத்தியமான மீன்பிடி மண்டலங்கள் (PFZ) & குளோரோபில் தகவல்\n"
@@ -36,16 +36,16 @@ GREETING_TEMPLATES = {
         "இன்று உங்கள் பயணத்திற்கு எவ்வாறு உதவ முடியும்?"
     ),
     "te": (
-        "నమస్కారం! నేను సముద్రAI (SamudraAI), మీ ఇస్రో సముద్ర ఇంటెలిజెన్స్ సహాయకుడిని.\n\n"
+        "నమస్కారం! నేను నావిక AI (Navika AI), మీ ఇస్రో సముద్ర ఇంటెలిజెన్స్ సహాయకుడిని.\n\n"
         "నేను మీకు సహాయపడగలను:\n"
         "• 🌊 రియల్-టైమ్ సముద్ర పరిస్థితులు (అలల ఎత్తు, గాలి వేగం)\n"
         "• 🐟 సంభావ్య చేపల వేట మండలాలు (PFZ) & క్లోరోఫిల్ డేటా\n"
-        "• 🧭 సురక్షితమైన నావిగేషన్ మార్గాలు\n"
+        "• 🧭 సురಕ್ಷితమైన నావిగేషన్ మార్గాలు\n"
         "• ⚠️ సముద్ర సరిహద్దు (IMBL) & హెచ్చరికలు\n\n"
         "నేను మీకు ఎలా సహాయపడగలను?"
     ),
     "ml": (
-        "നമസ്കാരം! ഞാൻ സമുദ്രAI (SamudraAI), നിങ്ങളുടെ ഐഎസ്ആർഒ സമുദ്ര ഇന്റലിജൻസ് അസിസ്റ്റന്റ്.\n\n"
+        "നമസ്കാരം! ഞാൻ നാവിക AI (Navika AI), നിങ്ങളുടെ ഐഎസ്ആർഒ സമുദ്ര ഇന്റലിജൻസ് അസിസ്റ്റന്റ്.\n\n"
         "സഹായങ്ങൾ:\n"
         "• 🌊 തത്സമയ സമുദ്രാവസ്ഥ (തിരമാല ഉയരം, കാറ്റിന്റെ വേഗത)\n"
         "• 🐟 മത്സ്യബന്ധന സാധ്യതാ മേഖലകൾ (PFZ)\n"
@@ -54,7 +54,7 @@ GREETING_TEMPLATES = {
         "ഇന്ന് ഞാൻ എങ്ങനെ സഹായിക്കണം?"
     ),
     "kn": (
-        "ನಮಸ್ಕಾರ! ನಾನು ಸಮುದ್ರAI (SamudraAI), ನಿಮ್ಮ ಇಸ್ರೋ ಕಡಲ ಗುಪ್ತಚರ ಸಹಾಯಕ.\n\n"
+        "ನಮಸ್ಕಾರ! ನಾನು ನಾವಿಕ AI (Navika AI), ನಿಮ್ಮ ಇಸ್ರೋ ಕಡಲ ಗುಪ್ತಚರ ಸಹಾಯಕ.\n\n"
         "ನಾನು ಸಹಾಯ ಮಾಡುವ ಕ್ಷೇತ್ರಗಳು:\n"
         "• 🌊 ನೈಜ ಸಮಯದ ಸಮುದ್ರ ಸ್ಥಿತಿ (ಅಲೆ ಎತ್ತರ, ಗಾಳಿಯ ವೇಗ)\n"
         "• 🐟 ಸಂಭಾವ್ಯ ಮೀನುಗಾರಿಕೆ ವಲಯಗಳು (PFZ)\n"
@@ -63,7 +63,7 @@ GREETING_TEMPLATES = {
         "ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?"
     ),
     "bn": (
-        "নমস্কার! আমি সমুদ্রAI (SamudraAI), আপনার ইসরো-চালিত সামুদ্রিক গোয়েন্দা সহকারী।\n\n"
+        "নমস্কার! আমি নাবিকা AI (Navika AI), আপনার ইসরো-চালিত সামুদ্রিক গোয়েন্দা সহকারী।\n\n"
         "আমি আপনাকে সাহায্য করতে পারি:\n"
         "• 🌊 রিয়েল-টাইম সমুদ্রের অবস্থা (ঢেউয়ের উচ্চতা, বাতাসের গতি)\n"
         "• 🐟 সম্ভাব্য মাছ ধরার অঞ্চল (PFZ) তথ্য\n"
@@ -72,7 +72,7 @@ GREETING_TEMPLATES = {
         "আজ আপনাকে কীভাবে সাহায্য করতে পারি?"
     ),
     "mr": (
-        "नमस्कार! मी समुद्राAI (SamudraAI), तुमचा इस्रो-संचलित सागरी बुद्धिमत्ता सहाय्यक आहे.\n\n"
+        "नमस्कार! मी नाविका AI (Navika AI), तुमचा इस्रो-संचलित सागरी बुद्धिमत्ता सहाय्यक आहे.\n\n"
         "मी खालील बाबींमध्ये मदत करू शकतो:\n"
         "• 🌊 थेट समुद्राची स्थिती (लाटांची उंची, वाऱ्याचा वेग)\n"
         "• 🐟 संभाव्य मत्स्य व्यवसाय क्षेत्र (PFZ)\n"
@@ -81,7 +81,7 @@ GREETING_TEMPLATES = {
         "आज मी तुम्हाला कशी मदत करू शकतो?"
     ),
     "gu": (
-        "નમસ્તે! હું સમુદ્રAI (SamudraAI) છું, તમારો ઇસરો સંચાલિત દરિયાઈ ગુપ્તચર સહાયક.\n\n"
+        "નમસ્તે! હું નાવિકા AI (Navika AI) છું, તમારો ઇસરો સંચાલિત દરિયાઈ ગુપ્તચર સહાયક.\n\n"
         "હું નીચેની બાબતોમાં મદદ કરી શકું છું:\n"
         "• 🌊 વાસ્તવિક સમયની દરિયાઈ સ્થિતિ (મોજાની ઊંચાઈ, પવનની ઝડપ)\n"
         "• 🐟 સંભવિત માછીમારી ઝોન (PFZ)\n"
@@ -90,7 +90,7 @@ GREETING_TEMPLATES = {
         "આજે હું તમારી શું મદદ કરી શકું?"
     ),
     "or": (
-        "ନମସ୍କାର! ମୁଁ ସମୁଦ୍ରAI (SamudraAI), ଆପଣଙ୍କ ଇସ୍ରୋ-ଚାଳିତ ସାମୁଦ୍ରିକ ଗୁପ୍ତଚର ସହାୟକ।\n\n"
+        "ନମସ୍କାର! ମୁଁ ନାବିକା AI (Navika AI), ଆପଣଙ୍କ ଇସ୍ରୋ-ଚାଳିତ ସାମୁଦ୍ରିକ ଗୁପ୍ତଚର ସହାୟକ।\n\n"
         "ମୁଁ ସାହାଯ୍ୟ କରିପାରିବି:\n"
         "• 🌊 ପ୍ରକୃତ ସମୟ ସମୁଦ୍ର ଅବସ୍ଥା (ତରଙ୍ଗ ଉଚ୍ଚତା, ପବନର ବେଗ)\n"
         "• 🐟 ସମ୍ଭାବ୍ୟ ମତ୍ସ୍ୟ ଶିକାର କ୍ଷେତ୍ର (PFZ)\n"
@@ -338,9 +338,9 @@ class ExplanationAndEvidenceAgent:
                         "gu": "Gujarati", "or": "Odia"
                     }
                     target_lang_name = lang_names.get(lang, "English")
-                    greet_prompt = f"""You are SamudraAI, the official ISRO Agentic Marine Intelligence Helmsman Assistant.
+                    greet_prompt = f"""You are Navika AI, the official ISRO Agentic Marine Intelligence Helmsman Assistant.
 The user greeted you: "{query}".
-In {target_lang_name}, reply with a professional, authoritative, yet courteous maritime greeting. Introduce yourself as SamudraAI and clearly state that you exclusively assist with:
+In {target_lang_name}, reply with a professional, authoritative, yet courteous maritime greeting. Introduce yourself as Navika AI and clearly state that you exclusively assist with:
 1. Real-time sea state (wave height, surface wind, swell, cyclones)
 2. Potential Fishing Zones (PFZ) & satellite ocean color
 3. Safe nautical voyage route planning avoiding shoals and marine hazards
@@ -377,7 +377,7 @@ Keep the response concise (under 4 sentences), respectful, and focused strictly 
                     f"{settings.OLLAMA_BASE_URL}/api/generate",
                     json={
                         "model": settings.OLLAMA_MODEL,
-                        "prompt": f"You are SamudraAI, a professional marine intelligence assistant. Reply warmly in {lang} to this maritime greeting: '{query}'. Briefly mention sea state, fishing zones, and navigation safety.",
+                        "prompt": f"You are Navika AI, a professional marine intelligence assistant. Reply warmly in {lang} to this maritime greeting: '{query}'. Briefly mention sea state, fishing zones, and navigation safety.",
                         "stream": False,
                         "options": {"temperature": 0.3}
                     },
@@ -399,7 +399,7 @@ Keep the response concise (under 4 sentences), respectful, and focused strictly 
             return {
                 "direct_answer": greeting_text,
                 "safety_verdict": "SAFE",
-                "recommendation": "SamudraAI operational. Ask about marine weather, PFZ, or safe routing."
+                "recommendation": "Navika AI operational. Ask about marine weather, PFZ, or safe routing."
             }
 
         # 1. Specialized Maritime Intelligence Prompt Construction
@@ -414,14 +414,14 @@ Keep the response concise (under 4 sentences), respectful, and focused strictly 
         route_info = f"- Routing: Shortest track {route.shortest_route.distance_km} km ({route.shortest_route.risk_level} risk) vs Safe route {route.safe_route.distance_km} km ({route.safe_route.risk_level} risk). Advisory: {route.reasoning}" if route else ""
         boundary_info = f"- Boundary: Distance to {boundary_ctx['imbl']['name']} is {boundary_ctx['imbl']['distance_km']} km" if (boundary_ctx and 'imbl' in boundary_ctx) else ""
 
-        specialized_prompt = f"""You are SamudraAI, the specialized operational AI helmsman for the ISRO Agentic Marine Intelligence Platform.
+        specialized_prompt = f"""You are Navika AI, the specialized operational AI helmsman for the ISRO Agentic Marine Intelligence Platform.
 USER QUERY: "{query}" (Intent: {intent})
 TARGET LANGUAGE: {target_lang_name}
 
 === STRICT SCOPE & REFUSAL POLICY ===
 1. EXCLUSIVE DOMAIN: You ONLY answer questions related to operational oceanography, marine weather, sea state (waves, wind, currents), potential fishing zones (PFZ), nautical voyage navigation, fish catch advisories, coastal geography, and Indian maritime borders (IMBL/MPA).
 2. REFUSAL RULE: If the user query is UNRELATED to marine operations, ocean conditions, fishing, vessel routing, or maritime safety (e.g., general programming, entertainment, pop culture, non-marine trivia, politics, recipes, homework, etc.), you MUST POLITELY AND FIRMLY REFUSE to answer in {target_lang_name}. State clearly:
-   "I am SamudraAI, an operational marine intelligence platform. I can only assist with oceanographic observations, marine weather, potential fishing zones (PFZ), vessel navigation, and maritime boundary safety within the Indian Exclusive Economic Zone (EEZ)."
+   "I am Navika AI, an operational marine intelligence platform. I can only assist with oceanographic observations, marine weather, potential fishing zones (PFZ), vessel navigation, and maritime boundary safety within the Indian Exclusive Economic Zone (EEZ)."
    Do NOT provide answers to off-topic questions.
 
 === STRICT ANTI-HALLUCINATION GROUNDING (VERIFIED TELEMETRY) ===

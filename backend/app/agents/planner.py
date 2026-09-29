@@ -59,7 +59,7 @@ class PlannerAgent:
             subtasks = [
                 "Acknowledge user greeting in operational context",
                 "Identify regional language preference",
-                "Present SamudraAI marine intelligence capabilities"
+                "Present Navika AI marine intelligence capabilities"
             ]
             agents = ["explanation"]
 

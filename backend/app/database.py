@@ -1,4 +1,4 @@
-"""SQLite Database Layer for SamudraAI conversations and telemetry with serverless resilience."""
+"""SQLite Database Layer for Navika AI conversations and telemetry with serverless resilience."""
 import sqlite3
 import json
 import os
