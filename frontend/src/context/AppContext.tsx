@@ -88,21 +88,31 @@ const DEFAULT_LAYERS = ['pfz', 'waves', 'imbl', 'risk_zones', 'simulated_vessel'
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const WELCOME_MESSAGES: Record<string, string> = {
-  hi: 'समुद्र एआई में आपका स्वागत है। संभावित मत्स्य पालन क्षेत्रों (PFZ), समुद्री मौसम पूर्वानुमान, सुरक्षित मार्ग या संप्रभु समुद्री सीमा (IMBL) के बारे में कोई भी प्रश्न पूछें।',
-  ml: 'സമുദ്ര എഐയിലേക്ക് സ്വാഗതം. മത്സ്യബന്ധന മേഖലകൾ, കാലാവസ്ഥാ പ്രവചനം, സുരക്ഷിത പാത, സമുദ്രാതിർത്തി (IMBL) എന്നിവയെക്കുറിച്ച് എന്തും ചോദിക്കാം.',
-  ta: 'சமுத்ரா ஏஐ-க்கு வரவேற்கிறோம். மீன்பிடி மண்டலங்கள், கடல் வானிலை முன்னறிவிப்பு, பாதுகாப்பான வழிகள் அல்லது சர்வதேச கடல் எல்லை (IMBL) பற்றி ஏதேனும் கேளுங்கள்.',
-  te: 'సముద్ర AI కి స్వాగతం. చేపల వేట మండలాలు, సముద్ర వాతావరణ సూచనలు, సురక్షిత మార్గాలు లేదా అంతర్జాతీయ సరిహద్దు (IMBL) గురించి ఏదైనా అడగండి.',
-  bn: 'সমুদ্র এআই-তে স্বাগতম। সম্ভাব্য মাছ ধরার অঞ্চল, সামুদ্রিক আবহাওয়ার পূর্বাভাস, নিরাপদ নৌপথ বা আন্তর্জাতিক সীমান্ত (IMBL) সম্পর্কে যেকোনো প্রশ্ন জিজ্ঞাসা করুন।',
-  en: 'Welcome to SamudraAI. Ask any question about potential fishing zones, marine weather forecasts, safe routing, or sovereign boundary geofences.'
+  hi: 'नाविका एआई (NavikaAI) में आपका स्वागत है। संभावित मत्स्य पालन क्षेत्रों (PFZ), समुद्री मौसम पूर्वानुमान, सुरक्षित मार्ग या संप्रभु समुद्री सीमा (IMBL) के बारे में कोई भी प्रश्न पूछें।',
+  ml: 'നാവിക എഐയിലേക്ക് (NavikaAI) സ്വാഗതം. മത്സ്യബന്ധന മേഖലകൾ, കാലാവസ്ഥാ പ്രവചനം, സുരക്ഷിത പാത, സമുദ്രാതിർത്തി (IMBL) എന്നിവയെക്കുറിച്ച് എന്തും ചോദിക്കാം.',
+  ta: 'நாவிகா ஏஐ-க்கு (NavikaAI) வரவேற்கிறோம். மீன்பிடி மண்டலங்கள், கடல் வானிலை முன்னறிவிப்பு, பாதுகாப்பான வழிகள் அல்லது சர்வதேச கடல் எல்லை (IMBL) பற்றி ஏதேனும் கேளுங்கள்.',
+  te: 'నావికా AI (NavikaAI) కి స్వాగతం. చేపల వేట మండలాలు, సముద్ర వాతావరణ సూచనలు, సురక్షిత మార్గాలు లేదా అంతర్జాతీయ సరిహద్దు (IMBL) గురించి ఏదైనా అడగండి.',
+  bn: 'নাবিকা এআই-তে (NavikaAI) স্বাগতম। সম্ভাব্য মাছ ধরার অঞ্চল, সামুদ্রিক আবহাওয়ার পূর্বাভাস, নিরাপদ নৌপথ বা আন্তর্জাতিক সীমান্ত (IMBL) সম্পর্কে যেকোনো প্রশ্ন জিজ্ঞাসা করুন।',
+  en: 'Welcome to NavikaAI. Ask any question about potential fishing zones, marine weather forecasts, safe routing, or sovereign boundary geofences.'
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLocationSelected, setIsLocationSelected] = useState<boolean>(() => {
-    return localStorage.getItem('samudra_location_confirmed') === 'true';
+    return localStorage.getItem('navika_location_confirmed') === 'true' || localStorage.getItem('samudra_location_confirmed') === 'true';
   });
   const [activeLocation, setActiveLocationState] = useState<Coordinates>(DEFAULT_COORDS);
   const [activeLocationName, setActiveLocationName] = useState<string>(DEFAULT_NAME);
-  const [language, setLanguage] = useState<string>('en');
+  const [language, setLanguageState] = useState<string>(() => {
+    return localStorage.getItem('navika_language') || localStorage.getItem('samudra_language') || 'en';
+  });
+
+  const setLanguage = (lang: string) => {
+    setLanguageState(lang);
+    try {
+      localStorage.setItem('navika_language', lang);
+      localStorage.setItem('samudra_language', lang);
+    } catch {}
+  };
   const [activeCommandTab, setActiveCommandTab] = useState<'conditions' | 'pfz' | 'route' | 'chat'>('pfz');
   const [activeMapLayers, setActiveMapLayers] = useState<string[]>(DEFAULT_LAYERS);
   const [weather, setWeather] = useState<WeatherReport | null>(null);
@@ -150,7 +160,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // User Profile & Voyage States
   const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('samudra_captain_profile');
+    const saved = localStorage.getItem('navika_captain_profile') || localStorage.getItem('samudra_captain_profile');
     try {
       return saved ? JSON.parse(saved) : null;
     } catch {
@@ -163,11 +173,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Restore or sync user & voyages on mount
   useEffect(() => {
-    const savedPhone = localStorage.getItem('samudra_captain_phone');
+    const savedPhone = localStorage.getItem('navika_captain_phone') || localStorage.getItem('samudra_captain_phone');
     if (savedPhone) {
       api.getUserProfile(savedPhone).then((profile) => {
         if (profile) {
           setUser(profile);
+          localStorage.setItem('navika_captain_profile', JSON.stringify(profile));
           localStorage.setItem('samudra_captain_profile', JSON.stringify(profile));
         }
       }).catch(console.error);
@@ -192,7 +203,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const res = await api.phoneLogin({ phone, otp, name, vessel_name, vessel_type, home_port });
       if (res && res.user) {
         setUser(res.user);
+        localStorage.setItem('navika_captain_phone', res.user.phone);
         localStorage.setItem('samudra_captain_phone', res.user.phone);
+        localStorage.setItem('navika_captain_profile', JSON.stringify(res.user));
         localStorage.setItem('samudra_captain_profile', JSON.stringify(res.user));
         const vLogs = await api.getUserVoyages(res.user.phone);
         setVoyages(vLogs);
@@ -211,6 +224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const res = await api.saveUserProfile(profile);
       if (res && res.user) {
         setUser(res.user);
+        localStorage.setItem('navika_captain_profile', JSON.stringify(res.user));
         localStorage.setItem('samudra_captain_profile', JSON.stringify(res.user));
         return true;
       }
@@ -225,8 +239,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(null);
     setVoyages([]);
     setIsLocationSelected(false);
+    localStorage.removeItem('navika_captain_phone');
     localStorage.removeItem('samudra_captain_phone');
+    localStorage.removeItem('navika_captain_profile');
     localStorage.removeItem('samudra_captain_profile');
+    localStorage.removeItem('navika_location_confirmed');
     localStorage.removeItem('samudra_location_confirmed');
   };
 
@@ -310,11 +327,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setActiveLocationName(`${coords.latitude.toFixed(4)}°N, ${coords.longitude.toFixed(4)}°E`);
     }
     setPfzs([]);
+    localStorage.setItem('navika_location_confirmed', 'true');
     localStorage.setItem('samudra_location_confirmed', 'true');
     setIsLocationSelected(true);
   };
 
   const resetLocation = () => {
+    localStorage.removeItem('navika_location_confirmed');
     localStorage.removeItem('samudra_location_confirmed');
     setIsLocationSelected(false);
     setRouteComparison(null);

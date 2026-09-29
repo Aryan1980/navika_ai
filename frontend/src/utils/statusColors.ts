@@ -1,7 +1,7 @@
 /**
  * Centralized Marine Navigation & Safety Status Color System
  * Provides consistent SAFE (Green), CAUTION (Yellow/Amber), and AVOID (Red)
- * tokens, classes, and helpers across all SAMUDRA AI cards and views.
+ * tokens, classes, and helpers across all NAVIKA AI cards and views.
  */
 
 export type SafetyStatus = 'SAFE' | 'CAUTION' | 'AVOID';

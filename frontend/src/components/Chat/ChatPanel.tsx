@@ -14,7 +14,6 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { DemoQueries } from './DemoQueries';
 import { EvidenceDrawer } from './EvidenceDrawer';
 import { voiceService } from '../../services/voice';
 import { EvidenceDetails, AgentTrace } from '../../types/marine';
@@ -147,10 +146,7 @@ export const ChatPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Minimalist Query Suggestions */}
-      <DemoQueries />
-
-      {/* 3. Messages Stream */}
+      {/* 2. Messages Stream */}
       <div className="flex-1 p-4 overflow-y-auto space-y-3.5 text-xs">
         {chatMessages.map((msg) => {
           const isUser = msg.role === 'user';

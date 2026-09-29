@@ -364,7 +364,7 @@ export function getFallbackAlerts(coords: Coordinates): MarineAlert[] {
       message: 'Active thermal-chlorophyll convergence zones detected 8 to 22 km seaward. 6 Safe Zones verified.',
       issued_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + 86400000).toISOString(),
-      source: 'SamudraAI Navigation Watch',
+      source: 'NavikaAI Navigation Watch',
       is_demo: true
     }
   ];

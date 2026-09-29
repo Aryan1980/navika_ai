@@ -1,4 +1,4 @@
-// Comprehensive Maritime & Coastal Localization Engine for SamudraAI
+// Comprehensive Maritime & Coastal Localization Engine for NavikaAI
 // Supporting Hindi, Malayalam, Tamil, Telugu, Bengali, and English
 
 export interface LocalizedPort {
@@ -518,6 +518,43 @@ export function getLocalizedRecommendation(rec: string, lang: string = 'en'): st
     }
   }
 
+  // Dynamic regex matching for backend generated thermal front recommendations
+  const sstMatch = rec.match(/([\d\.]+)\s*°?C/i);
+  const chlMatch = rec.match(/Chl:\s*([\d\.]+)/i);
+  const distMatch = rec.match(/([\d\.]+)\s*km/i);
+  const nmMatch = rec.match(/~?([\d\.]+)\s*NM/i);
+
+  if ((rec.toLowerCase().includes('thermal front') || rec.toLowerCase().includes('high-yield') || rec.toLowerCase().includes('minimizes transit')) && sstMatch && distMatch) {
+    const sst = sstMatch[1];
+    const chl = chlMatch ? chlMatch[1] : '2.85';
+    const dist = distMatch[1];
+    const nm = nmMatch ? nmMatch[1] : (parseFloat(dist) * 0.54).toFixed(1);
+
+    if (lang === 'hi') {
+      return `उच्च-उत्पादकता थर्मल फ्रंट (${sst}°C, क्लोरोफिल: ${chl} mg/m³)। निकट दूरी (${dist} किमी, ~${nm} NM) यात्रा समय व ईंधन की खपत कम करती है।`;
+    }
+    if (lang === 'ml') {
+      return `ഉയർന്ന വിളവ് നൽകുന്ന തെർമൽ ഫ്രണ്ട് (${sst}°C, ക്ലോറോഫിൽ: ${chl} mg/m³). കുറഞ്ഞ ദൂരം (${dist} കി.മീ, ~${nm} NM) യാത്രാ സമയവും ഇന്ധനച്ചെലവും കുറയ്ക്കുന്നു.`;
+    }
+    if (lang === 'ta') {
+      return `அதிக மீன்வளம் தரும் வெப்ப முகப்பு (${sst}°C, குளோரோபில்: ${chl} mg/m³). குறுகிய தூரம் (${dist} கி.மீ, ~${nm} NM) பயண நேரத்தையும் எரிபொருள் செலவையும் குறைக்கிறது.`;
+    }
+    if (lang === 'te') {
+      return `అధిక ఉత్పాదకత కలిగిన థర్మల్ ఫ్రంట్ (${sst}°C, క్లోరోఫిల్: ${chl} mg/m³). దగ్గరి పరిధి (${dist} కి.మీ, ~${nm} NM) ప్రయాణ సమయాన్ని మరియు ఇంధన వినియోగాన్ని తగ్గిస్తుంది.`;
+    }
+    if (lang === 'bn') {
+      return `উচ্চ ফলনশীল থার্মাল ফ্রন্ট (${sst}°C, ক্লোরোফিল: ${chl} mg/m³)। স্বল্প দূরত্ব (${dist} কিমি, ~${nm} নটিক্যাল মাইল) যাতায়াতের সময় ও জ্বালানি খরচ কমায়।`;
+    }
+  }
+
+  if (rec.toLowerCase().includes('minimizes transit time') || rec.toLowerCase().includes('fuel consumption')) {
+    if (lang === 'hi') return 'उच्च-उत्पादकता थर्मल फ्रंट। निकट दूरी यात्रा समय और ईंधन खपत को न्यूनतम करती है।';
+    if (lang === 'ml') return 'ഉയർന്ന വിളവ് നൽകുന്ന തെർമൽ ഫ്രണ്ട്. കുറഞ്ഞ ദൂരം യാത്രാ സമയവും ഇന്ധനച്ചെലവും കുറയ്ക്കുന്നു.';
+    if (lang === 'ta') return 'அதிக மீன்வளம் தரும் வெப்ப முகப்பு. குறுகிய தூரம் பயண நேரத்தையும் எரிபொருள் செலவையும் குறைக்கிறது.';
+    if (lang === 'te') return 'అధిక ఉత్పాదకత కలిగిన థర్మల్ ఫ్రంట్. దగ్గరి పరిధి ప్రయాణ సమయాన్ని మరియు ఇంధన వినియోగాన్ని తగ్గిస్తుంది.';
+    if (lang === 'bn') return 'উচ্চ ফলনশীল থার্মাল ফ্রন্ট। স্বল্প দূরত্ব যাতায়াতের সময় ও জ্বালানি খরচ কমায়।';
+  }
+
   return rec;
 }
 
@@ -525,15 +562,126 @@ export function getLocalizedRecommendation(rec: string, lang: string = 'en'): st
 export function getLocalizedRiskFactor(factorName: string, lang: string = 'en'): string {
   if (lang === 'en' || !factorName) return factorName;
 
-  const FACTORS_MAP: Record<string, Record<string, string>> = {
-    'Wave Swell': { hi: 'तरंग एवं समुद्री लहरें', ml: 'തിരമാലകൾ', ta: 'அலைகள்', te: 'సముద్రపు అలలు', bn: 'ঢেউয়ের উচ্চতা' },
-    'Wind Speed': { hi: 'हवा की गति', ml: 'കാറ്റിന്റെ വേഗത', ta: 'காற்றின் வேகம்', te: 'గాలి వేగం', bn: 'বাতাসের গতি' },
-    'Distance to Shore': { hi: 'तट से दूरी', ml: 'തീരത്തുനിന്നുള്ള ദൂരം', ta: 'கரையிலிருந்து தூரம்', te: 'తీరం నుండి దూరం', bn: 'তীর থেকে দূরত্ব' },
-    'Lightning Risk': { hi: 'आकाशीय बिजली का खतरा', ml: 'ഇടിമിന്നൽ സാധ്യത', ta: 'மின்னல் ஆபத்து', te: 'పిడుగుపాటు ముప్పు', bn: 'বজ্রপাতের ঝুঁকি' },
-    'IMBL Proximity': { hi: 'अंतरराष्ट्रीय सीमा से निकटता', ml: 'അതിർത്തി സാമീപ്യം', ta: 'எல்லை அருகாமை', te: 'సరిహద్దు సమీపత', bn: 'সীমান্তের নিকটবর্তিতা' }
+  const fn = factorName.toLowerCase();
+
+  // Pattern matching for various backend hazard terminology
+  if (fn.includes('wind') || fn.includes('gust') || fn.includes('velocity')) {
+    const map: Record<string, string> = {
+      hi: 'पवन वेग एवं झोंके',
+      ml: 'കാറ്റിന്റെ വേഗതയും കാറ്റും',
+      ta: 'காற்றின் வேகம் மற்றும் காற்று',
+      te: 'గాలి వేగం మరియు ఈదురుగాలులు',
+      bn: 'বাতাসের গতিবেগ ও দমকা হাওয়া'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('wave') || fn.includes('swell')) {
+    const map: Record<string, string> = {
+      hi: 'महत्वपूर्ण समुद्री लहरें एवं उभार',
+      ml: 'കടൽ തിരമാലകളുടെ ഉയരം',
+      ta: 'குறிப்பிடத்தக்க கடல் அலைகள்',
+      te: 'గణనీయమైన సముద్రపు అలలు',
+      bn: 'উল্লেখযোগ্য সমুদ্রের ঢেউ ও স্ফীতি'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('imbl') || fn.includes('sovereign') || fn.includes('border') || fn.includes('clearance')) {
+    const map: Record<string, string> = {
+      hi: 'संप्रभु आईएमबीएल सीमा दूरी',
+      ml: 'പരമാധികാര അന്താരാഷ്ട്ര സമുദ്രാതിർത്തി (IMBL)',
+      ta: 'சர்வதேச கடல் எல்லை (IMBL) தூரம்',
+      te: 'సార్వభౌమ IMBL అంతర్జాతీయ సరిహద్దు',
+      bn: 'সার্বভৌম আইএমবিএল সীমান্ত ছাড়পত্র'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('lightning') || fn.includes('thunder') || fn.includes('storm')) {
+    const map: Record<string, string> = {
+      hi: 'गरज के साथ आंधी एवं आकाशीय बिजली',
+      ml: 'ഇടിമിന്നലും കൊടുങ്കാറ്റും',
+      ta: 'இடி மின்னல் மற்றும் புயல் ஆபத்து',
+      te: 'ఉరుములు, మెరుపులు మరియు తుఫాను',
+      bn: 'বজ্রঝড় ও বজ্রপাত'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('shore') || fn.includes('distance')) {
+    const map: Record<string, string> = {
+      hi: 'तट से दूरी',
+      ml: 'തീരത്തുനിന്നുള്ള ദൂരം',
+      ta: 'கரையிலிருந்து தூரம்',
+      te: 'తీరం నుండి దూరం',
+      bn: 'তীর থেকে দূরত্ব'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('trajectory') || fn.includes('drift') || fn.includes('leeway')) {
+    const map: Record<string, string> = {
+      hi: 'पूर्वानुमानित बहाव एवं जलप्रवाह',
+      ml: 'ബോട്ടൊഴുക്ക് പ്രവചനം',
+      ta: 'படகின் நகர்வு மற்றும் சறுக்கல் கணக்கீடு',
+      te: 'ముందస్తు బోటు ప్రవాహ అంచనా',
+      bn: 'নৌকার সম্ভাব্য বিচ্যুতি ও গতিপথ'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('sst') || fn.includes('temperature') || fn.includes('thermal')) {
+    const map: Record<string, string> = {
+      hi: 'समुद्री सतह का तापमान',
+      ml: 'സമുദ്രോപരിതല താപനില',
+      ta: 'கடல் மேற்பரப்பு வெப்பநிலை',
+      te: 'సముద్ర ఉపరితల ఉష్ణోగ్రత',
+      bn: 'সমুদ্রপৃষ্ঠের তাপমাত্রা'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('chlorophyll') || fn.includes('plume')) {
+    const map: Record<string, string> = {
+      hi: 'क्लोरोफिल फ्रंटल उत्पादकता',
+      ml: 'ക്ലോറോഫിൽ സാന്ദ്രത',
+      ta: 'குளோரோபில் உற்பத்தி திறன்',
+      te: 'క్లోరోఫిల్ ఫ్రంటల్ ఉత్పాదకత',
+      bn: 'ক্লোরোফিল ফ্রন্টাল উৎপাদনশীলতা'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('cyclone') || fn.includes('depression')) {
+    const map: Record<string, string> = {
+      hi: 'चक्रवात एवं समुद्री दबाव',
+      ml: 'ചുഴലിക്കാറ്റ് ഭീഷണി',
+      ta: 'புயல் எச்சரிக்கை',
+      te: 'తుఫాను ముప్పు',
+      bn: 'ঘূর্ণিঝড় ও নিম্নচাপ'
+    };
+    return map[lang] || factorName;
+  }
+
+  return factorName;
+}
+
+// Localizes hazard severity level (LOW, MODERATE, HIGH, CRITICAL)
+export function getLocalizedSeverity(severity: string, lang: string = 'en'): string {
+  if (lang === 'en' || !severity) return severity;
+
+  const sev = severity.toUpperCase();
+  const SEVERITY_MAP: Record<string, Record<string, string>> = {
+    'LOW': { hi: 'निम्न', ml: 'കുറഞ്ഞത്', ta: 'குறைவு', te: 'తక్కువ', bn: 'কম' },
+    'MODERATE': { hi: 'मध्यम', ml: 'മിതമായത്', ta: 'மிதமானது', te: 'మధ్యస్థం', bn: 'মাঝারি' },
+    'HIGH': { hi: 'उच्च', ml: 'കൂടിയത്', ta: 'அதிகம்', te: 'అధికం', bn: 'উচ্চ' },
+    'ELEVATED': { hi: 'बढ़ा हुआ', ml: 'കൂടിയത്', ta: 'அதிகரிக்கப்பட்டது', te: 'పెరిగిన', bn: 'বর্ধিত' },
+    'SEVERE': { hi: 'गंभीर', ml: 'ഗുരുതരം', ta: 'ஆபத்தானது', te: 'తీవ్రమైనది', bn: 'সংকটজনক' },
+    'CRITICAL': { hi: 'अति-गंभीर', ml: 'അതീവ ഗുരുതരം', ta: 'மிகவும் ஆபத்தானது', te: 'అత్యంత ప్రమాదకరం', bn: 'চরম বিপজ্জনক' }
   };
 
-  return FACTORS_MAP[factorName]?.[lang] || factorName;
+  return SEVERITY_MAP[sev]?.[lang] || severity;
 }
 
 // Localizes safety verdict

@@ -20,7 +20,7 @@ import { OceanDynamicsPanel } from './OceanDynamicsPanel';
 import { ImpactHeroPanel } from './ImpactHeroPanel';
 import { DeterministicRiskExplanation } from './DeterministicRiskExplanation';
 import { getTranslation } from '../../utils/translations';
-import { getLocalizedPortName, getLocalizedRiskVerdict, getLocalizedRiskFactor } from '../../utils/locationTranslations';
+import { getLocalizedPortName, getLocalizedRiskVerdict, getLocalizedRiskFactor, getLocalizedSeverity } from '../../utils/locationTranslations';
 
 interface LocationAnalyticsViewProps {
   onOpenAdvisory?: () => void;
@@ -44,7 +44,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
   const isModerate = riskLevel === 'MODERATE';
 
   return (
-    <div className="h-full min-h-0 flex-1 flex flex-col overflow-y-auto bg-[#151926] text-[#f1f5fb] p-6 sm:p-8 space-y-8 relative selection:bg-[#0474C4]/30 selection:text-[#A8C4EC]">
+    <div className="h-full min-h-0 flex-1 flex flex-col overflow-y-auto bg-[#151926] text-[#f1f5fb] p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 space-y-5 sm:space-y-8 relative selection:bg-[#0474C4]/30 selection:text-[#A8C4EC]">
       
       {/* ── Ambient Sapphire Nightfall Glow ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -139,7 +139,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             {/* Hatched Banner Band with Category Badge (Image 1 Style) */}
             <div className="banner-hatched-rust px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
-                <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
+                <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">
                   {getTranslation('thermal_fronts_badge', language)}
                 </span>
               </div>
@@ -148,23 +148,23 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             {/* Card Content Body */}
             <div className="p-4 sm:p-5 space-y-2.5">
               {/* Chapter / Sensor subhead */}
-              <div className="text-[10px] font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
+              <div className="text-xs font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
                 CHAPTER · 01 · MODIS SATELLITE
               </div>
 
               {/* Title & Big Metric */}
               <div>
-                <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
+                <h3 className="font-editorial text-xl sm:text-2xl text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
                   {getTranslation('sst_title', language)}
                 </h3>
-                <div className="flex items-baseline gap-1.5 mt-1 font-mono">
-                  <span className="text-3xl font-bold text-white tracking-tight">{sstVal}</span>
-                  <span className="text-xs text-[#A8C4EC] font-sans">°C</span>
+                <div className="flex items-baseline gap-1.5 mt-1.5 font-mono">
+                  <span className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{sstVal}</span>
+                  <span className="text-sm text-[#A8C4EC] font-sans">°C</span>
                 </div>
               </div>
 
               {/* Oceanographic Narrative Description */}
-              <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
+              <p className="text-sm text-[#A8C4EC]/90 font-light leading-relaxed pt-1">
                 {getTranslation('sst_desc', language)}
               </p>
             </div>
@@ -173,7 +173,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
           {/* Dotted Divider & Footer (Image 1 Style) */}
           <div className="px-4 sm:px-5 pb-4 pt-1">
             <div className="border-b border-dotted border-[#5379AE]/40 mb-2.5" />
-            <div className="flex items-center justify-between text-[10px] font-mono">
+            <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-[#A8C4EC]/70 uppercase tracking-wider">INCOIS BUOY · LIVE</span>
               <span className="text-[#e59883] font-bold tracking-wider uppercase">OPTIMAL ▸ 0.8°C ΔT</span>
             </div>
@@ -202,7 +202,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             {/* Hatched Banner Band with Category Badge */}
             <div className="banner-hatched-pine px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
-                <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
+                <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">
                   {getTranslation('biogeochemical_badge', language)}
                 </span>
               </div>
@@ -210,21 +210,21 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
             {/* Card Content Body */}
             <div className="p-4 sm:p-5 space-y-2.5">
-              <div className="text-[10px] font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
+              <div className="text-xs font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
                 CHAPTER · 02 · OCEANSAT-3 OCM
               </div>
 
               <div>
-                <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
+                <h3 className="font-editorial text-xl sm:text-2xl text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
                   {getTranslation('chlorophyll_title', language)}
                 </h3>
-                <div className="flex items-baseline gap-1.5 mt-1 font-mono">
-                  <span className="text-3xl font-bold text-emerald-300 tracking-tight">{chlVal}</span>
-                  <span className="text-xs text-[#A8C4EC] font-sans">mg/m³</span>
+                <div className="flex items-baseline gap-1.5 mt-1.5 font-mono">
+                  <span className="text-3xl sm:text-4xl font-bold text-emerald-300 tracking-tight">{chlVal}</span>
+                  <span className="text-sm text-[#A8C4EC] font-sans">mg/m³</span>
                 </div>
               </div>
 
-              <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
+              <p className="text-sm text-[#A8C4EC]/90 font-light leading-relaxed pt-1">
                 {getTranslation('chlorophyll_desc', language)}
               </p>
             </div>
@@ -233,7 +233,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
           {/* Dotted Divider & Footer */}
           <div className="px-4 sm:px-5 pb-4 pt-1">
             <div className="border-b border-dotted border-[#5379AE]/40 mb-2.5" />
-            <div className="flex items-center justify-between text-[10px] font-mono">
+            <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-[#A8C4EC]/70 uppercase tracking-wider">ISRO OCM · 2H AGO</span>
               <span className="text-emerald-300 font-bold tracking-wider uppercase">BLOOM ▸ HIGH FRONT</span>
             </div>
@@ -261,7 +261,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             {/* Hatched Banner Band with Category Badge */}
             <div className="banner-hatched-sapphire px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
-                <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
+                <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">
                   {getTranslation('hydrodynamics_badge', language)}
                 </span>
               </div>
@@ -269,21 +269,21 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
             {/* Card Content Body */}
             <div className="p-4 sm:p-5 space-y-2.5">
-              <div className="text-[10px] font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
+              <div className="text-xs font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
                 CHAPTER · 03 · ALTIMETRY RADAR
               </div>
 
               <div>
-                <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
+                <h3 className="font-editorial text-xl sm:text-2xl text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
                   {getTranslation('wave_swell_title', language)}
                 </h3>
-                <div className="flex items-baseline gap-1.5 mt-1 font-mono">
-                  <span className="text-3xl font-bold text-sky-200 tracking-tight">{waveVal}</span>
-                  <span className="text-xs text-[#A8C4EC] font-sans">meters</span>
+                <div className="flex items-baseline gap-1.5 mt-1.5 font-mono">
+                  <span className="text-3xl sm:text-4xl font-bold text-sky-200 tracking-tight">{waveVal}</span>
+                  <span className="text-sm text-[#A8C4EC] font-sans">meters</span>
                 </div>
               </div>
 
-              <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
+              <p className="text-sm text-[#A8C4EC]/90 font-light leading-relaxed pt-1">
                 {getTranslation('wave_swell_desc', language)}
               </p>
             </div>
@@ -292,7 +292,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
           {/* Dotted Divider & Footer */}
           <div className="px-4 sm:px-5 pb-4 pt-1">
             <div className="border-b border-dotted border-[#5379AE]/40 mb-2.5" />
-            <div className="flex items-center justify-between text-[10px] font-mono">
+            <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-[#A8C4EC]/70 uppercase tracking-wider">SWAN FORECAST · 1H</span>
               <span className="text-sky-300 font-bold tracking-wider uppercase">SWELL ▸ 8.2S PERIOD</span>
             </div>
@@ -321,7 +321,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
             {/* Hatched Banner Band with Category Badge */}
             <div className="banner-hatched-steel px-4 py-1.5 flex items-center border-y border-black/30">
               <div className="bg-[#121622] px-2.5 py-0.5 border border-white/90 shadow-sm">
-                <span className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
+                <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">
                   {getTranslation('meteorology_badge', language)}
                 </span>
               </div>
@@ -329,22 +329,22 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
 
             {/* Card Content Body */}
             <div className="p-4 sm:p-5 space-y-2.5">
-              <div className="text-[10px] font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
+              <div className="text-xs font-mono text-[#A8C4EC] tracking-widest uppercase font-semibold">
                 CHAPTER · 04 · SCATSAT-1 SENSOR
               </div>
 
               <div>
-                <h3 className="font-editorial text-lg text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
+                <h3 className="font-editorial text-xl sm:text-2xl text-white font-normal leading-tight group-hover:text-[#A8C4EC] transition-colors">
                   {getTranslation('wind_velocity_title', language)}
                 </h3>
-                <div className="flex items-baseline gap-1.5 mt-1 font-mono">
-                  <span className="text-3xl font-bold text-white tracking-tight">{windKmh}</span>
-                  <span className="text-xs text-[#A8C4EC] font-sans">km/h</span>
+                <div className="flex items-baseline gap-1.5 mt-1.5 font-mono">
+                  <span className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{windKmh}</span>
+                  <span className="text-sm text-[#A8C4EC] font-sans">km/h</span>
                   <span className="text-xs text-[#5379AE] ml-1">({windKnots} kn)</span>
                 </div>
               </div>
 
-              <p className="text-xs text-[#A8C4EC]/85 font-light leading-relaxed pt-1">
+              <p className="text-sm text-[#A8C4EC]/90 font-light leading-relaxed pt-1">
                 {getTranslation('wind_desc', language)}
               </p>
             </div>
@@ -353,7 +353,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
           {/* Dotted Divider & Footer */}
           <div className="px-4 sm:px-5 pb-4 pt-1">
             <div className="border-b border-dotted border-[#5379AE]/40 mb-2.5" />
-            <div className="flex items-center justify-between text-[10px] font-mono">
+            <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-[#A8C4EC]/70 uppercase tracking-wider">IMD ANEMOMETER</span>
               <span className="text-[#A8C4EC] font-bold tracking-wider uppercase">GUSTS ▸ {windGust} KM/H</span>
             </div>
@@ -369,13 +369,13 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
         <div className="lg:col-span-7 p-6 rounded-2xl bg-[#1d2334] border border-[#5379AE]/30 shadow-xl space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-[#5379AE]/20">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#06457F]/60 border border-[#5379AE]/40 flex items-center justify-center">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <div className="w-9 h-9 rounded-xl bg-[#06457F]/60 border border-[#5379AE]/40 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
               </div>
-              <h2 className="font-editorial text-lg font-normal text-white">{getTranslation('risk_hazard_title', language)}</h2>
+              <h2 className="font-editorial text-xl sm:text-2xl font-normal text-white">{getTranslation('risk_hazard_title', language)}</h2>
             </div>
             <span
-              className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                 isLowRisk
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
                   : isModerate
@@ -383,48 +383,48 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
                   : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
               }`}
             >
-              {isLowRisk ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+              {isLowRisk ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
               {getLocalizedRiskVerdict(risk?.safety_verdict || 'SAFE TO VENTURE', language)}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">{getTranslation('composite_risk_score', language)}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 shadow-sm">
+              <span className="text-xs sm:text-sm text-[#A8C4EC] font-mono block font-bold uppercase tracking-wider">{getTranslation('composite_risk_score', language)}</span>
               <div className="flex items-baseline gap-1 mt-1.5 font-mono">
-                <span className="text-2xl font-bold text-emerald-300">{score}</span>
-                <span className="text-xs text-[#5379AE]">/ 100</span>
+                <span className="text-3xl sm:text-4xl font-extrabold text-emerald-300">{score}</span>
+                <span className="text-sm sm:text-base text-[#5379AE] font-bold">/ 100</span>
               </div>
-              <span className="text-[10px] text-[#A8C4EC]/75 block mt-1">{getTranslation('minimal_turbulence', language)}</span>
+              <span className="text-xs sm:text-sm text-[#A8C4EC] block mt-1 font-medium">{getTranslation('minimal_turbulence', language)}</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">{getTranslation('craft_suitability', language)}</span>
-              <span className="text-sm font-semibold text-white block mt-1.5">{getTranslation('all_vessel_classes', language)}</span>
-              <span className="text-[10px] text-emerald-400 block mt-1">{getTranslation('canoe_obm_trawler', language)}</span>
+            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 shadow-sm">
+              <span className="text-xs sm:text-sm text-[#A8C4EC] font-mono block font-bold uppercase tracking-wider">{getTranslation('craft_suitability', language)}</span>
+              <span className="text-base sm:text-lg font-bold text-white block mt-1.5">{getTranslation('all_vessel_classes', language)}</span>
+              <span className="text-xs sm:text-sm text-emerald-400 block mt-1 font-semibold">{getTranslation('canoe_obm_trawler', language)}</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
-              <span className="text-[10px] text-[#A8C4EC]/75 font-mono block">{getTranslation('cyclone_risk_title', language)}</span>
-              <span className="text-sm font-semibold text-white block mt-1.5">{getTranslation('normal_level_0', language)}</span>
-              <span className="text-[10px] text-[#A8C4EC]/75 block mt-1">{getTranslation('no_active_depression', language)}</span>
+            <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 shadow-sm">
+              <span className="text-xs sm:text-sm text-[#A8C4EC] font-mono block font-bold uppercase tracking-wider">{getTranslation('cyclone_risk_title', language)}</span>
+              <span className="text-base sm:text-lg font-bold text-white block mt-1.5">{getTranslation('normal_level_0', language)}</span>
+              <span className="text-xs sm:text-sm text-[#A8C4EC] block mt-1 font-semibold">{getTranslation('no_active_depression', language)}</span>
             </div>
           </div>
 
           {/* Risk Factors Breakdown Progress Bars */}
           <div className="space-y-3 pt-2">
-            <span className="text-[11px] font-mono text-[#A8C4EC] uppercase tracking-wider block font-medium">
+            <span className="text-xs sm:text-sm font-mono text-[#A8C4EC] uppercase tracking-wider block font-semibold">
               {getTranslation('hazard_breakdown_title', language)}
             </span>
             {risk?.factors.map((factor) => (
               <div key={factor.factor_name} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono">
+                <div className="flex justify-between text-xs sm:text-sm font-mono">
                   <span className="text-[#f1f5fb]">{getLocalizedRiskFactor(factor.factor_name, language)}</span>
-                  <span className={factor.severity === 'LOW' ? 'text-emerald-400' : 'text-amber-400'}>
-                    {factor.score}% ({factor.severity})
+                  <span className={factor.severity === 'LOW' ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                    {factor.score}% ({getLocalizedSeverity(factor.severity, language)})
                   </span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#151926] overflow-hidden border border-[#5379AE]/20">
+                <div className="w-full h-2.5 rounded-full bg-[#151926] overflow-hidden border border-[#5379AE]/20">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       factor.severity === 'LOW' ? 'bg-emerald-400' : factor.severity === 'MODERATE' ? 'bg-amber-400' : 'bg-rose-500'
@@ -441,37 +441,37 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
         <div className="lg:col-span-5 p-6 rounded-2xl bg-[#1d2334] border border-[#5379AE]/30 shadow-xl flex flex-col justify-between space-y-5">
           <div>
             <div className="flex items-center gap-2.5 pb-3 border-b border-[#5379AE]/20">
-              <div className="w-8 h-8 rounded-xl bg-[#06457F]/60 border border-[#5379AE]/40 flex items-center justify-center">
-                <Gauge className="w-4 h-4 text-[#A8C4EC]" />
+              <div className="w-9 h-9 rounded-xl bg-[#06457F]/60 border border-[#5379AE]/40 flex items-center justify-center">
+                <Gauge className="w-5 h-5 text-[#A8C4EC]" />
               </div>
-              <h2 className="font-editorial text-lg font-normal text-white">{getTranslation('insitu_state_title', language)}</h2>
+              <h2 className="font-editorial text-xl sm:text-2xl font-normal text-white">{getTranslation('insitu_state_title', language)}</h2>
             </div>
 
-            <div className="space-y-2.5 mt-4 font-mono text-xs">
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
+            <div className="space-y-3 mt-4 font-mono text-sm">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#151926] border border-[#5379AE]/20">
                 <span className="text-[#A8C4EC]/75">{getTranslation('tidal_status', language)}</span>
                 <span className="text-[#0474C4] font-semibold">{ocean?.tide ?? 'Ebb Tide (Receding)'}</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#151926] border border-[#5379AE]/20">
                 <span className="text-[#A8C4EC]/75">{getTranslation('tidal_elevation', language)}</span>
                 <span className="text-white font-semibold">{ocean?.tide_height_m ?? 1.1} m {getTranslation('above_chart_datum', language)}</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#151926] border border-[#5379AE]/20">
                 <span className="text-[#A8C4EC]/75">{getTranslation('wmo_sea_state', language)}</span>
                 <span className="text-emerald-300 font-semibold">{ocean?.sea_state ?? 'State 2 (Smooth/Slight)'}</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#151926] border border-[#5379AE]/20">
                 <span className="text-[#A8C4EC]/75">{getTranslation('barometric_pressure', language)}</span>
                 <span className="text-white font-semibold">1012.4 hPa ({getTranslation('steady', language)})</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#151926] border border-[#5379AE]/20">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#151926] border border-[#5379AE]/20">
                 <span className="text-[#A8C4EC]/75">{getTranslation('precipitation_rate', language)}</span>
                 <span className="text-[#A8C4EC] font-semibold">{weather?.rainfall_mm ?? 0.0} mm/hr ({getTranslation('dry', language)})</span>
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-[#151926] border border-[#5379AE]/30 text-xs text-[#A8C4EC] font-light">
+          <div className="p-4 rounded-xl bg-[#151926] border border-[#5379AE]/30 text-xs sm:text-sm text-[#A8C4EC] font-light">
             {getTranslation('calibrated_footnote', language).replace('{port}', getLocalizedPortName(activeLocationName.split(',')[0], language))}
           </div>
         </div>

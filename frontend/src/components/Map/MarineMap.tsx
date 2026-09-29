@@ -22,6 +22,7 @@ export const MarineMap: React.FC = () => {
   const [isNavicMeshActive, setIsNavicMeshActive] = useState<boolean>(true);
   const [is3DMode, setIs3DMode] = useState<boolean>(false);
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false);
+  const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
 
   const {
     activeLocation,
@@ -854,32 +855,32 @@ export const MarineMap: React.FC = () => {
       <div ref={mapContainerRef} className="w-full h-full" />
 
       {/* Floating Top Nav / Search Header */}
-      <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto">
+      <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-20 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-2 sm:gap-2.5 pointer-events-auto flex-wrap">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#88BDF2]" />
             <input
               type="text"
-              placeholder="Search nautical zones, safe harbors..."
+              placeholder="Search zones, harbors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2.5 w-64 sm:w-80 rounded-2xl bg-[#161c27]/90 backdrop-blur-md border border-[#384959] text-white placeholder-[#BDDDFC]/50 text-xs font-medium focus:outline-none focus:border-[#88BDF2] shadow-xl"
+              className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 w-40 sm:w-64 md:w-80 rounded-xl sm:rounded-2xl bg-[#161c27]/90 backdrop-blur-md border border-[#384959] text-white placeholder-[#BDDDFC]/50 text-sm font-medium focus:outline-none focus:border-[#88BDF2] shadow-xl"
             />
           </div>
 
           {/* OpenSeaMap Toggle */}
           <button
             onClick={() => setIsOpenSeaMapActive(!isOpenSeaMapActive)}
-            className={`px-3 py-2.5 rounded-2xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-mono font-bold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               isOpenSeaMapActive
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
             }`}
             title="Toggle Official OpenSeaMap Seamarks (Buoys, Beacons, Lighthouses, Fairways)"
           >
-            <Anchor className="w-3.5 h-3.5" />
+            <Anchor className="w-4 h-4" />
             <span className="hidden sm:inline">OpenSeaMap</span>
-            <span className={`text-[10px] px-1 rounded ${isOpenSeaMapActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
+            <span className={`text-xs px-1.5 py-0.2 rounded font-bold ${isOpenSeaMapActive ? 'bg-[#88BDF2]/20 text-[#88BDF2]' : 'text-slate-500'}`}>
               {isOpenSeaMapActive ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -887,7 +888,7 @@ export const MarineMap: React.FC = () => {
           {/* NavIC / LoRaWAN Mesh Toggle */}
           <button
             onClick={() => setIsNavicMeshActive(!isNavicMeshActive)}
-            className={`px-3.5 py-2 rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               isNavicMeshActive
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2] shadow-[0_0_12px_rgba(136,189,242,0.25)]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
@@ -904,7 +905,7 @@ export const MarineMap: React.FC = () => {
           {/* 3D / 2D Perspective Toggle Button */}
           <button
             onClick={toggle3DMode}
-            className={`px-3.5 py-2 rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-sans font-semibold flex items-center gap-1.5 transition-all shadow-xl cursor-pointer ${
               is3DMode
                 ? 'bg-[#1E2632] border-[#88BDF2] text-[#88BDF2]'
                 : 'bg-[#161c27]/90 border-[#384959] text-[#BDDDFC]/70 hover:text-white'
@@ -912,22 +913,70 @@ export const MarineMap: React.FC = () => {
             title="Switch between 3D Nautical Perspective and 2D Plan View"
           >
             <Box className="w-4 h-4" />
-            <span>{is3DMode ? '3D View' : '2D Plan'}</span>
+            <span className="hidden sm:inline">{is3DMode ? '3D View' : '2D Plan'}</span>
+            <span className="sm:hidden">{is3DMode ? '3D' : '2D'}</span>
           </button>
         </div>
 
         {/* Departure Coordinate Badge */}
         <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-xl pointer-events-auto font-sans">
           <div className="w-2.5 h-2.5 rounded-full bg-[#0474c4] animate-pulse" />
-          <span className="text-xs sm:text-sm text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</span>
-          <span className="text-xs text-[#BDDDFC]/70 font-mono">
+          <span className="text-sm sm:text-base text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</span>
+          <span className="text-xs sm:text-sm text-[#BDDDFC]/80 font-mono">
             {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
           </span>
         </div>
       </div>
 
-      {/* ── Marine Map NavIC Legend (Bottom Left) - Sleek UI matching other elements ── */}
-      <div className="absolute left-4 bottom-8 z-20 pointer-events-auto max-w-xs sm:max-w-sm p-4 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs sm:text-sm font-sans transition-all">
+      {/* ── Marine Map NavIC Legend (Bottom Left) ── */}
+      {/* Mobile Mini Toggle Pill */}
+      <div className="sm:hidden absolute left-3 bottom-20 z-20 pointer-events-auto">
+        {!isLegendOpen ? (
+          <button
+            onClick={() => setIsLegendOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] text-xs font-semibold text-[#88BDF2] shadow-xl cursor-pointer"
+          >
+            <Radio className="w-3.5 h-3.5" />
+            <span>Legend</span>
+          </button>
+        ) : (
+          <div className="max-w-[280px] p-3.5 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs font-sans animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-[#384959] mb-2 gap-2">
+              <div className="flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 text-[#88BDF2]" />
+                <span className="font-bold text-white text-xs">{getTranslation('nautical_mesh_title', language)}</span>
+              </div>
+              <button
+                onClick={() => setIsLegendOpen(false)}
+                className="p-1 rounded-md text-[#BDDDFC] hover:text-white bg-[#2A3744]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="space-y-1.5 text-xs text-[#BDDDFC]">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0474C4] border-2 border-white shadow-sm flex-shrink-0"></span>
+                <span className="text-white font-medium">{getTranslation('active_vessel_fix', language)}</span>
+              </div>
+              {isNavicMeshActive && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#88BDF2] flex-shrink-0"></span>
+                    <span>{getTranslation('peer_fleet_relays', language)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-0.5 border-b-2 border-dashed border-[#88BDF2] flex-shrink-0"></span>
+                    <span>{getTranslation('lora_mesh_links', language)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Persistent Legend */}
+      <div className="hidden sm:block absolute left-4 bottom-20 md:bottom-8 z-20 pointer-events-auto max-w-xs sm:max-w-sm p-4 rounded-2xl bg-[#1E2632]/95 backdrop-blur-md border border-[#384959] shadow-2xl text-xs sm:text-sm font-sans transition-all">
         <div className="flex items-center justify-between pb-2.5 border-b border-[#384959] mb-2.5 gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <Radio className="w-4 h-4 text-[#88BDF2] flex-shrink-0" />
@@ -964,32 +1013,32 @@ export const MarineMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Map Action Controls (Right Side) */}
-      <div className="absolute right-4 bottom-8 z-20 flex flex-col gap-2 pointer-events-auto">
+      {/* Floating Map Action Controls (Right Side) - Elevated for mobile bottom nav */}
+      <div className="absolute right-3 sm:right-4 bottom-20 md:bottom-8 z-20 flex flex-col gap-2 pointer-events-auto">
         <button
           onClick={handleZoomIn}
-          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
           title="Zoom In"
         >
           <Plus className="w-4 h-4" />
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
           title="Zoom Out"
         >
           <Minus className="w-4 h-4" />
         </button>
         <button
           onClick={handleRecenter}
-          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
           title="Center Vessel Position"
         >
           <Crosshair className="w-4 h-4 text-[#88BDF2]" />
         </button>
         <button
           onClick={handleResetNorth}
-          className="w-10 h-10 rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#161c27]/95 border border-[#384959] text-[#BDDDFC] hover:text-white hover:border-[#88BDF2] flex items-center justify-center shadow-2xl transition-all cursor-pointer"
           title="Reset Heading & North"
         >
           <Compass className="w-4 h-4 text-emerald-400" />

@@ -51,7 +51,7 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
   const fuelEst = selected ? Math.round(selected.distance_km * 0.85) : 18;
 
   return (
-    <div className="h-full min-h-0 flex-1 flex flex-col overflow-hidden bg-[#151926] text-[#f1f5fb] p-6 sm:p-8 relative selection:bg-[#384959] selection:text-[#BDDDFC] font-sans">
+    <div className="h-full min-h-0 flex-1 flex flex-col overflow-y-auto lg:overflow-hidden bg-[#151926] text-[#f1f5fb] p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 relative selection:bg-[#384959] selection:text-[#BDDDFC] font-sans">
       
       {/* ── Ambient Glow (Stormy morning tones) ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -60,17 +60,17 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
       </div>
 
       {/* ── Top Header ── */}
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#384959]/60 flex-shrink-0">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 sm:pb-6 border-b border-[#384959]/60 flex-shrink-0">
         <div>
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-[#384959] border border-[#6A89A7]/50 flex items-center justify-center text-[#88BDF2] shadow-md">
-              <Fish className="w-6 h-6 text-[#88BDF2]" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#384959] border border-[#6A89A7]/50 flex items-center justify-center text-[#88BDF2] shadow-md flex-shrink-0">
+              <Fish className="w-5 h-5 sm:w-6 sm:h-6 text-[#88BDF2]" />
             </div>
             <div>
-              <h1 className="font-editorial text-2xl sm:text-3xl font-normal text-white tracking-tight">
+              <h1 className="font-editorial text-xl sm:text-3xl font-normal text-white tracking-tight">
                 {getTranslation('spots_header_title', language)}
               </h1>
-              <p className="text-xs sm:text-sm text-[#BDDDFC] font-mono mt-1 flex items-center gap-2">
+              <p className="text-xs sm:text-sm text-[#BDDDFC] font-mono mt-0.5 sm:mt-1 flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span>{getTranslation('departure_fix_label', language)}: <strong className="text-white font-semibold">{getLocalizedPortName(activeLocationName, language)}</strong></span>
                 <span className="text-[#88BDF2]">·</span>
                 <span className="text-[#88BDF2] font-semibold">
@@ -93,10 +93,10 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
       </div>
 
       {/* ── Main 2-Column Grid ── */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 pt-5 overflow-hidden">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 pt-4 sm:pt-5 overflow-visible lg:overflow-hidden">
         
         {/* Left Column (5 Cols): List of Spots with Crisp High-Contrast Cards */}
-        <div className="lg:col-span-5 flex flex-col min-h-0 bg-[#1a222f] border border-[#384959] rounded-2xl p-5 shadow-xl">
+        <div className="lg:col-span-5 flex flex-col min-h-0 max-h-[380px] lg:max-h-none bg-[#1a222f] border border-[#384959] rounded-2xl p-4 sm:p-5 shadow-xl">
           <div className="flex items-center justify-between pb-3.5 border-b border-[#384959]/60 flex-shrink-0">
             <span className="font-editorial text-lg text-white font-normal">
               {getTranslation('identified_thermal_fronts', language)}
@@ -126,14 +126,14 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                       <span className="w-6 h-6 rounded-lg bg-[#263140] text-[#88BDF2] font-mono font-bold text-xs flex items-center justify-center border border-[#6A89A7]/40 flex-shrink-0">
                         {idx + 1}
                       </span>
-                      <span className="font-sans text-sm font-semibold text-white truncate">
+                      <span className="font-sans text-base font-semibold text-white truncate">
                         {localizeDestination(pfz.name, language)}
                       </span>
                     </div>
 
                     {/* Consistent SAFE / CAUTION / AVOID Status Badge */}
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${statusTheme.badgeBg} ${statusTheme.badgeText} border ${statusTheme.badgeBorder} flex-shrink-0 flex items-center gap-1.5 ${statusTheme.glowClass}`}
+                      className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${statusTheme.badgeBg} ${statusTheme.badgeText} border ${statusTheme.badgeBorder} flex-shrink-0 flex items-center gap-1.5 ${statusTheme.glowClass}`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${statusTheme.dotClass}`} />
                       <span>{getTranslation(pfz.safety_rating.toLowerCase(), language) || pfz.safety_rating}</span>
@@ -141,25 +141,25 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                   </div>
 
                   {/* Conditions Grid - Clean & High Contrast */}
-                  <div className="grid grid-cols-3 gap-2 bg-[#12161f] p-3 rounded-xl text-xs font-mono mb-2.5 border border-[#384959]/60">
+                  <div className="grid grid-cols-3 gap-2 bg-[#12161f] p-3 sm:p-3.5 rounded-xl text-xs sm:text-sm font-mono mb-2.5 border border-[#384959]/60">
                     <div>
-                      <span className="text-[#BDDDFC]/75 block text-[10px] uppercase font-semibold">{getTranslation('transit_label', language)}</span>
-                      <span className="text-white font-bold text-xs sm:text-sm mt-0.5 block">{pfz.distance_km} km</span>
-                      <span className="text-[#BDDDFC] text-[10px]">{pfz.bearing_compass}</span>
+                      <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold">{getTranslation('transit_label', language)}</span>
+                      <span className="text-white font-bold text-sm sm:text-base mt-0.5 block">{pfz.distance_km} km</span>
+                      <span className="text-[#BDDDFC] text-xs sm:text-sm font-medium">{pfz.bearing_compass}</span>
                     </div>
                     <div>
-                      <span className="text-[#BDDDFC]/75 block text-[10px] uppercase font-semibold">{getTranslation('sst_front_label', language)}</span>
-                      <span className="text-white font-bold text-xs sm:text-sm mt-0.5 block">{pfz.sst_c}°C</span>
-                      <span className="text-[#88BDF2] text-[10px]">{getTranslation('optimal', language)}</span>
+                      <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold">{getTranslation('sst_front_label', language)}</span>
+                      <span className="text-white font-bold text-sm sm:text-base mt-0.5 block">{pfz.sst_c}°C</span>
+                      <span className="text-[#88BDF2] text-xs sm:text-sm font-semibold">{getTranslation('optimal', language)}</span>
                     </div>
                     <div>
-                      <span className="text-[#BDDDFC]/75 block text-[10px] uppercase font-semibold">{getTranslation('feasibility_label', language)}</span>
-                      <span className="text-[#88BDF2] font-extrabold text-xs sm:text-sm mt-0.5 block">{Math.round(pfz.suitability_score)}%</span>
-                      <span className="text-[#BDDDFC] text-[10px]">{getTranslation('match', language)}</span>
+                      <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold">{getTranslation('feasibility_label', language)}</span>
+                      <span className="text-[#88BDF2] font-extrabold text-sm sm:text-base mt-0.5 block">{Math.round(pfz.suitability_score)}%</span>
+                      <span className="text-[#BDDDFC] text-xs sm:text-sm font-medium">{getTranslation('match', language)}</span>
                     </div>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-[#F1F5F9] font-normal leading-relaxed line-clamp-2">
+                  <p className="text-sm sm:text-base text-[#F1F5F9] font-normal leading-relaxed line-clamp-2">
                     {getLocalizedRecommendation(pfz.recommendation, language)}
                   </p>
                 </div>
@@ -177,25 +177,25 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
               <div className="flex items-center justify-between pb-3.5 border-b border-[#384959]/60">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-[#88BDF2] uppercase tracking-wider block font-bold">
+                    <span className="text-xs sm:text-sm font-mono text-[#88BDF2] uppercase tracking-wider block font-bold">
                       {getTranslation('selected_front_route', language)}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${selectedTheme.badgeBg} ${selectedTheme.badgeText} border ${selectedTheme.badgeBorder} flex items-center gap-1.5 shadow-sm`}
+                      className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${selectedTheme.badgeBg} ${selectedTheme.badgeText} border ${selectedTheme.badgeBorder} flex items-center gap-1.5 shadow-sm`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${selectedTheme.dotClass}`} />
                       <span>{getTranslation(selected.safety_rating.toLowerCase(), language) || selected.safety_rating}</span>
                     </span>
                   </div>
-                  <h2 className="font-editorial text-xl sm:text-2xl text-white font-normal mt-1">
+                  <h2 className="font-editorial text-2xl sm:text-3xl text-white font-normal mt-1">
                     {localizeDestination(selected.name, language)}
                   </h2>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <div className="text-right font-mono">
-                    <span className="text-xs text-[#BDDDFC]/80 block font-medium">{getTranslation('harvest_match', language)}</span>
-                    <span className="text-2xl sm:text-3xl font-extrabold text-[#88BDF2] font-mono leading-none">
+                    <span className="text-xs sm:text-sm text-[#BDDDFC]/80 block font-medium">{getTranslation('harvest_match', language)}</span>
+                    <span className="text-2xl sm:text-4xl font-extrabold text-[#88BDF2] font-mono leading-none">
                       {Math.round(selected.suitability_score)}%
                     </span>
                   </div>
@@ -204,31 +204,31 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
 
               {/* Transit & Fuel Highlights - High Contrast & Large Typography */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl bg-[#12161f] border border-[#384959] font-mono shadow-sm">
-                  <span className="text-xs text-[#BDDDFC] block uppercase font-bold tracking-wider">{getTranslation('one_way_distance', language)}</span>
-                  <span className="text-2xl font-bold text-white block mt-1">{selected.distance_km} km</span>
-                  <span className="text-xs text-[#88BDF2] font-semibold block mt-1">
+                <div className="p-4 sm:p-5 rounded-xl bg-[#12161f] border border-[#384959] font-mono shadow-sm">
+                  <span className="text-xs sm:text-sm text-[#BDDDFC] block uppercase font-bold tracking-wider">{getTranslation('one_way_distance', language)}</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-white block mt-1">{selected.distance_km} km</span>
+                  <span className="text-xs sm:text-sm text-[#88BDF2] font-semibold block mt-1">
                     {getTranslation('bearing_prefix', language)} {selected.bearing_deg}° ({selected.bearing_compass})
                   </span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#12161f] border border-[#384959] font-mono shadow-sm">
-                  <span className="text-xs text-[#BDDDFC] block uppercase font-bold tracking-wider">{getTranslation('est_steaming_time', language)}</span>
-                  <span className="text-2xl font-bold text-white block mt-1">{estHours} hrs</span>
-                  <span className="text-xs text-[#BDDDFC]/80 block mt-1">{getTranslation('cruise_speed', language)}</span>
+                <div className="p-4 sm:p-5 rounded-xl bg-[#12161f] border border-[#384959] font-mono shadow-sm">
+                  <span className="text-xs sm:text-sm text-[#BDDDFC] block uppercase font-bold tracking-wider">{getTranslation('est_steaming_time', language)}</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-white block mt-1">{estHours} hrs</span>
+                  <span className="text-xs sm:text-sm text-[#BDDDFC]/80 block mt-1">{getTranslation('cruise_speed', language)}</span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#12161f] border border-[#384959] font-mono shadow-sm">
-                  <span className="text-xs text-[#BDDDFC] block uppercase font-bold tracking-wider">{getTranslation('fuel_consumption', language)}</span>
-                  <span className="text-2xl font-bold text-[#88BDF2] block mt-1">~{fuelEst} Liters</span>
-                  <span className="text-xs text-[#BDDDFC]/80 block mt-1">{getTranslation('fuel_type', language)}</span>
+                <div className="p-4 sm:p-5 rounded-xl bg-[#12161f] border border-[#384959] font-mono shadow-sm">
+                  <span className="text-xs sm:text-sm text-[#BDDDFC] block uppercase font-bold tracking-wider">{getTranslation('fuel_consumption', language)}</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#88BDF2] block mt-1">~{fuelEst} Liters</span>
+                  <span className="text-xs sm:text-sm text-[#BDDDFC]/80 block mt-1">{getTranslation('fuel_type', language)}</span>
                 </div>
               </div>
 
               {/* Target GPS Coordinates Card - Large, Readable Coordinates */}
               <div className="p-5 rounded-xl bg-[#12161f] border border-[#384959] space-y-3.5 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider block">
+                  <span className="text-sm sm:text-base font-bold text-white uppercase tracking-wider block">
                     {getTranslation('target_gps_coords', language)}
                   </span>
                   <button
@@ -236,30 +236,30 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
                       navigator.clipboard.writeText(`${selected.location.latitude.toFixed(4)}, ${selected.location.longitude.toFixed(4)}`);
                       alert(getTranslation('copied_alert', language));
                     }}
-                    className="text-xs font-mono text-[#88BDF2] hover:text-white transition-colors cursor-pointer flex items-center gap-1 font-semibold px-2 py-1 rounded bg-[#1e2634] border border-[#384959]"
+                    className="text-xs sm:text-sm font-mono text-[#88BDF2] hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 font-semibold px-2.5 py-1.5 rounded-lg bg-[#1e2634] border border-[#384959]"
                   >
                     <span>{getTranslation('copy_coordinates', language)}</span>
                   </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-                  <div className="p-3.5 rounded-xl bg-[#1a222f] border border-[#384959] font-mono text-xs">
-                    <span className="text-[#BDDDFC] block text-xs uppercase font-bold tracking-wider">{getTranslation('target_location_fix', language)}</span>
-                    <span className="text-white font-extrabold text-base block mt-1">
+                  <div className="p-4 rounded-xl bg-[#1a222f] border border-[#384959] font-mono text-sm">
+                    <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold tracking-wider">{getTranslation('target_location_fix', language)}</span>
+                    <span className="text-white font-extrabold text-base sm:text-lg block mt-1">
                       {selected.location.latitude.toFixed(4)}°N, {selected.location.longitude.toFixed(4)}°E
                     </span>
-                    <span className={`${selectedTheme.accentTextClass} text-xs font-semibold block mt-1 flex items-center gap-1.5`}>
+                    <span className={`${selectedTheme.accentTextClass} text-xs sm:text-sm font-semibold block mt-1 flex items-center gap-1.5`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${selectedTheme.dotClass}`} />
                       <span>{getTranslation('verified_front', language)} ({selected.safety_rating})</span>
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-[#1a222f] border border-[#384959] font-mono text-xs">
-                    <span className="text-[#BDDDFC] block text-xs uppercase font-bold tracking-wider">{getTranslation('departure_fix_box', language)}</span>
-                    <span className="text-white font-bold text-base block mt-1">
+                  <div className="p-4 rounded-xl bg-[#1a222f] border border-[#384959] font-mono text-sm">
+                    <span className="text-[#BDDDFC] block text-xs sm:text-sm uppercase font-bold tracking-wider">{getTranslation('departure_fix_box', language)}</span>
+                    <span className="text-white font-bold text-base sm:text-lg block mt-1">
                       {activeLocation.latitude.toFixed(4)}°N, {activeLocation.longitude.toFixed(4)}°E
                     </span>
-                    <span className="text-[#BDDDFC]/90 text-xs font-medium block mt-1">
+                    <span className="text-[#BDDDFC]/90 text-xs sm:text-sm font-medium block mt-1">
                       {getLocalizedPortName(activeLocationName, language)} {getTranslation('harbor_suffix', language)}
                     </span>
                   </div>
@@ -270,57 +270,57 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
               <div className="p-5 rounded-xl bg-[#12161f] border border-[#384959] space-y-3.5 shadow-sm">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                  <span className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                  <span className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
                     {getTranslation('hazard_danger_scan', language)}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-                  <div className="p-3 rounded-xl bg-[#1a222f] border border-[#384959]">
-                    <span className="text-[#BDDDFC] block text-[10px] uppercase font-bold tracking-wider">{getTranslation('imbl_border', language)}</span>
-                    <span className="text-white font-bold text-sm mt-1 flex items-center gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
+                  <div className="p-3.5 rounded-xl bg-[#1a222f] border border-[#384959]">
+                    <span className="text-[#BDDDFC] block text-xs uppercase font-bold tracking-wider">{getTranslation('imbl_border', language)}</span>
+                    <span className="text-white font-bold text-sm sm:text-base mt-1 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       <span>{getTranslation('imbl_clear', language)}</span>
                     </span>
-                    <span className="text-xs text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('no_territorial_risk', language)}</span>
+                    <span className="text-xs sm:text-sm text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('no_territorial_risk', language)}</span>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-[#1a222f] border border-[#384959]">
-                    <span className="text-[#BDDDFC] block text-[10px] uppercase font-bold tracking-wider">{getTranslation('protected_areas', language)}</span>
-                    <span className="text-white font-bold text-sm mt-1 flex items-center gap-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#1a222f] border border-[#384959]">
+                    <span className="text-[#BDDDFC] block text-xs uppercase font-bold tracking-wider">{getTranslation('protected_areas', language)}</span>
+                    <span className="text-white font-bold text-sm sm:text-base mt-1 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       <span>{getTranslation('zero_intersections', language)}</span>
                     </span>
-                    <span className="text-xs text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('sanctuary_clear', language)}</span>
+                    <span className="text-xs sm:text-sm text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('sanctuary_clear', language)}</span>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-[#1a222f] border border-[#384959]">
-                    <span className="text-[#BDDDFC] block text-[10px] uppercase font-bold tracking-wider">{getTranslation('defense_restrictions', language)}</span>
-                    <span className="text-white font-bold text-sm mt-1 flex items-center gap-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#1a222f] border border-[#384959]">
+                    <span className="text-[#BDDDFC] block text-xs uppercase font-bold tracking-wider">{getTranslation('defense_restrictions', language)}</span>
+                    <span className="text-white font-bold text-sm sm:text-base mt-1 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       <span>{getTranslation('unrestricted', language)}</span>
                     </span>
-                    <span className="text-xs text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('naval_corridor_open', language)}</span>
+                    <span className="text-xs sm:text-sm text-[#BDDDFC]/80 block mt-1 font-medium">{getTranslation('naval_corridor_open', language)}</span>
                   </div>
                 </div>
 
                 {/* Safety Guidance Note - Consistent Dynamic Status Theme */}
-                <div className={`p-3.5 rounded-xl bg-[#1a222f] border ${selectedTheme.badgeBorder} space-y-1.5 shadow-sm`}>
-                  <div className={`flex items-center gap-2 ${selectedTheme.accentTextClass} font-bold text-xs sm:text-sm`}>
+                <div className={`p-4 sm:p-5 rounded-xl bg-[#1a222f] border ${selectedTheme.badgeBorder} space-y-2 shadow-sm`}>
+                  <div className={`flex items-center gap-2 ${selectedTheme.accentTextClass} font-bold text-base sm:text-lg`}>
                     {selected.safety_rating === 'SAFE' ? (
-                      <CheckCircle2 className={`w-4 h-4 ${selectedTheme.iconColorClass}`} />
+                      <CheckCircle2 className={`w-5 h-5 ${selectedTheme.iconColorClass}`} />
                     ) : (
-                      <AlertTriangle className={`w-4 h-4 ${selectedTheme.iconColorClass}`} />
+                      <AlertTriangle className={`w-5 h-5 ${selectedTheme.iconColorClass}`} />
                     )}
                     <span>
                       {selected.safety_rating === 'SAFE'
-                        ? 'Safe Seaward Passage Verified'
+                        ? getTranslation('safe_seaward_passage', language, 'Safe Seaward Passage Verified')
                         : selected.safety_rating === 'CAUTION'
-                        ? getTranslation('areas_to_avoid', language) || 'Advisory Caution Zone'
-                        : 'Hazardous Boundary / Restricted Area - Avoid'}
+                        ? getTranslation('advisory_caution_zone', language, 'Advisory Caution Zone')
+                        : getTranslation('hazardous_boundary_avoid', language, 'Hazardous Boundary / Restricted Area - Avoid')}
                     </span>
                   </div>
-                  <p className="text-[#F1F5F9] text-xs sm:text-sm leading-relaxed font-normal">
+                  <p className="text-[#F1F5F9] text-sm sm:text-base leading-relaxed font-normal">
                     {getLocalizedRecommendation(selected.recommendation, language)}
                   </p>
                 </div>
@@ -330,9 +330,9 @@ export const FishingSpotsView: React.FC<FishingSpotsViewProps> = ({ onViewOnMap 
               <div className="pt-2">
                 <button
                   onClick={onViewOnMap}
-                  className="btn-signature w-full py-3.5 group text-xs sm:text-sm tracking-[0.14em] cursor-pointer shadow-lg"
+                  className="btn-signature w-full py-3.5 group text-sm sm:text-base tracking-[0.12em] cursor-pointer shadow-lg"
                 >
-                  <Navigation className="w-4 h-4 text-[#BDDDFC]" />
+                  <Navigation className="w-5 h-5 text-[#BDDDFC]" />
                   <span>{getTranslation('inspect_spot_on_map', language)}</span>
                   <span className="text-[#BDDDFC] transition-transform duration-200 group-hover:translate-x-1 font-sans">→</span>
                 </button>

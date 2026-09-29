@@ -41,7 +41,7 @@ export const Header: React.FC = () => {
             <Compass className="w-3.5 h-3.5" />
           </div>
           <h1 className="font-heading font-bold text-[15px] tracking-tight text-white">
-            Samudra<span style={{ color: '#22d3ee' }}>AI</span>
+            Navika<span style={{ color: '#22d3ee' }}>AI</span>
           </h1>
         </div>
 
