@@ -9,8 +9,16 @@ import os
 import math
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
-import numpy as np
-import joblib
+
+try:
+    import numpy as np
+except Exception:
+    np = None
+
+try:
+    import joblib
+except Exception:
+    joblib = None
 
 from app.schemas.marine import Coordinates, PFZZone
 from app.geo.calculations import haversine_distance, calculate_bearing, destination_point
@@ -29,7 +37,7 @@ class DynamicPFZScanner:
         self._load_model()
 
     def _load_model(self):
-        if os.path.exists(MODEL_PATH):
+        if joblib is not None and os.path.exists(MODEL_PATH):
             try:
                 self.model = joblib.load(MODEL_PATH)
             except Exception as e:
@@ -116,21 +124,24 @@ class DynamicPFZScanner:
                 # Wind speed (km/h)
                 wind_val = round(16.0 + 3.0 * math.sin(b), 1)
 
-                # Feature vector for ML model
-                X_sample = np.array([[
-                    sst_val,
-                    sst_grad,
-                    chl_val,
-                    chl_grad,
-                    depth_val,
-                    dist_km,
-                    wind_val,
-                    current_month
-                ]])
+                raw_suitability = None
+                if self.model is not None and np is not None:
+                    try:
+                        X_sample = np.array([[
+                            sst_val,
+                            sst_grad,
+                            chl_val,
+                            chl_grad,
+                            depth_val,
+                            dist_km,
+                            wind_val,
+                            current_month
+                        ]])
+                        raw_suitability = float(self.model.predict(X_sample)[0])
+                    except Exception:
+                        raw_suitability = None
 
-                if self.model is not None:
-                    raw_suitability = float(self.model.predict(X_sample)[0])
-                else:
+                if raw_suitability is None:
                     # Fallback physics formulation if model not yet loaded
                     raw_suitability = 70.0 + (sst_grad * 15.0) + (chl_val * 4.0) - (dist_km * 1.5)
 

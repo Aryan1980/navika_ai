@@ -93,6 +93,15 @@ export const MarineMap: React.FC = () => {
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
+    // Configure MapLibre Web Worker location with graceful fallbacks
+    try {
+      if (typeof maplibregl.setWorkerUrl === 'function') {
+        maplibregl.setWorkerUrl('/assets/maplibre-gl-worker.mjs');
+      }
+    } catch (e) {
+      console.warn('MapLibre workerUrl setup:', e);
+    }
+
     try {
       const map = new maplibregl.Map({
         container: mapContainerRef.current,

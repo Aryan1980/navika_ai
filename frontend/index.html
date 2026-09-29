@@ -24,12 +24,34 @@
           <div style="font-size: 18px; font-weight: 700; color: #ffffff;">
             Marine Intelligence Platform
           </div>
-          <div style="font-size: 12px; color: #A8C4EC;">
+          <div id="navika-loader-notice" style="font-size: 12px; color: #A8C4EC;">
             Loading satellite feeds &amp; port telemetry...
           </div>
+          <button id="navika-retry-btn" onclick="try{localStorage.clear();}catch(e){}window.location.reload();" style="display: none; margin-top: 8px; background: #0474C4; color: #ffffff; border: none; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+            Click to Launch Dashboard
+          </button>
         </div>
       </div>
     </div>
+    <script>
+      window.addEventListener('error', function(e) {
+        var msg = (e && e.message) || '';
+        if (msg.indexOf('Loading chunk') !== -1 || msg.indexOf('dynamically imported module') !== -1) {
+          if (!sessionStorage.getItem('navika_reloaded')) {
+            sessionStorage.setItem('navika_reloaded', '1');
+            window.location.reload();
+          }
+        }
+      });
+      setTimeout(function() {
+        var loaderNotice = document.getElementById('navika-loader-notice');
+        var retryBtn = document.getElementById('navika-retry-btn');
+        if (loaderNotice && retryBtn) {
+          loaderNotice.innerText = 'Synchronizing marine telemetry...';
+          retryBtn.style.display = 'inline-block';
+        }
+      }, 4000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
