@@ -368,73 +368,17 @@ class DemoDataProvider(MarineDataProvider):
             }
         }
 
-    async def get_pfz_advisories(self, coords: Coordinates, radius_km: float = 120.0) -> List[PFZZone]:
-        # Generate 4 distinct, realistic PFZs displaced around the user's sea coordinates
-        lat, lon = coords.latitude, coords.longitude
-        results: List[PFZZone] = []
+    async def get_pfz_advisories(self, coords: Coordinates, radius_km: float = 10.0) -> List[PFZZone]:
+        # Dynamically scan coastal waters <= 10 km using ML Random Forest inference
+        from app.ml.dynamic_scanner import dynamic_pfz_scanner
+        effective_radius = min(radius_km, 10.0)
+        return dynamic_pfz_scanner.scan_dynamic_pfz(
+            origin=coords,
+            max_distance_km=effective_radius,
+            min_distance_km=1.0,
+            top_k=8
+        )
 
-        # Vector bearings (typically seaward, away from coast)
-        # For West coast (lon < 78), seaward is W/SW/NW; For East coast (lon >= 78), seaward is E/SE/NE
-        seaward_bearings = [240, 270, 290, 210] if lon < 78.0 else [70, 90, 120, 150]
-        distances = [18.5, 31.0, 47.5, 68.0]
-        names = [
-            "Thermal-Chlorophyll Frontal Zone Alpha",
-            "Oceanic Frontal Convergence Bravo",
-            "Shelf-Break Upwelling Patch Charlie",
-            "Coastal Eddy Pelagic Zone Delta"
-        ]
-
-        for i in range(4):
-            bearing = seaward_bearings[i]
-            dist = distances[i]
-            pfz_lat, pfz_lon = destination_point(lat, lon, dist, bearing)
-            b_deg, b_comp = calculate_bearing(lat, lon, pfz_lat, pfz_lon)
-
-            # High suitability corresponds to cool thermal anomaly + high chlorophyll
-            sst = round(28.2 - (i * 0.3), 1)
-            chl = round(2.8 - (i * 0.4), 2)
-            suitability = round(92.0 - (i * 8.5), 1)
-
-            # Check safety against distance and weather
-            safety_rating = "SAFE" if dist < 35.0 else "CAUTION" if dist < 55.0 else "AVOID"
-            recommendation = (
-                "Highly Recommended: Optimal SST gradient (?T=0.8?C) with rich chlorophyll front."
-                if i == 0 else
-                "Favourable: Strong pelagic aggregation signs. Maintain standard navigational watch."
-                if i == 1 else
-                "Moderate Suitability: Distant offshore zone; monitor wind gusts before departure."
-                if i == 2 else
-                "Not Recommended for Small Crafts: Long transit distance into deeper oceanic waters."
-            )
-
-            # Small 4-point polygon around PFZ coordinate
-            poly = [
-                [pfz_lat + 0.04, pfz_lon - 0.04],
-                [pfz_lat + 0.04, pfz_lon + 0.04],
-                [pfz_lat - 0.04, pfz_lon + 0.04],
-                [pfz_lat - 0.04, pfz_lon - 0.04],
-                [pfz_lat + 0.04, pfz_lon - 0.04]
-            ]
-
-            results.append(PFZZone(
-                id=f"pfz_{int(lat*100)}_{int(lon*100)}_{i+1}",
-                name=names[i],
-                location=Coordinates(latitude=pfz_lat, longitude=pfz_lon),
-                polygon=poly,
-                distance_km=round(dist, 1),
-                bearing_deg=b_deg,
-                bearing_compass=b_comp,
-                sst_c=sst,
-                chlorophyll_mg_m3=chl,
-                suitability_score=suitability,
-                safety_rating=safety_rating,
-                recommendation=recommendation,
-                avoids=(safety_rating == "AVOID"),
-                source="INCOIS PFZ Multilingual Advisory (Synthetic Demo)",
-                is_demo=True
-            ))
-
-        return results
 
     async def get_boundary_contexts(self, coords: Coordinates) -> Dict[str, Any]:
         lat, lon = coords.latitude, coords.longitude

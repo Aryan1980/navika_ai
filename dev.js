@@ -8,16 +8,26 @@ console.log('\x1b[36m%s\x1b[0m', '═══════════════�
 console.log('\x1b[36m%s\x1b[0m', '  Starting SamudraAI Marine Intelligence Platform...  ');
 console.log('\x1b[36m%s\x1b[0m', '═══════════════════════════════════════════════════════');
 
-// 1. Launch FastAPI Backend
-const backendCmd = 'python';
+// 1. Launch FastAPI Backend (prioritizing local venv)
+const fs = require('fs');
+const venvPython = isWindows 
+  ? path.join(__dirname, 'venv', 'Scripts', 'python.exe')
+  : path.join(__dirname, 'venv', 'bin', 'python');
+const backendCmd = fs.existsSync(venvPython) ? venvPython : 'python';
 const backendArgs = ['-m', 'uvicorn', 'app.main:app', '--app-dir', 'backend', '--host', '127.0.0.1', '--port', '8000', '--reload'];
 
 console.log('\x1b[34m[BACKEND]\x1b[0m Launching FastAPI on http://127.0.0.1:8000 ...');
-const backend = spawn(backendCmd, backendArgs, {
-  shell: isWindows,
-  cwd: __dirname,
-  env: process.env
-});
+const backend = isWindows
+  ? spawn(`"${backendCmd}" -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload`, {
+      shell: true,
+      cwd: __dirname,
+      env: process.env
+    })
+  : spawn(backendCmd, backendArgs, {
+      shell: false,
+      cwd: __dirname,
+      env: process.env
+    });
 
 backend.stdout.on('data', (data) => {
   process.stdout.write(`\x1b[34m[BACKEND]\x1b[0m ${data.toString()}`);

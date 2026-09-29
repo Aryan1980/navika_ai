@@ -14,7 +14,7 @@ def test_mosdac_provider_technical_dashboard_status():
 
     assert status["data_source"] == "MOSDAC"
     assert "ISRO" in status["data_source_full_name"]
-    assert status["connection_status"] in ["ONLINE", "UNCONFIGURED"]
+    assert status["connection_status"] in ["ONLINE", "OFFLINE"]
     assert len(status["products"]) == 3
 
     # Check products
