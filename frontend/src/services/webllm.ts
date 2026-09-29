@@ -102,7 +102,7 @@ class MobileWebLLMService {
     }
 
     try {
-      const systemPrompt = `You are SamudraAI Mobile Edge Helmsman. You MUST respond ONLY in ${targetLangName}. Do NOT use English except for coordinates and SI units (km, NM, °C, kts). Provide concise, lifesaving nautical advice for skippers at sea. Ground responses in maritime navigation safety. ${maritimeContext || ''}`;
+      const systemPrompt = `You are NavikaAI Mobile Edge Helmsman. You MUST respond ONLY in ${targetLangName}. Do NOT use English except for coordinates and SI units (km, NM, °C, kts). Provide concise, lifesaving nautical advice for skippers at sea. Ground responses in maritime navigation safety. ${maritimeContext || ''}`;
 
       const reply = await this.engine.chat.completions.create({
         messages: [

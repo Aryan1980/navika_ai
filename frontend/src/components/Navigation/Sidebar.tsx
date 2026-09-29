@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
     { id: 'analytics', label: getTranslation('nav_analytics', language) || 'Location Analytics', icon: Layers },
     { id: 'spots', label: getTranslation('nav_spots', language) || 'Fishing Spots & Routes', icon: Fish, badge: pfzs.length },
     { id: 'assistant', label: getTranslation('nav_assistant', language) || 'AI Helmsman Assistant', icon: Sparkles },
-    { id: 'observability', label: '11-Agent AI DAG', icon: Cpu, badge: '11' },
+    { id: 'observability', label: getTranslation('nav_dag', language) || '11-Agent AI DAG', icon: Cpu, badge: '11' },
   ];
 
   return (
@@ -60,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
               <Compass className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <span className="font-bold text-white text-lg tracking-tight block leading-tight">SamudraAI</span>
+              <span className="font-bold text-white text-lg tracking-tight block leading-tight">NavikaAI</span>
               <span className="text-xs text-[#6A89A7] font-mono tracking-wider block">
                 {getTranslation('maritime_platform', language)}
               </span>

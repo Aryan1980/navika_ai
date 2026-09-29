@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Fuel, Globe, Cpu, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { getTranslation } from '../../utils/translations';
 
 interface ImpactHeroPanelProps {
   onExploreDAG?: () => void;
   onExploreSpots?: () => void;
 }
 
-export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, onExploreSpots }) => {
+export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG }) => {
+  const { language } = useApp();
   const [animatedFishermen, setAnimatedFishermen] = useState<number>(0);
   const [animatedFuel, setAnimatedFuel] = useState<number>(0);
 
@@ -34,46 +37,46 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
   const stats = [
     {
       id: 'fishermen',
-      label: 'Artisanal & Mechanized Fleet',
+      label: getTranslation('hero_c1_label', language, 'Artisanal & Mechanized Fleet'),
       value: `${animatedFishermen}M+`,
-      metric: 'Fishermen Protected',
-      subtext: 'Across 3,288 coastal fishing villages & 7,516 km Indian coastline',
+      metric: getTranslation('hero_c1_metric', language, 'Fishermen Protected'),
+      subtext: getTranslation('hero_c1_subtext', language, 'Across 3,288 coastal fishing villages & 7,516 km Indian coastline'),
       icon: Users,
       accent: 'from-blue-500/20 to-cyan-500/10 border-cyan-500/30 text-cyan-300'
     },
     {
       id: 'fuel',
-      label: 'Operational Economic Impact',
+      label: getTranslation('hero_c2_label', language, 'Operational Economic Impact'),
       value: `${animatedFuel}%`,
-      metric: 'Direct Fuel Savings',
-      subtext: 'Reduced ocean search hours via satellite PFZ frontal vectors',
+      metric: getTranslation('hero_c2_metric', language, 'Direct Fuel Savings'),
+      subtext: getTranslation('hero_c2_subtext', language, 'Reduced ocean search hours via satellite PFZ frontal vectors'),
       icon: Fuel,
       accent: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30 text-emerald-300'
     },
     {
       id: 'languages',
-      label: 'Vernacular Marine Inclusion',
+      label: getTranslation('hero_c3_label', language, 'Vernacular Marine Inclusion'),
       value: '10',
-      metric: 'Coastal Languages',
-      subtext: 'Tamil, Malayalam, Telugu, Kannada, Bengali, Gujarati, Marathi, Odia, Hindi, English',
+      metric: getTranslation('hero_c3_metric', language, 'Coastal Languages'),
+      subtext: getTranslation('hero_c3_subtext', language, 'Tamil, Malayalam, Telugu, Kannada, Bengali, Gujarati, Marathi, Odia, Hindi, English'),
       icon: Globe,
       accent: 'from-indigo-500/20 to-purple-500/10 border-indigo-500/30 text-indigo-300'
     },
     {
       id: 'agents',
-      label: 'Autonomous Intelligence DAG',
+      label: getTranslation('hero_c4_label', language, 'Autonomous Intelligence DAG'),
       value: '11',
-      metric: 'Specialized AI Agents',
-      subtext: 'Deterministic orchestration network with concurrent satellite ingestion',
+      metric: getTranslation('hero_c4_metric', language, 'Specialized AI Agents'),
+      subtext: getTranslation('hero_c4_subtext', language, 'Deterministic orchestration network with concurrent satellite ingestion'),
       icon: Cpu,
       accent: 'from-amber-500/20 to-orange-500/10 border-amber-500/30 text-amber-300'
     },
     {
       id: 'hallucination',
-      label: 'Physical Safety Guarantee',
+      label: getTranslation('hero_c5_label', language, 'Physical Safety Guarantee'),
       value: '0%',
-      metric: 'LLM Hallucination',
-      subtext: 'Evaluated purely via deterministic hydrodynamic physics equations',
+      metric: getTranslation('hero_c5_metric', language, 'LLM Hallucination'),
+      subtext: getTranslation('hero_c5_subtext', language, 'Evaluated purely via deterministic hydrodynamic physics equations'),
       icon: ShieldCheck,
       accent: 'from-rose-500/20 to-red-500/10 border-rose-500/30 text-rose-300'
     }
@@ -91,11 +94,11 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase">
-              NATIONAL MARITIME INTELLIGENCE
+              {getTranslation('hero_tag_intel', language, 'NATIONAL MARITIME INTELLIGENCE')}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2">
-            Empowering India's Blue Economy & Coastal Safety
+            {getTranslation('hero_title_economy', language, "Empowering India's Blue Economy & Coastal Safety")}
           </h2>
         </div>
 
@@ -105,7 +108,7 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
               onClick={onExploreDAG}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1d263b] hover:bg-[#253250] border border-[#5379AE]/30 hover:border-cyan-400 text-cyan-300 text-sm font-medium transition-colors cursor-pointer"
             >
-              <span>View 11-Agent DAG</span>
+              <span>{getTranslation('hero_view_dag', language, 'View 11-Agent DAG')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}
@@ -152,9 +155,17 @@ export const ImpactHeroPanel: React.FC<ImpactHeroPanelProps> = ({ onExploreDAG, 
       <div className="relative z-10 mt-4 pt-3 border-t border-[#5379AE]/20 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-slate-300 font-mono">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-          <span>Synthesized from real ISRO MOSDAC satellite passes, INCOIS hydrodynamic forecasts & IMD coastal radar.</span>
+          <span>
+            {getTranslation(
+              'hero_footer_source',
+              language,
+              'Synthesized from real ISRO MOSDAC satellite passes, INCOIS hydrodynamic forecasts & IMD coastal radar.'
+            )}
+          </span>
         </div>
-        <span className="text-[#A8C4EC] font-semibold">Zero-Blackbox Autonomous Safety</span>
+        <span className="text-[#A8C4EC] font-semibold">
+          {getTranslation('hero_footer_guarantee', language, 'Zero-Blackbox Autonomous Safety')}
+        </span>
       </div>
 
     </div>

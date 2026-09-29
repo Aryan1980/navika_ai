@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error in SamudraAI React tree:', error, errorInfo);
+    console.error('Uncaught error in NavikaAI React tree:', error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
@@ -61,7 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
               marginBottom: '1rem',
               fontFamily: "'JetBrains Mono', monospace"
             }}>
-              SAMUDRA AI // SYSTEM RECOVERY
+              NAVIKA AI // SYSTEM RECOVERY
             </div>
             <h1 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 1rem 0', color: '#ffffff' }}>
               Interface Diagnostic Notice

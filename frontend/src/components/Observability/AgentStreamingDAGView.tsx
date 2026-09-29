@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { getTranslation } from '../../utils/translations';
+import { getLocalizedDAGAgent } from '../../utils/dagTranslations';
 
 export interface DAGAgentNode {
   id: string;
@@ -235,6 +236,7 @@ export const AgentStreamingDAGView: React.FC = () => {
 
       const agentId = stepOrder[currentStep];
       const agent = DAG_AGENTS.find((a) => a.id === agentId)!;
+      const locAgent = getLocalizedDAGAgent(agent.id, language);
 
       // Mark current as running
       setAgentStates((prev) => ({ ...prev, [agentId]: 'RUNNING' }));
@@ -246,9 +248,9 @@ export const AgentStreamingDAGView: React.FC = () => {
           id: `log_run_${Date.now()}_${agentId}`,
           timestamp: now(),
           agentId,
-          agentName: agent.name,
+          agentName: locAgent.name,
           state: 'RUNNING',
-          message: `Dispatched ${agent.name} [${agent.category.toUpperCase()}]. Ingesting dependencies...`
+          message: `Dispatched ${locAgent.name} [${locAgent.category.toUpperCase()}]. Ingesting dependencies...`
         }
       ]);
 
@@ -261,10 +263,10 @@ export const AgentStreamingDAGView: React.FC = () => {
             id: `log_done_${Date.now()}_${agentId}`,
             timestamp: now(),
             agentId,
-            agentName: agent.name,
+            agentName: locAgent.name,
             state: 'COMPLETED',
             durationMs: agent.latencyMs,
-            message: `✓ Completed in ${agent.latencyMs}ms. ${agent.sampleOutput}`
+            message: `✓ Completed in ${agent.latencyMs}ms. ${locAgent.sampleOutput}`
           }
         ]);
       }, 150);
@@ -477,8 +479,8 @@ export const AgentStreamingDAGView: React.FC = () => {
 
           {/* Bottom Summary Bar */}
           <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between text-xs sm:text-sm font-mono text-slate-300">
-            <span>Orchestration Topology: 13 Total Agents (11 Core + Trajectory + Verification)</span>
-            <span className="text-cyan-400 font-bold">100% Deterministic Reproducibility</span>
+            <span>{getTranslation('dag_topology_summary', language, 'Orchestration Topology: 13 Total Agents (11 Core + Trajectory + Verification)')}</span>
+            <span className="text-cyan-400 font-bold">{getTranslation('dag_deterministic_badge', language, '100% Deterministic Reproducibility')}</span>
           </div>
 
         </div>
@@ -487,54 +489,59 @@ export const AgentStreamingDAGView: React.FC = () => {
         <div className="lg:col-span-5 flex flex-col min-h-0 lg:h-full bg-[#111726] overflow-visible lg:overflow-hidden">
           
           {/* Agent Node Inspector (Top Half) */}
-          <div className="p-5 sm:p-6 border-b border-[#5379AE]/25 space-y-4 bg-[#141b2e] flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="px-2.5 py-1 rounded-md bg-cyan-500/20 text-cyan-300 font-mono text-xs uppercase font-bold">
-                  {selectedAgent.category}
-                </span>
-                <h3 className="font-bold text-white text-base sm:text-lg">{selectedAgent.name}</h3>
-              </div>
-              <span className={`px-2.5 py-1 rounded text-xs font-mono font-bold border ${getStatusBadge(agentStates[selectedAgent.id] ?? 'COMPLETED')}`}>
-                {agentStates[selectedAgent.id] ?? 'COMPLETED'}
-              </span>
-            </div>
+          {(() => {
+            const locSel = getLocalizedDAGAgent(selectedAgent.id, language);
+            return (
+              <div className="p-5 sm:p-6 border-b border-[#5379AE]/25 space-y-4 bg-[#141b2e] flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="px-2.5 py-1 rounded-md bg-cyan-500/20 text-cyan-300 font-mono text-xs uppercase font-bold">
+                      {locSel.category}
+                    </span>
+                    <h3 className="font-bold text-white text-base sm:text-lg">{locSel.name}</h3>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded text-xs font-mono font-bold border ${getStatusBadge(agentStates[selectedAgent.id] ?? 'COMPLETED')}`}>
+                    {agentStates[selectedAgent.id] ?? 'COMPLETED'}
+                  </span>
+                </div>
 
-            <p className="text-sm text-slate-200 leading-relaxed font-sans">
-              {selectedAgent.role}
-            </p>
+                <p className="text-sm text-slate-200 leading-relaxed font-sans">
+                  {locSel.role}
+                </p>
 
-            {/* Provider and Formula Details */}
-            <div className="space-y-2.5 text-xs sm:text-sm font-mono">
-              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-                <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
-                  {getTranslation('data_source_provider', language, 'DATA SOURCE / PROVIDER')}
-                </span>
-                <span className="text-white text-sm sm:text-base flex items-center gap-2 mt-1.5 font-sans font-medium">
-                  <Database className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                  {selectedAgent.provider}
-                </span>
-              </div>
+                {/* Provider and Formula Details */}
+                <div className="space-y-2.5 text-xs sm:text-sm font-mono">
+                  <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
+                    <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
+                      {getTranslation('data_source_provider', language, 'DATA SOURCE / PROVIDER')}
+                    </span>
+                    <span className="text-white text-sm sm:text-base flex items-center gap-2 mt-1.5 font-sans font-medium">
+                      <Database className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                      {locSel.provider}
+                    </span>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-                <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
-                  {getTranslation('governing_equation', language, 'GOVERNING EQUATION / HEURISTIC')}
-                </span>
-                <code className="text-cyan-300 text-xs sm:text-sm block mt-1.5 overflow-x-auto leading-relaxed font-semibold">
-                  {selectedAgent.equation}
-                </code>
-              </div>
+                  <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
+                    <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
+                      {getTranslation('governing_equation', language, 'GOVERNING EQUATION / HEURISTIC')}
+                    </span>
+                    <code className="text-cyan-300 text-xs sm:text-sm block mt-1.5 overflow-x-auto leading-relaxed font-semibold">
+                      {selectedAgent.equation}
+                    </code>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-                <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
-                  {getTranslation('live_telemetry_output', language, 'LIVE TELEMETRY OUTPUT')}
-                </span>
-                <span className="text-emerald-300 text-xs sm:text-sm block mt-1.5 font-sans leading-relaxed font-medium">
-                  {selectedAgent.sampleOutput}
-                </span>
+                  <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
+                    <span className="text-xs sm:text-sm text-slate-400 block uppercase font-bold tracking-wider">
+                      {getTranslation('live_telemetry_output', language, 'LIVE TELEMETRY OUTPUT')}
+                    </span>
+                    <span className="text-emerald-300 text-xs sm:text-sm block mt-1.5 font-sans leading-relaxed font-medium">
+                      {locSel.sampleOutput}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Real-time Streaming Event Console (Bottom Half) */}
           <div className="flex-1 flex flex-col min-h-0 bg-[#0c101a]">
@@ -598,6 +605,8 @@ const AgentNodeCard: React.FC<{
   onClick: () => void;
   language?: string;
 }> = ({ agent, state, isSelected, onClick, language = 'en' }) => {
+  const loc = getLocalizedDAGAgent(agent.id, language);
+
   const getBorder = () => {
     if (isSelected) return 'border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)] bg-[#1a2336]';
     if (state === 'RUNNING') return 'border-amber-400 bg-amber-950/20 shadow-[0_0_12px_rgba(251,191,36,0.3)]';
@@ -611,7 +620,7 @@ const AgentNodeCard: React.FC<{
       className={`p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer select-none flex flex-col justify-between ${getBorder()}`}
     >
       <div className="flex items-center justify-between gap-1 mb-1">
-        <span className="font-bold text-sm sm:text-base text-white truncate">{agent.name}</span>
+        <span className="font-bold text-sm sm:text-base text-white truncate">{loc.name}</span>
         <span className="flex items-center gap-1.5 text-xs sm:text-sm font-mono">
           {state === 'RUNNING' && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />}
           {state === 'COMPLETED' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
@@ -620,12 +629,12 @@ const AgentNodeCard: React.FC<{
       </div>
 
       <div className="text-xs sm:text-sm text-slate-300 truncate font-normal mb-1.5 leading-snug">
-        {agent.role}
+        {loc.role}
       </div>
 
       <div className="flex items-center justify-between text-xs sm:text-sm font-mono text-slate-400 pt-1.5 border-t border-white/5">
-        <span className="truncate max-w-[140px] text-slate-300">{agent.provider.split(' ')[0]}</span>
-        <span className="text-cyan-400 font-bold uppercase">{agent.category}</span>
+        <span className="truncate max-w-[140px] text-slate-300">{loc.provider.split(' ')[0]}</span>
+        <span className="text-cyan-400 font-bold uppercase">{loc.category}</span>
       </div>
     </div>
   );

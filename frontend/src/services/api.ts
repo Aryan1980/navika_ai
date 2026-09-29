@@ -390,6 +390,7 @@ export const api = {
         home_port: payload.home_port || 'Fort Kochi Coastal Harbor',
         created_at: new Date().toISOString()
       };
+      localStorage.setItem(`navika_user_${payload.phone}`, JSON.stringify(defaultUser));
       localStorage.setItem(`samudra_user_${payload.phone}`, JSON.stringify(defaultUser));
       return { success: true, user: defaultUser };
     }
@@ -400,7 +401,7 @@ export const api = {
       const res = await client.get<UserProfile>(`/user/profile?phone=${encodeURIComponent(phone)}`);
       return res.data;
     } catch (err) {
-      const saved = localStorage.getItem(`samudra_user_${phone}`);
+      const saved = localStorage.getItem(`navika_user_${phone}`) || localStorage.getItem(`samudra_user_${phone}`);
       if (saved) return JSON.parse(saved);
       return null;
     }
@@ -409,9 +410,11 @@ export const api = {
   async saveUserProfile(profile: UserProfile): Promise<{ success: boolean; user: UserProfile }> {
     try {
       const res = await client.post<{ success: boolean; user: UserProfile }>('/user/profile', profile);
+      localStorage.setItem(`navika_user_${profile.phone}`, JSON.stringify(res.data.user || profile));
       localStorage.setItem(`samudra_user_${profile.phone}`, JSON.stringify(res.data.user || profile));
       return res.data;
     } catch (err) {
+      localStorage.setItem(`navika_user_${profile.phone}`, JSON.stringify(profile));
       localStorage.setItem(`samudra_user_${profile.phone}`, JSON.stringify(profile));
       return { success: true, user: profile };
     }
@@ -422,7 +425,7 @@ export const api = {
       const res = await client.get<{ voyages: VoyageLog[] }>(`/user/voyages?phone=${encodeURIComponent(phone)}`);
       return res.data.voyages || [];
     } catch (err) {
-      const local = localStorage.getItem(`samudra_voyages_${phone}`);
+      const local = localStorage.getItem(`navika_voyages_${phone}`) || localStorage.getItem(`samudra_voyages_${phone}`);
       if (local) {
         return JSON.parse(local);
       }
@@ -455,7 +458,7 @@ export const api = {
           catch_kg: 780,
           catch_species: 'Yellowfin Tuna, Ribbon Fish',
           safety_rating: 'SAFE',
-          notes: 'Thermal gradient 28.1C. Avoided coastal squall by following Samudra route.'
+          notes: 'Thermal gradient 28.1C. Avoided coastal squall by following Navika route.'
         }
       ];
     }
@@ -479,13 +482,14 @@ export const api = {
         catch_kg: payload.catch_kg || 450,
         catch_species: payload.catch_species || 'Mixed Pelagic',
         safety_rating: payload.safety_rating || 'SAFE',
-        notes: payload.notes || 'Navigated using Samudra AI optimal waypoints.',
+        notes: payload.notes || 'Navigated using Navika AI optimal waypoints.',
         created_at: new Date().toISOString()
       };
       if (payload.user_phone) {
-        const existing = localStorage.getItem(`samudra_voyages_${payload.user_phone}`);
+        const existing = localStorage.getItem(`navika_voyages_${payload.user_phone}`) || localStorage.getItem(`samudra_voyages_${payload.user_phone}`);
         const list: VoyageLog[] = existing ? JSON.parse(existing) : [];
         list.unshift(newVoyage);
+        localStorage.setItem(`navika_voyages_${payload.user_phone}`, JSON.stringify(list));
         localStorage.setItem(`samudra_voyages_${payload.user_phone}`, JSON.stringify(list));
       }
       return { success: true, voyage: newVoyage };

@@ -112,7 +112,7 @@ const DashboardView: React.FC = () => {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-[#BDDDFC]/75 font-medium hidden sm:inline">SamudraAI</span>
+            <span className="text-[#BDDDFC]/75 font-medium hidden sm:inline">NavikaAI</span>
             <span className="text-[#6A89A7] hidden sm:inline">/</span>
             <span className="text-white font-semibold tracking-tight truncate max-w-[140px] sm:max-w-none text-sm sm:text-base">
               {activeNav === 'map' && (getTranslation('nav_dashboard', language) || 'Satellite Recon & Navigation')}
@@ -120,7 +120,7 @@ const DashboardView: React.FC = () => {
               {activeNav === 'analytics' && (getTranslation('nav_analytics', language) || 'Port & Ocean Telemetry')}
               {activeNav === 'spots' && (getTranslation('nav_spots', language) || 'Potential Fishing Grounds & Seaward Routes')}
               {activeNav === 'assistant' && (getTranslation('nav_assistant', language) || 'Conversational AI Helmsman')}
-              {activeNav === 'observability' && '11-Agent AI DAG & Live Stream'}
+              {activeNav === 'observability' && (getTranslation('nav_dag_breadcrumb', language) || '11-Agent AI DAG & Live Stream')}
             </span>
           </div>
 

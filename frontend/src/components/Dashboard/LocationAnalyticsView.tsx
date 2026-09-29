@@ -20,7 +20,7 @@ import { OceanDynamicsPanel } from './OceanDynamicsPanel';
 import { ImpactHeroPanel } from './ImpactHeroPanel';
 import { DeterministicRiskExplanation } from './DeterministicRiskExplanation';
 import { getTranslation } from '../../utils/translations';
-import { getLocalizedPortName, getLocalizedRiskVerdict, getLocalizedRiskFactor } from '../../utils/locationTranslations';
+import { getLocalizedPortName, getLocalizedRiskVerdict, getLocalizedRiskFactor, getLocalizedSeverity } from '../../utils/locationTranslations';
 
 interface LocationAnalyticsViewProps {
   onOpenAdvisory?: () => void;
@@ -421,7 +421,7 @@ export const LocationAnalyticsView: React.FC<LocationAnalyticsViewProps> = ({ on
                 <div className="flex justify-between text-xs sm:text-sm font-mono">
                   <span className="text-[#f1f5fb]">{getLocalizedRiskFactor(factor.factor_name, language)}</span>
                   <span className={factor.severity === 'LOW' ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
-                    {factor.score}% ({factor.severity})
+                    {factor.score}% ({getLocalizedSeverity(factor.severity, language)})
                   </span>
                 </div>
                 <div className="w-full h-2.5 rounded-full bg-[#151926] overflow-hidden border border-[#5379AE]/20">

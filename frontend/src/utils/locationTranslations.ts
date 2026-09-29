@@ -1,4 +1,4 @@
-// Comprehensive Maritime & Coastal Localization Engine for SamudraAI
+// Comprehensive Maritime & Coastal Localization Engine for NavikaAI
 // Supporting Hindi, Malayalam, Tamil, Telugu, Bengali, and English
 
 export interface LocalizedPort {
@@ -562,15 +562,126 @@ export function getLocalizedRecommendation(rec: string, lang: string = 'en'): st
 export function getLocalizedRiskFactor(factorName: string, lang: string = 'en'): string {
   if (lang === 'en' || !factorName) return factorName;
 
-  const FACTORS_MAP: Record<string, Record<string, string>> = {
-    'Wave Swell': { hi: 'तरंग एवं समुद्री लहरें', ml: 'തിരമാലകൾ', ta: 'அலைகள்', te: 'సముద్రపు అలలు', bn: 'ঢেউয়ের উচ্চতা' },
-    'Wind Speed': { hi: 'हवा की गति', ml: 'കാറ്റിന്റെ വേഗത', ta: 'காற்றின் வேகம்', te: 'గాలి వేగం', bn: 'বাতাসের গতি' },
-    'Distance to Shore': { hi: 'तट से दूरी', ml: 'തീരത്തുനിന്നുള്ള ദൂരം', ta: 'கரையிலிருந்து தூரம்', te: 'తీరం నుండి దూరం', bn: 'তীর থেকে দূরত্ব' },
-    'Lightning Risk': { hi: 'आकाशीय बिजली का खतरा', ml: 'ഇടിമിന്നൽ സാധ്യത', ta: 'மின்னல் ஆபத்து', te: 'పిడుగుపాటు ముప్పు', bn: 'বজ্রপাতের ঝুঁকি' },
-    'IMBL Proximity': { hi: 'अंतरराष्ट्रीय सीमा से निकटता', ml: 'അതിർത്തി സാമീപ്യം', ta: 'எல்லை அருகாமை', te: 'సరిహద్దు సమీపత', bn: 'সীমান্তের নিকটবর্তিতা' }
+  const fn = factorName.toLowerCase();
+
+  // Pattern matching for various backend hazard terminology
+  if (fn.includes('wind') || fn.includes('gust') || fn.includes('velocity')) {
+    const map: Record<string, string> = {
+      hi: 'पवन वेग एवं झोंके',
+      ml: 'കാറ്റിന്റെ വേഗതയും കാറ്റും',
+      ta: 'காற்றின் வேகம் மற்றும் காற்று',
+      te: 'గాలి వేగం మరియు ఈదురుగాలులు',
+      bn: 'বাতাসের গতিবেগ ও দমকা হাওয়া'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('wave') || fn.includes('swell')) {
+    const map: Record<string, string> = {
+      hi: 'महत्वपूर्ण समुद्री लहरें एवं उभार',
+      ml: 'കടൽ തിരമാലകളുടെ ഉയരം',
+      ta: 'குறிப்பிடத்தக்க கடல் அலைகள்',
+      te: 'గణనీయమైన సముద్రపు అలలు',
+      bn: 'উল্লেখযোগ্য সমুদ্রের ঢেউ ও স্ফীতি'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('imbl') || fn.includes('sovereign') || fn.includes('border') || fn.includes('clearance')) {
+    const map: Record<string, string> = {
+      hi: 'संप्रभु आईएमबीएल सीमा दूरी',
+      ml: 'പരമാധികാര അന്താരാഷ്ട്ര സമുദ്രാതിർത്തി (IMBL)',
+      ta: 'சர்வதேச கடல் எல்லை (IMBL) தூரம்',
+      te: 'సార్వభౌమ IMBL అంతర్జాతీయ సరిహద్దు',
+      bn: 'সার্বভৌম আইএমবিএল সীমান্ত ছাড়পত্র'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('lightning') || fn.includes('thunder') || fn.includes('storm')) {
+    const map: Record<string, string> = {
+      hi: 'गरज के साथ आंधी एवं आकाशीय बिजली',
+      ml: 'ഇടിമിന്നലും കൊടുങ്കാറ്റും',
+      ta: 'இடி மின்னல் மற்றும் புயல் ஆபத்து',
+      te: 'ఉరుములు, మెరుపులు మరియు తుఫాను',
+      bn: 'বজ্রঝড় ও বজ্রপাত'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('shore') || fn.includes('distance')) {
+    const map: Record<string, string> = {
+      hi: 'तट से दूरी',
+      ml: 'തീരത്തുനിന്നുള്ള ദൂരം',
+      ta: 'கரையிலிருந்து தூரம்',
+      te: 'తీరం నుండి దూరం',
+      bn: 'তীর থেকে দূরত্ব'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('trajectory') || fn.includes('drift') || fn.includes('leeway')) {
+    const map: Record<string, string> = {
+      hi: 'पूर्वानुमानित बहाव एवं जलप्रवाह',
+      ml: 'ബോട്ടൊഴുക്ക് പ്രവചനം',
+      ta: 'படகின் நகர்வு மற்றும் சறுக்கல் கணக்கீடு',
+      te: 'ముందస్తు బోటు ప్రవాహ అంచనా',
+      bn: 'নৌকার সম্ভাব্য বিচ্যুতি ও গতিপথ'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('sst') || fn.includes('temperature') || fn.includes('thermal')) {
+    const map: Record<string, string> = {
+      hi: 'समुद्री सतह का तापमान',
+      ml: 'സമുദ്രോപരിതല താപനില',
+      ta: 'கடல் மேற்பரப்பு வெப்பநிலை',
+      te: 'సముద్ర ఉపరితల ఉష్ణోగ్రత',
+      bn: 'সমুদ্রপৃষ্ঠের তাপমাত্রা'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('chlorophyll') || fn.includes('plume')) {
+    const map: Record<string, string> = {
+      hi: 'क्लोरोफिल फ्रंटल उत्पादकता',
+      ml: 'ക്ലോറോഫിൽ സാന്ദ്രത',
+      ta: 'குளோரோபில் உற்பத்தி திறன்',
+      te: 'క్లోరోఫిల్ ఫ్రంటల్ ఉత్పాదకత',
+      bn: 'ক্লোরোফিল ফ্রন্টাল উৎপাদনশীলতা'
+    };
+    return map[lang] || factorName;
+  }
+
+  if (fn.includes('cyclone') || fn.includes('depression')) {
+    const map: Record<string, string> = {
+      hi: 'चक्रवात एवं समुद्री दबाव',
+      ml: 'ചുഴലിക്കാറ്റ് ഭീഷണി',
+      ta: 'புயல் எச்சரிக்கை',
+      te: 'తుఫాను ముప్పు',
+      bn: 'ঘূর্ণিঝড় ও নিম্নচাপ'
+    };
+    return map[lang] || factorName;
+  }
+
+  return factorName;
+}
+
+// Localizes hazard severity level (LOW, MODERATE, HIGH, CRITICAL)
+export function getLocalizedSeverity(severity: string, lang: string = 'en'): string {
+  if (lang === 'en' || !severity) return severity;
+
+  const sev = severity.toUpperCase();
+  const SEVERITY_MAP: Record<string, Record<string, string>> = {
+    'LOW': { hi: 'निम्न', ml: 'കുറഞ്ഞത്', ta: 'குறைவு', te: 'తక్కువ', bn: 'কম' },
+    'MODERATE': { hi: 'मध्यम', ml: 'മിതമായത്', ta: 'மிதமானது', te: 'మధ్యస్థం', bn: 'মাঝারি' },
+    'HIGH': { hi: 'उच्च', ml: 'കൂടിയത്', ta: 'அதிகம்', te: 'అధికం', bn: 'উচ্চ' },
+    'ELEVATED': { hi: 'बढ़ा हुआ', ml: 'കൂടിയത്', ta: 'அதிகரிக்கப்பட்டது', te: 'పెరిగిన', bn: 'বর্ধিত' },
+    'SEVERE': { hi: 'गंभीर', ml: 'ഗുരുതരം', ta: 'ஆபத்தானது', te: 'తీవ్రమైనది', bn: 'সংকটজনক' },
+    'CRITICAL': { hi: 'अति-गंभीर', ml: 'അതീവ ഗുരുതരം', ta: 'மிகவும் ஆபத்தானது', te: 'అత్యంత ప్రమాదకరం', bn: 'চরম বিপজ্জনক' }
   };
 
-  return FACTORS_MAP[factorName]?.[lang] || factorName;
+  return SEVERITY_MAP[sev]?.[lang] || severity;
 }
 
 // Localizes safety verdict

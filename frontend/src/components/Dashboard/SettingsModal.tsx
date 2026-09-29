@@ -205,7 +205,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-[#5379AE]/20 bg-[#181e2e] flex items-center justify-between">
-          <span className="text-[11px] text-[#5379AE] font-mono">SamudraAI Marine Intelligence Engine</span>
+          <span className="text-[11px] text-[#5379AE] font-mono">NavikaAI Marine Intelligence Engine</span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-[#0474C4] hover:bg-[#0360a3] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow"

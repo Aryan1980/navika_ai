@@ -443,7 +443,7 @@ export const LocationSetupView: React.FC = () => {
               className="flex items-center gap-2.5 text-white tracking-wider text-xl sm:text-2xl font-bold cursor-pointer group"
             >
               <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-[#FBD784] transition-transform duration-500 group-hover:rotate-45 flex-shrink-0" />
-              <span>SamudraAI</span>
+              <span>NavikaAI</span>
             </a>
 
             {/* Navigation links: Home and Features */}
@@ -708,7 +708,7 @@ export const LocationSetupView: React.FC = () => {
 
               {/* Narrative Text */}
               <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
-                {t('feat_01_desc', 'Determining your voyage parameters and operational sea-state thresholds is critical before casting off. SamudraAI continuously synchronizes live INSAT-3DR thermal radiometry, Sentinel-3 altimetry, and coastal radar streams to map high-resolution sea surface temperatures, chlorophyll-a plumes, and tidal drift currents across India\'s Exclusive Economic Zone.')}
+                {t('feat_01_desc', 'Determining your voyage parameters and operational sea-state thresholds is critical before casting off. NavikaAI continuously synchronizes live INSAT-3DR thermal radiometry, Sentinel-3 altimetry, and coastal radar streams to map high-resolution sea surface temperatures, chlorophyll-a plumes, and tidal drift currents across India\'s Exclusive Economic Zone.')}
               </p>
 
               {/* Action Link */}
@@ -786,7 +786,7 @@ export const LocationSetupView: React.FC = () => {
 
               {/* Narrative Text */}
               <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-normal">
-                {t('feat_02_desc', 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. SamudraAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.')}
+                {t('feat_02_desc', 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. NavikaAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.')}
               </p>
 
               {/* Action Link */}
@@ -896,7 +896,7 @@ export const LocationSetupView: React.FC = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <Compass className="w-5 h-5 text-[#FBD784]" />
-            <span className="text-white font-bold text-base tracking-tight">SamudraAI</span>
+            <span className="text-white font-bold text-base tracking-tight">NavikaAI</span>
             <span className="text-slate-600">|</span>
             <span className="text-slate-300">Autonomous Marine Intelligence Platform</span>
           </div>

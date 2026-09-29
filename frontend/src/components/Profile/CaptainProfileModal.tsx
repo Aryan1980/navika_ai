@@ -52,7 +52,7 @@ export const CaptainProfileModal: React.FC = () => {
   const [catchKg, setCatchKg] = useState('620');
   const [catchSpecies, setCatchSpecies] = useState('Indian Mackerel & Oil Sardine');
   const [safetyRating, setSafetyRating] = useState('SAFE');
-  const [captainNotes, setCaptainNotes] = useState('Followed Samudra thermal front line. Moderate 1.2m swell, calm winds.');
+  const [captainNotes, setCaptainNotes] = useState('Followed Navika thermal front line. Moderate 1.2m swell, calm winds.');
   const [isSubmittingVoyage, setIsSubmittingVoyage] = useState(false);
   const [logSuccessMsg, setLogSuccessMsg] = useState(false);
 

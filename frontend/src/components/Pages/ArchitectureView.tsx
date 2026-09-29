@@ -11,10 +11,10 @@ export const ArchitectureView: React.FC = () => {
           Autonomous Maritime AI Architecture Specification
         </span>
         <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-200 to-indigo-200">
-          How SamudraAI Works: End-to-End Agentic AI Architecture
+          How NavikaAI Works: End-to-End Agentic AI Architecture
         </h2>
         <p className="text-xs text-slate-400 max-w-2xl mx-auto">
-          SamudraAI departs from superficial conversational bots by employing an autonomous multi-agent planner, concurrent dataset fusion, spatial reasoning, and a strictly deterministic physical risk engine.
+          NavikaAI departs from superficial conversational bots by employing an autonomous multi-agent planner, concurrent dataset fusion, spatial reasoning, and a strictly deterministic physical risk engine.
         </p>
       </div>
 

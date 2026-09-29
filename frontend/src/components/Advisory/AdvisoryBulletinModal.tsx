@@ -10,12 +10,12 @@ interface AdvisoryBulletinModalProps {
 export const AdvisoryBulletinModal: React.FC<AdvisoryBulletinModalProps> = ({ isOpen, onClose }) => {
   const { activeLocation, activeLocationName, weather, ocean, risk, pfzs } = useApp();
   const bulletinRef = useRef<HTMLDivElement>(null);
-  const [bulletinId, setBulletinId] = useState<string>('SAMUDRA-INCOIS-2026-8492');
+  const [bulletinId, setBulletinId] = useState<string>('NAVIKA-INCOIS-2026-8492');
 
   useEffect(() => {
     if (isOpen) {
       const code = Math.floor(1000 + Math.random() * 9000);
-      setBulletinId(`SAMUDRA-INCOIS-2026-${code}`);
+      setBulletinId(`NAVIKA-INCOIS-2026-${code}`);
     }
   }, [isOpen]);
 
@@ -113,7 +113,7 @@ export const AdvisoryBulletinModal: React.FC<AdvisoryBulletinModalProps> = ({ is
               National Marine Safety & Potential Fishing Zone (PFZ) Advisory
             </h1>
             <div className="text-xs text-cyan-300 font-mono font-medium">
-              Autonomous Synthesis by Samudra AI · Integrated with ISRO MOSDAC, INCOIS & IMD
+              Autonomous Synthesis by Navika AI · Integrated with ISRO MOSDAC, INCOIS & IMD
             </div>
           </div>
 
@@ -264,7 +264,7 @@ export const AdvisoryBulletinModal: React.FC<AdvisoryBulletinModalProps> = ({ is
             </div>
 
             <div className="text-right">
-              <div className="text-slate-300 font-bold">Samudra AI Marine Intelligence HELM</div>
+              <div className="text-slate-300 font-bold">Navika AI Marine Intelligence HELM</div>
               <div className="text-[10px] text-emerald-400 flex items-center justify-end gap-1">
                 <CheckCircle className="w-3 h-3 text-emerald-400" />
                 <span>Deterministic Verification PASSED</span>
