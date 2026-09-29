@@ -1,6 +1,7 @@
 """FastAPI route handlers for SamudraAI marine intelligence services."""
+import asyncio
 from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from app.schemas.marine import Coordinates, MarineObservation, PFZZone, WeatherReport
@@ -294,5 +295,62 @@ async def demo_simulate_endpoint(payload: DemoSimulatePayload):
         "verification_audit": audit,
         "fisherman_voice_advisory": resp_text
     }
+
+
+# ============================================================================
+# Real-Time Multi-Agent WebSocket Streaming Endpoint
+# ============================================================================
+
+@router.websocket("/ws/agent-stream")
+async def websocket_agent_stream(websocket: WebSocket):
+    """Real-time bidirectional WebSocket stream emitting agent execution traces step-by-step."""
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_json()
+            query = data.get("query", "Is it safe to go fishing?")
+            lat = float(data.get("latitude", 9.9312))
+            lon = float(data.get("longitude", 76.2673))
+            lang = data.get("language", "en")
+
+            # Stream starting event
+            await websocket.send_json({
+                "event": "PIPELINE_START",
+                "query": query,
+                "coordinates": {"lat": lat, "lon": lon}
+            })
+
+            # Execute full pipeline through orchestrator
+            req = ChatRequest(query=query, latitude=lat, longitude=lon, language=lang)
+            resp = await orchestrator.execute_query(req)
+
+            # Stream each trace sequentially
+            for trace in resp.agent_traces:
+                await websocket.send_json({
+                    "event": "AGENT_TRACE",
+                    "agent_name": trace.agent_name,
+                    "status": trace.status,
+                    "execution_time_ms": trace.execution_time_ms,
+                    "data_source": trace.data_source,
+                    "summary": trace.summary
+                })
+                await asyncio.sleep(0.06)
+
+            await websocket.send_json({
+                "event": "PIPELINE_COMPLETE",
+                "direct_answer": resp.direct_answer,
+                "safety_verdict": resp.safety_verdict,
+                "risk_level": resp.risk_level,
+                "evidence": resp.evidence.model_dump() if hasattr(resp.evidence, "model_dump") else resp.evidence
+            })
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        try:
+            await websocket.send_json({"event": "ERROR", "error": str(e)})
+            await websocket.close()
+        except Exception:
+            pass
+
 
 

@@ -1,0 +1,622 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Cpu,
+  CheckCircle2,
+  AlertTriangle,
+  Play,
+  Pause,
+  RefreshCw,
+  Database,
+  Radio,
+  ExternalLink,
+  Layers,
+  ArrowRight,
+  Terminal,
+  Activity,
+  ShieldCheck,
+  Compass,
+  FileText,
+  Lock,
+  ChevronRight
+} from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+
+export interface DAGAgentNode {
+  id: string;
+  name: string;
+  role: string;
+  category: 'planning' | 'data' | 'spatial' | 'safety' | 'synthesis';
+  provider: string;
+  equation: string;
+  dependencies: string[];
+  latencyMs: number;
+  sampleOutput: string;
+}
+
+export const DAG_AGENTS: DAGAgentNode[] = [
+  {
+    id: 'planner',
+    name: 'Planner Agent',
+    role: 'Autonomous Intent Classification & DAG Task Graph Decomposition',
+    category: 'planning',
+    provider: 'Rule-Based Intent Classifier & Context Engine',
+    equation: 'T_plan = argmax_i P(Intent_i | Query, Harbor_Context)',
+    dependencies: [],
+    latencyMs: 14,
+    sampleOutput: "Intent: 'pfz_safe_navigation', Dispatched: 10 Sub-Agents, Coordinates: 9.9312°N, 76.2673°E"
+  },
+  {
+    id: 'discovery',
+    name: 'Data Discovery Agent',
+    role: 'Spaceborne Satellite Catalogue & Ingest Pipeline Matching',
+    category: 'data',
+    provider: 'ISRO MOSDAC & INCOIS Open Telemetry Catalog',
+    equation: 'Match(Pass_ID, Sensor_Band) where Lat ∈ [6°N, 24°N], Lon ∈ [68°E, 96°E]',
+    dependencies: ['planner'],
+    latencyMs: 18,
+    sampleOutput: 'Catalog match: EOS-06 OCM-3 (NetCDF4), INSAT-3DR TIR (HDF5), IMD AWS Buoy 42001'
+  },
+  {
+    id: 'weather',
+    name: 'Weather Intelligence Agent',
+    role: 'Atmospheric Wind Vectors, Sea Gusts & Swell Dynamics',
+    category: 'data',
+    provider: 'IMD Coastal AWS & WeatherAPI Integration',
+    equation: 'W_eff = V_wind · cos(θ_wind) + V_gust_factor · 1.3',
+    dependencies: ['planner'],
+    latencyMs: 28,
+    sampleOutput: 'Wind: 16.5 km/h @ 245° WSW, Gust: 22.0 km/h, Swell: 1.2m @ 8.2s interval'
+  },
+  {
+    id: 'ocean',
+    name: 'Ocean Analytics Agent',
+    role: 'Thermal Radiometry & Ocean Color Chlorophyll Inversion',
+    category: 'data',
+    provider: 'Oceansat-3 (EOS-06) OCM-3 & INSAT-3DR TIR',
+    equation: 'Chl-a = 10^(a0 + a1·R + a2·R^2) ; SST = T_11μm + γ(T_11μm - T_12μm)',
+    dependencies: ['planner'],
+    latencyMs: 34,
+    sampleOutput: 'SST: 28.4°C (Optimal front), Chlorophyll-a: 2.85 mg/m³ (Upwelling plume)'
+  },
+  {
+    id: 'alert',
+    name: 'Marine Alert Agent',
+    role: 'Early Cyclone Warnings, High Swell Surges & Navigational Hazards',
+    category: 'safety',
+    provider: 'IMD Coastal Warning System & INCOIS High Wave Alert Service',
+    equation: 'Alert_level = max(Cyclone_Depression, Lightning_Strike_Dist, Swell_Surge)',
+    dependencies: ['planner'],
+    latencyMs: 12,
+    sampleOutput: 'Alert Level: 0 (Normal). No convective lightning within 50 km. Cyclone: None'
+  },
+  {
+    id: 'pfz',
+    name: 'PFZ Intelligence Agent',
+    role: 'Thermal-Chlorophyll Frontal Convergence Zone Extraction',
+    category: 'data',
+    provider: 'INCOIS PFZ Advisories & Spaceborne Chlorophyll Gradients',
+    equation: 'PFZ_Score = w_chl·∇(Chl) + w_sst·∇(SST) - w_dist·Distance_km',
+    dependencies: ['ocean', 'weather'],
+    latencyMs: 26,
+    sampleOutput: 'Extracted 8 PFZ candidate clusters. Top spot: Frontal Zone Alpha (18.5 km, 240° WSW)'
+  },
+  {
+    id: 'gis',
+    name: 'Geospatial Reasoning Agent',
+    role: 'Sovereign IMBL, 12nm Territorial Waters & MPA Geofencing',
+    category: 'spatial',
+    provider: 'Indian Coast Guard GIS Boundary Geodatabase & Bhuvan',
+    equation: 'D_IMBL = min_j ||P_vessel - Segment_j(IMBL)|| ; CheckRayCast(MPA)',
+    dependencies: ['planner'],
+    latencyMs: 16,
+    sampleOutput: 'IMBL Clearance: 48.2 km (SAFE). Nearest Marine Sanctuary: 36.4 km clear'
+  },
+  {
+    id: 'trajectory',
+    name: 'Trajectory Agent',
+    role: 'Forward Predictive Dead Reckoning with Wind Leeway Drift',
+    category: 'spatial',
+    provider: 'Kinematic Leeway Drift Integral (60-Min Horizon)',
+    equation: 'P(t+Δt) = P(t) + (V_boat + L_coeff · V_wind) · Δt',
+    dependencies: ['weather', 'gis'],
+    latencyMs: 22,
+    sampleOutput: 'Projected 60-min track: Heading 240°, Leeway 1.4 kn. Boundary clearance maintained'
+  },
+  {
+    id: 'risk',
+    name: 'Risk Assessment Agent',
+    role: 'Deterministic 7-Factor Hydro-Meteorological Physics Matrix',
+    category: 'safety',
+    provider: 'Deterministic Physical Safety Engine (Zero LLM Hallucination)',
+    equation: 'Risk = 0.20·S_w + 0.25·S_wave + 0.15·S_wx + 0.15·S_imbl + 0.10·S_traj + 0.05·S_sst + 0.05·S_chl',
+    dependencies: ['weather', 'ocean', 'gis', 'trajectory', 'alert'],
+    latencyMs: 15,
+    sampleOutput: 'Safety Score: 85/100 (Risk: 15/100) -> Verdict: SAFE TO VENTURE'
+  },
+  {
+    id: 'route',
+    name: 'Route Optimization Agent',
+    role: 'A* Waypoint Safe Corridor & Hazard Detour Router',
+    category: 'spatial',
+    provider: 'A* Coastal Waypoint Graph Router',
+    equation: 'f(n) = g(n) + h(n) + Hazard_Penalty(n)',
+    dependencies: ['pfz', 'risk', 'gis'],
+    latencyMs: 19,
+    sampleOutput: 'Safe Route: 22.4 km (Clear channel) vs Direct: 18.5 km (Nearshore reef proximity)'
+  },
+  {
+    id: 'verification',
+    name: 'Verification Agent',
+    role: 'Cross-Sensor Multi-Source Physical Consensus Audit',
+    category: 'safety',
+    provider: 'Independent Physical Guardrail Auditor',
+    equation: 'Verify: |T_insat - T_incois| < 1.5°C ∧ Wave_swan ≈ Wave_observed',
+    dependencies: ['risk', 'weather', 'ocean', 'trajectory'],
+    latencyMs: 11,
+    sampleOutput: 'Audited 5 physics consistency rules: PASS (100% consensus across sensors)'
+  },
+  {
+    id: 'visualization',
+    name: 'Visualization Agent',
+    role: 'Dynamic Vector Overlay Synthesizer & Cartographic Symbology',
+    category: 'synthesis',
+    provider: 'Leaflet Vector Pipeline & Marine Symbology Engine',
+    equation: 'Layers = FilterActive(Intent, Risk_Level, User_Overrides)',
+    dependencies: ['route', 'pfz', 'risk'],
+    latencyMs: 10,
+    sampleOutput: 'Activated overlays: [pfz_clusters, swell_vector_field, imbl_boundary, safe_corridor]'
+  },
+  {
+    id: 'explanation',
+    name: 'Explanation & Evidence Agent',
+    role: 'Multilingual Vernacular Generation with Exact Provenance Trace',
+    category: 'synthesis',
+    provider: '10-Language Maritime Translator & Provenance Engine',
+    equation: 'Advisory = Localize(Template_Safe, Lang_Code) + AuditEvidence(Trace_Hash)',
+    dependencies: ['verification', 'visualization', 'risk'],
+    latencyMs: 29,
+    sampleOutput: 'Generated localized advice in selected language with SHA-256 provenance stamp'
+  }
+];
+
+interface StreamingLogEntry {
+  id: string;
+  timestamp: string;
+  agentId: string;
+  agentName: string;
+  state: 'RUNNING' | 'COMPLETED' | 'ERROR';
+  message: string;
+  durationMs?: number;
+}
+
+export const AgentStreamingDAGView: React.FC = () => {
+  const { activeLocation, activeLocationName } = useApp();
+  const [selectedAgent, setSelectedAgent] = useState<DAGAgentNode>(DAG_AGENTS[0]);
+  const [agentStates, setAgentStates] = useState<Record<string, 'IDLE' | 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR'>>(() => {
+    const init: Record<string, any> = {};
+    DAG_AGENTS.forEach((a) => (init[a.id] = 'COMPLETED'));
+    return init;
+  });
+  const [streamLogs, setStreamLogs] = useState<StreamingLogEntry[]>([]);
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [streamMode, setStreamMode] = useState<'LIVE WS' | 'PROGRESSIVE DEMO'>('PROGRESSIVE DEMO');
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto scroll logs
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [streamLogs]);
+
+  // Progressive streaming simulation (or WS trigger)
+  const triggerDAGExecution = () => {
+    if (isStreaming) return;
+    setIsStreaming(true);
+
+    // Reset all to IDLE
+    const resetStates: Record<string, 'IDLE' | 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR'> = {};
+    DAG_AGENTS.forEach((a) => (resetStates[a.id] = 'PENDING'));
+    setAgentStates(resetStates);
+    setStreamLogs([]);
+
+    const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    let currentStep = 0;
+    const stepOrder = DAG_AGENTS.map((a) => a.id);
+
+    const stepInterval = setInterval(() => {
+      if (currentStep >= stepOrder.length) {
+        clearInterval(stepInterval);
+        setIsStreaming(false);
+        return;
+      }
+
+      const agentId = stepOrder[currentStep];
+      const agent = DAG_AGENTS.find((a) => a.id === agentId)!;
+
+      // Mark current as running
+      setAgentStates((prev) => ({ ...prev, [agentId]: 'RUNNING' }));
+      setSelectedAgent(agent);
+
+      setStreamLogs((prev) => [
+        ...prev,
+        {
+          id: `log_run_${Date.now()}_${agentId}`,
+          timestamp: now(),
+          agentId,
+          agentName: agent.name,
+          state: 'RUNNING',
+          message: `Dispatched ${agent.name} [${agent.category.toUpperCase()}]. Ingesting dependencies...`
+        }
+      ]);
+
+      // Complete after latency
+      setTimeout(() => {
+        setAgentStates((prev) => ({ ...prev, [agentId]: 'COMPLETED' }));
+        setStreamLogs((prev) => [
+          ...prev,
+          {
+            id: `log_done_${Date.now()}_${agentId}`,
+            timestamp: now(),
+            agentId,
+            agentName: agent.name,
+            state: 'COMPLETED',
+            durationMs: agent.latencyMs,
+            message: `✓ Completed in ${agent.latencyMs}ms. ${agent.sampleOutput}`
+          }
+        ]);
+      }, 150);
+
+      currentStep++;
+    }, 280);
+  };
+
+  const getStatusBadge = (state: string) => {
+    switch (state) {
+      case 'RUNNING':
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse';
+      case 'COMPLETED':
+        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+      case 'ERROR':
+        return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+      case 'PENDING':
+        return 'bg-blue-500/10 text-blue-300 border-blue-500/20';
+      case 'IDLE':
+      default:
+        return 'bg-slate-700/20 text-slate-400 border-slate-700/30';
+    }
+  };
+
+  return (
+    <div className="h-full w-full flex flex-col bg-[#0e1320] text-slate-100 font-sans overflow-hidden">
+      
+      {/* ── Top Bar: Orchestration Status & Actions ── */}
+      <div className="px-6 py-3.5 bg-[#141b2a] border-b border-[#5379AE]/30 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+            <Cpu className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-white tracking-tight">
+                11-Agent Autonomous Orchestration DAG
+              </h2>
+              <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 text-[10px] font-mono font-bold">
+                SIH 2026 · PS 26176
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Deterministic topological task execution graph with physical consensus verification.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Stream Mode Indicator */}
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0e1422] border border-[#5379AE]/30 font-mono text-[11px] text-slate-300">
+            <span className={`w-2 h-2 rounded-full ${isStreaming ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`} />
+            <span className="text-slate-400">Mode:</span>
+            <span className="font-semibold text-cyan-300">{streamMode}</span>
+          </div>
+
+          {/* Trigger Simulation Button */}
+          <button
+            onClick={triggerDAGExecution}
+            disabled={isStreaming}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            {isStreaming ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Executing DAG...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Run Live DAG Pipeline</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Main Viewport Split (DAG Visualizer + Live Stream Console + Inspector) ── */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+        
+        {/* Left / Center Area: 11-Agent Interactive Topological Network (7 Cols) */}
+        <div className="lg:col-span-7 p-5 overflow-y-auto flex flex-col justify-between border-r border-[#5379AE]/25 bg-[#0e1320] space-y-4">
+          
+          <div className="flex items-center justify-between pb-2 border-b border-white/5">
+            <span className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+              Interactive Agent Task Graph
+            </span>
+            <span className="text-[11px] text-slate-500 font-mono">
+              Click any agent to inspect rules & input/output payload
+            </span>
+          </div>
+
+          {/* Connected Network Pipeline Render */}
+          <div className="space-y-4 py-2">
+            
+            {/* Level 1: Intent & Planning */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
+                STAGE 01 · QUERY DECOMPOSITION
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                {DAG_AGENTS.filter((a) => a.id === 'planner').map((agent) => (
+                  <AgentNodeCard
+                    key={agent.id}
+                    agent={agent}
+                    state={agentStates[agent.id] ?? 'COMPLETED'}
+                    isSelected={selectedAgent.id === agent.id}
+                    onClick={() => setSelectedAgent(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Connecting Flow Arrow */}
+            <div className="flex items-center justify-center text-slate-600 text-xs font-mono">
+              <span>▼ Concurrent Telemetry Retrieval Fan-Out</span>
+            </div>
+
+            {/* Level 2: Concurrent Data Ingestion (Discovery, Weather, Ocean, Alert, GIS) */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
+                STAGE 02 · CONCURRENT SATELLITE & SENSOR INGESTION
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {DAG_AGENTS.filter((a) => ['discovery', 'weather', 'ocean', 'alert', 'gis'].includes(a.id)).map((agent) => (
+                  <AgentNodeCard
+                    key={agent.id}
+                    agent={agent}
+                    state={agentStates[agent.id] ?? 'COMPLETED'}
+                    isSelected={selectedAgent.id === agent.id}
+                    onClick={() => setSelectedAgent(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Connecting Flow Arrow */}
+            <div className="flex items-center justify-center text-slate-600 text-xs font-mono">
+              <span>▼ Biogeochemical & Trajectory Convergence</span>
+            </div>
+
+            {/* Level 3: Ocean Modeling & Predictive Trajectory */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
+                STAGE 03 · OCEAN DYNAMICS & PREDICTIVE KINEMATICS
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {DAG_AGENTS.filter((a) => ['pfz', 'trajectory'].includes(a.id)).map((agent) => (
+                  <AgentNodeCard
+                    key={agent.id}
+                    agent={agent}
+                    state={agentStates[agent.id] ?? 'COMPLETED'}
+                    isSelected={selectedAgent.id === agent.id}
+                    onClick={() => setSelectedAgent(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Connecting Flow Arrow */}
+            <div className="flex items-center justify-center text-slate-600 text-xs font-mono">
+              <span>▼ Deterministic Multi-Factor Safety Matrix</span>
+            </div>
+
+            {/* Level 4: Risk, Routing & Physical Verification */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
+                STAGE 04 · MULTI-FACTOR RISK, A* ROUTING & AUDIT GUARDRAILS
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {DAG_AGENTS.filter((a) => ['risk', 'route', 'verification'].includes(a.id)).map((agent) => (
+                  <AgentNodeCard
+                    key={agent.id}
+                    agent={agent}
+                    state={agentStates[agent.id] ?? 'COMPLETED'}
+                    isSelected={selectedAgent.id === agent.id}
+                    onClick={() => setSelectedAgent(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Connecting Flow Arrow */}
+            <div className="flex items-center justify-center text-slate-600 text-xs font-mono">
+              <span>▼ Dynamic Visualization & Vernacular Evidence Synthesis</span>
+            </div>
+
+            {/* Level 5: Visualization & Vernacular Synthesis */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
+                STAGE 05 · VECTOR OVERLAYS & MULTILINGUAL ADVISORY
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {DAG_AGENTS.filter((a) => ['visualization', 'explanation'].includes(a.id)).map((agent) => (
+                  <AgentNodeCard
+                    key={agent.id}
+                    agent={agent}
+                    state={agentStates[agent.id] ?? 'COMPLETED'}
+                    isSelected={selectedAgent.id === agent.id}
+                    onClick={() => setSelectedAgent(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Summary Bar */}
+          <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>Orchestration Topology: 13 Total Agents (11 Core + Trajectory + Verification)</span>
+            <span className="text-cyan-400 font-bold">100% Deterministic Reproducibility</span>
+          </div>
+
+        </div>
+
+        {/* Right Area: Streaming Event Console & Agent Inspector (5 Cols) */}
+        <div className="lg:col-span-5 flex flex-col h-full bg-[#111726] overflow-hidden">
+          
+          {/* Agent Node Inspector (Top Half) */}
+          <div className="p-5 border-b border-[#5379AE]/25 space-y-3.5 bg-[#141b2e] flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono text-[10px] uppercase font-bold">
+                  {selectedAgent.category}
+                </span>
+                <h3 className="font-bold text-white text-sm">{selectedAgent.name}</h3>
+              </div>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${getStatusBadge(agentStates[selectedAgent.id] ?? 'COMPLETED')}`}>
+                {agentStates[selectedAgent.id] ?? 'COMPLETED'}
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              {selectedAgent.role}
+            </p>
+
+            {/* Provider and Formula Details */}
+            <div className="space-y-2 text-xs font-mono">
+              <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span className="text-[10px] text-slate-400 block uppercase">DATA SOURCE / PROVIDER</span>
+                <span className="text-white text-xs flex items-center gap-1.5 mt-0.5 font-sans">
+                  <Database className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                  {selectedAgent.provider}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span className="text-[10px] text-slate-400 block uppercase">GOVERNING EQUATION / HEURISTIC</span>
+                <code className="text-cyan-300 text-[11px] block mt-0.5 overflow-x-auto">
+                  {selectedAgent.equation}
+                </code>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span className="text-[10px] text-slate-400 block uppercase">LIVE TELEMETRY OUTPUT</span>
+                <span className="text-emerald-300 text-xs block mt-0.5 font-sans">
+                  {selectedAgent.sampleOutput}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Real-time Streaming Event Console (Bottom Half) */}
+          <div className="flex-1 flex flex-col min-h-0 bg-[#0c101a]">
+            <div className="px-4 py-2.5 bg-[#121827] border-b border-white/5 flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2 text-slate-300">
+                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Live Event Stream Console</span>
+              </div>
+              <span className="text-[10px] text-slate-500">
+                {streamLogs.length} events logged
+              </span>
+            </div>
+
+            <div
+              ref={logContainerRef}
+              className="flex-1 p-3.5 overflow-y-auto space-y-2 font-mono text-[11px] select-text"
+            >
+              {streamLogs.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs space-y-2">
+                  <Terminal className="w-8 h-8 text-slate-600" />
+                  <span>Click "Run Live DAG Pipeline" above to stream agent events.</span>
+                </div>
+              ) : (
+                streamLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className={`p-2 rounded-lg border text-xs leading-relaxed transition-all ${
+                      log.state === 'RUNNING'
+                        ? 'bg-amber-950/20 border-amber-500/30 text-amber-200'
+                        : log.state === 'COMPLETED'
+                        ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+                        : 'bg-rose-950/20 border-rose-500/30 text-rose-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                      <span className="font-bold text-white">{log.agentName}</span>
+                      <span>{log.timestamp} {log.durationMs && `(${log.durationMs}ms)`}</span>
+                    </div>
+                    <div className="text-slate-200 font-sans text-xs">
+                      {log.message}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+};
+
+// Reusable card for each agent in the topological graph
+const AgentNodeCard: React.FC<{
+  agent: DAGAgentNode;
+  state: 'IDLE' | 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR';
+  isSelected: boolean;
+  onClick: () => void;
+}> = ({ agent, state, isSelected, onClick }) => {
+  const getBorder = () => {
+    if (isSelected) return 'border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)] bg-[#1a2336]';
+    if (state === 'RUNNING') return 'border-amber-400 bg-amber-950/20 shadow-[0_0_12px_rgba(251,191,36,0.3)]';
+    if (state === 'COMPLETED') return 'border-[#5379AE]/35 bg-[#141b2a] hover:border-cyan-500/60';
+    return 'border-white/5 bg-[#101522] opacity-60';
+  };
+
+  return (
+    <div
+      onClick={onClick}
+      className={`p-2.5 rounded-xl border transition-all duration-200 cursor-pointer select-none flex flex-col justify-between ${getBorder()}`}
+    >
+      <div className="flex items-center justify-between gap-1 mb-1">
+        <span className="font-semibold text-xs text-white truncate">{agent.name}</span>
+        <span className="flex items-center gap-1 text-[10px] font-mono">
+          {state === 'RUNNING' && <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />}
+          {state === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+          <span className="text-slate-400">{agent.latencyMs}ms</span>
+        </span>
+      </div>
+
+      <div className="text-[10px] text-slate-400 truncate font-light mb-1">
+        {agent.role}
+      </div>
+
+      <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 pt-1 border-t border-white/5">
+        <span className="truncate max-w-[130px]">{agent.provider.split(' ')[0]}</span>
+        <span className="text-cyan-400 uppercase">{agent.category}</span>
+      </div>
+    </div>
+  );
+};

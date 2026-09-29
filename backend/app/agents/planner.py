@@ -96,7 +96,7 @@ class PlannerAgent:
             ]
             agents = ["discovery", "ocean", "pfz", "gis", "visualization", "explanation"]
 
-        elif any(w in q for w in ["safe", "safety", "tomorrow morning", "tomorrow", "weather tomorrow", "सुरक्षा", "सुरक्षित", "பாதுகாப்பு", "రక్షణ", "ಸುರಕ್ಷತೆ", "নিরাপদ"]):
+        elif any(w in q for w in ["safe", "safety", "offline", "cache", "ಮೀನುಗಾರಿಕೆ", "ಸುರಕ್ಷಿತ", "tomorrow morning", "tomorrow", "weather tomorrow", "सुरक्षा", "सुरक्षित", "பாதுகாப்பு", "రక్షణ", "ಸುರಕ್ಷತೆ", "নিরাপদ"]):
             intent = "safety_check"
             subtasks = [
                 "Determine temporal target (tomorrow morning / 24h horizon)",
@@ -118,7 +118,7 @@ class PlannerAgent:
             ]
             agents = ["weather", "ocean", "risk", "visualization", "explanation"]
 
-        elif any(w in q for w in ["chlorophyll", "sst", "temperature", "plankton", "thermal", "तापमान", "क्लोरोफिल", "வெப்பநிலை", "ఉష్ణోగ్రత"]):
+        elif any(w in q for w in ["chlorophyll", "sst", "anomaly", "mannar", "historical", "temperature", "plankton", "thermal", "तापमान", "क्लोरोफिल", "வெப்பநிலை", "ఉష్ణోగ్రత"]):
             intent = "chlorophyll_sst"
             subtasks = [
                 "Retrieve satellite sea surface temperature (SST) field",
