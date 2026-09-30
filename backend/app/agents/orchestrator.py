@@ -249,7 +249,7 @@ class AgentOrchestrator:
                 f"✓ Leeway Drift: {int(traj_pred.time_horizon_min)} min vector ({traj_pred.heading_deg}° heading)"
             ],
             "Conflict Resolution Engine": [
-                f"✓ Status: {'SAFETY VETO OVERRIDE ACTIVE' if is_veto else 'PASS — Composite Safe'}",
+                f"✓ Status: {'SAFETY VETO OVERRIDE ACTIVE' if is_veto else 'PASS - Composite Safe'}",
                 f"✓ Deterministic Safety Index: {risk.safety_score}/100",
                 f"✓ Decision Summary: {veto_reason}"
             ]

@@ -815,7 +815,7 @@ export function getFallbackChatResponse(coords: Coordinates, query: string = '',
           "✓ Leeway Drift: 1.4 knots northward offset"
         ],
         "Conflict Resolution Engine": [
-          "✓ Status: PASS — Composite Safe (15/100 Risk)",
+          "✓ Status: PASS - Composite Safe (15/100 Risk)",
           "✓ No safety veto triggered",
           "✓ Transparent mathematical consensus certified"
         ]

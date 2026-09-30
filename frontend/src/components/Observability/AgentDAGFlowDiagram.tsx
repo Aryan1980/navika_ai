@@ -132,7 +132,7 @@ export const AgentDAGFlowDiagram: React.FC = () => {
               </span>
             </div>
             <p className="text-[11px] text-[#BDDDFC]/70 mt-0.5">
-              Auditable state traces — each decision logged as a timestamped node
+              Auditable state traces - each decision logged as a timestamped node
             </p>
           </div>
         </div>

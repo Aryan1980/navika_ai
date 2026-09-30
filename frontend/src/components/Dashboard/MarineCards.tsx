@@ -2,7 +2,7 @@ import React from 'react';
 import { Thermometer, Droplets, Waves, Wind } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
-// Compact inline metric card — minimal horizontal strip
+// Compact inline metric card - minimal horizontal strip
 const Stat: React.FC<{
   icon: React.ReactNode;
   label: string;

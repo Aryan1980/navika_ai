@@ -1,4 +1,4 @@
-# NavikaAI — Data Sources & Integration Guide
+# NavikaAI - Data Sources & Integration Guide
 
 ## 1. Overview
 NavikaAI uses a modular **Provider Abstraction Layer** (`backend/app/providers/base.py`) separating the application logic from external data providers. 

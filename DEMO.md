@@ -1,4 +1,4 @@
-# NavikaAI — ISRO Hackathon Evaluation & Demo Guide
+# NavikaAI - ISRO Hackathon Evaluation & Demo Guide
 
 This guide enables judges to test the complete end-to-end capabilities of NavikaAI locally without external API configuration.
 

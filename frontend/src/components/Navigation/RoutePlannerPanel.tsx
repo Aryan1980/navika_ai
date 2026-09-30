@@ -268,7 +268,7 @@ export const RoutePlannerPanel: React.FC = () => {
               </span>
             </div>
             <p className="text-base sm:text-lg text-white font-bold">
-              {getLocalizedPortName(refuge.name, language)} &mdash;{' '}
+              {getLocalizedPortName(refuge.name, language)} -{' '}
               <span className="font-mono text-[#88BDF2]">{refuge.distance_nm} NM ({refuge.distance_km} km)</span>
             </p>
             <p className="text-sm sm:text-base text-[#BDDDFC] mt-2 leading-relaxed font-sans">

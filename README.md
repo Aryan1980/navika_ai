@@ -1,4 +1,4 @@
-# Navika AI — Autonomous Multi-Agent Marine Intelligence Platform
+# Navika AI - Autonomous Multi-Agent Marine Intelligence Platform
 
 [![ISRO Problem Statement 26176](https://img.shields.io/badge/ISRO%20PS-26176%20%C2%B7%20SIH%202026-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
 [![Multi-Agent DAG](https://img.shields.io/badge/Architecture-11--Agent%20Deterministic%20DAG-0284c7?style=for-the-badge)](./docs/architecture.md)

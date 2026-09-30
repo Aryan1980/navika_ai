@@ -132,7 +132,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     feat_01_cta: 'explore live telemetry',
     feat_02_tag: '02 · BIOGEOCHEMICAL DETECTION',
     feat_02_title: 'Picking the right Fishing Grounds!',
-    feat_02_desc: 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. NavikaAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.',
+    feat_02_desc: 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. NavikaAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals - slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.',
     feat_02_cta: 'discover fishing spots',
     feat_03_tag: '03 · 100% NON-HALLUCINATORY SAFETY',
     feat_03_title: 'Understanding NavIC Mesh & Sovereign Geofences',
@@ -252,7 +252,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Deterministic Risk Explanation
     deterministic_breakdown_title: 'Why this score? Deterministic Mathematical Breakdown',
     zero_hallucination_badge: 'Zero LLM Hallucination',
-    deterministic_breakdown_desc: 'Strict multi-factor mathematical formulation — No generative AI hallucination on marine safety scores.',
+    deterministic_breakdown_desc: 'Strict multi-factor mathematical formulation - No generative AI hallucination on marine safety scores.',
     math_objective_formula: 'MATHEMATICAL OBJECTIVE FORMULA:',
     safety_score_formula: 'Safety Score = 100 - Risk Score',
     computed_safety_label: 'Computed Safety:',
@@ -580,7 +580,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Deterministic Risk Explanation
     deterministic_breakdown_title: 'എന്തുകൊണ്ട് ഈ സ്കോർ? കൃത്യമായ ഗണിതശാസ്ത്ര വിശകലനം',
     zero_hallucination_badge: 'പൂർണ്ണ കൃത്യത (Zero Hallucination)',
-    deterministic_breakdown_desc: 'ബഹുമുഖ ഗണിത സമവാക്യങ്ങൾ അടിസ്ഥാനമാക്കിയുള്ളത് — തെറ്റായ ഊഹങ്ങളില്ലാത്ത സമുദ്ര സുരക്ഷാ സ്കോർ.',
+    deterministic_breakdown_desc: 'ബഹുമുഖ ഗണിത സമവാക്യങ്ങൾ അടിസ്ഥാനമാക്കിയുള്ളത് - തെറ്റായ ഊഹങ്ങളില്ലാത്ത സമുദ്ര സുരക്ഷാ സ്കോർ.',
     math_objective_formula: 'ഗണിതശാസ്ത്ര ലക്ഷ്യ സമവാക്യം:',
     safety_score_formula: 'സുരക്ഷാ സ്കോർ = 100 - അപകട സ്കോർ',
     computed_safety_label: 'കണക്കാക്കിയ സുരക്ഷ:',
@@ -908,7 +908,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Deterministic Risk Explanation
     deterministic_breakdown_title: 'இந்த மதிப்பீடு ஏன்? துல்லியமான கணிதப் பகுப்பாய்வு',
     zero_hallucination_badge: 'பூஜ்ஜிய பிழை (Zero Hallucination)',
-    deterministic_breakdown_desc: 'கடுமையான பல காரணி கணித சூத்திரங்கள் — கடல்சார் பாதுகாப்பு மதிப்பீட்டில் பிழையற்ற துல்லியம்.',
+    deterministic_breakdown_desc: 'கடுமையான பல காரணி கணித சூத்திரங்கள் - கடல்சார் பாதுகாப்பு மதிப்பீட்டில் பிழையற்ற துல்லியம்.',
     math_objective_formula: 'கணித நோக்கு சூத்திரம்:',
     safety_score_formula: 'பாதுகாப்பு மதிப்பெண் = 100 - ஆபத்து மதிப்பெண்',
     computed_safety_label: 'கணக்கிடப்பட்ட பாதுகாப்பு:',
@@ -1236,7 +1236,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Deterministic Risk Explanation
     deterministic_breakdown_title: 'ఈ స్కోర్ ఎందుకు? ఖచ్చితమైన గణిత విశ్లేషణ',
     zero_hallucination_badge: 'జీరో ఏఐ భ్రాంతి (Zero Hallucination)',
-    deterministic_breakdown_desc: 'ఖచ్చితమైన బహుళ-కారకాల గణిత సూత్రీకరణ — సముద్ర భద్రతా స్కోర్‌లలో ఎటువంటి ఏఐ భ్రాంతి ఉండదు.',
+    deterministic_breakdown_desc: 'ఖచ్చితమైన బహుళ-కారకాల గణిత సూత్రీకరణ - సముద్ర భద్రతా స్కోర్‌లలో ఎటువంటి ఏఐ భ్రాంతి ఉండదు.',
     math_objective_formula: 'గణిత లక్ష్య సూత్రం:',
     safety_score_formula: 'భద్రతా స్కోరు = 100 - ప్రమాద స్కోరు',
     computed_safety_label: 'లెక్కించబడిన భద్రత:',
@@ -1564,7 +1564,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Deterministic Risk Explanation
     deterministic_breakdown_title: 'यह स्कोर क्यों? सांख्यिकीय गणितीय विभाजन',
     zero_hallucination_badge: 'शून्य एआई भ्रांति (Zero Hallucination)',
-    deterministic_breakdown_desc: 'सख्त बहु-कारक गणितीय सूत्रीकरण — समुद्री सुरक्षा स्कोर पर कोई जेनेरेटिव एआई भ्रांति नहीं।',
+    deterministic_breakdown_desc: 'सख्त बहु-कारक गणितीय सूत्रीकरण - समुद्री सुरक्षा स्कोर पर कोई जेनेरेटिव एआई भ्रांति नहीं।',
     math_objective_formula: 'गणितीय वस्तुनिष्ठ सूत्र:',
     safety_score_formula: 'सुरक्षा स्कोर = 100 - जोखिम स्कोर',
     computed_safety_label: 'गणना की गई सुरक्षा:',
@@ -1892,7 +1892,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Deterministic Risk Explanation
     deterministic_breakdown_title: 'এই স্কোর কেন? সুনির্দিষ্ট গাণিতিক বিশ্লেষণ',
     zero_hallucination_badge: 'শূন্য এআই বিভ্রান্তি (Zero Hallucination)',
-    deterministic_breakdown_desc: 'কঠোর বহু-ফ্যাক্টর গাণিতিক বিন্যাস — সামুদ্রিক সুরক্ষা স্কোরে কোনো বিভ্রান্তিকর অনুমান নেই।',
+    deterministic_breakdown_desc: 'কঠোর বহু-ফ্যাক্টর গাণিতিক বিন্যাস - সামুদ্রিক সুরক্ষা স্কোরে কোনো বিভ্রান্তিকর অনুমান নেই।',
     math_objective_formula: 'গাণিতিক উদ্দেশ্যমূলক সূত্র:',
     safety_score_formula: 'নিরাপত্তা স্কোর = ১০০ - ঝুঁকি স্কোর',
     computed_safety_label: 'গণনাকৃত নিরাপত্তা:',

@@ -151,7 +151,7 @@ export const DeterministicRiskExplanation: React.FC = () => {
               </span>
             </div>
             <p className="text-sm sm:text-base text-slate-300 mt-1 leading-snug">
-              {getTranslation('deterministic_breakdown_desc', language, 'Strict multi-factor mathematical formulation — No generative AI hallucination on marine safety scores.')}
+              {getTranslation('deterministic_breakdown_desc', language, 'Strict multi-factor mathematical formulation - No generative AI hallucination on marine safety scores.')}
             </p>
           </div>
         </div>

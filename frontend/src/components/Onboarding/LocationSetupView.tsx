@@ -864,7 +864,7 @@ export const LocationSetupView: React.FC = () => {
 
               {/* Narrative Text */}
               <p className="text-slate-200 text-sm sm:text-base md:text-lg leading-relaxed font-normal">
-                {t('feat_02_desc', 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. NavikaAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals — slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.')}
+                {t('feat_02_desc', 'Traditional artisanal voyages often waste over 180 liters of diesel steaming blindly into barren ocean waters. NavikaAI extracts biophysical thermal convergence gradients and chlorophyll frontals to direct skippers straight to pelagic shoals - slashing transit times, maximizing catch tonnage, and safeguarding small-scale coastal livelihoods.')}
               </p>
 
               {/* Action Link */}

@@ -533,7 +533,7 @@ Every sentence, advisory, warning, and recommendation MUST be in natural, profes
                 direct_answer_lines.append(f"\n🎯 {t['pfz_found'].format(count=len(pfzs))}")
                 for i, p in enumerate(pfzs[:3]):
                     direct_answer_lines.append(
-                        f"• **{p.name}**: {p.distance_km} km ({p.bearing_compass}) — SST {p.sst_c}°C, Chlorophyll {p.chlorophyll_mg_m3} mg/m³"
+                        f"• **{p.name}**: {p.distance_km} km ({p.bearing_compass}) - SST {p.sst_c}°C, Chlorophyll {p.chlorophyll_mg_m3} mg/m³"
                     )
             else:
                 direct_answer_lines.append("\n• No high-chlorophyll PFZ formations within immediate sector.")
