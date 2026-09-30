@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
                 {getTranslation('active_vessel', language)}
               </span>
               <span className="text-xs text-[#BDDDFC] font-mono truncate block mt-0.5">
-                {activeLocationName.split(',')[0]}
+                {activeLocationName?.split(',')[0] || activeLocationName || ''}
               </span>
             </div>
           </div>
@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, onOpe
                   {user.name}
                 </span>
                 <span className="text-xs text-[#6A89A7] font-mono block truncate mt-0.5">
-                  {user.vessel_name.split(' ')[0]} · {voyages.length} {getTranslation('logged_count', language)}
+                  {user.vessel_name?.split(' ')[0] || user.vessel_name || ''} · {voyages.length} {getTranslation('logged_count', language)}
                 </span>
               </div>
             </div>

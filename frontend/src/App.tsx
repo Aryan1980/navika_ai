@@ -185,7 +185,7 @@ const DashboardView: React.FC = () => {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1E2632] hover:bg-[#2A3644] border border-[#6A89A7]/50 hover:border-[#88BDF2] text-[#BDDDFC] transition-all shadow-sm cursor-pointer text-xs sm:text-sm"
                 >
                   <span className="w-2 h-2 rounded-full bg-[#88BDF2]" />
-                  <span className="font-medium text-white">{user.name.split(' ')[0]}</span>
+                  <span className="font-medium text-white">{user.name?.split(' ')[0] || user.name || ''}</span>
                   <span className="text-xs font-mono text-[#88BDF2] bg-[#2A3644] px-1.5 py-0.5 rounded">
                     {voyages.length} {getTranslation('logged_count', language)}
                   </span>

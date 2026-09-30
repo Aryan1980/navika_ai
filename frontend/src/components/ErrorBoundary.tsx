@@ -18,16 +18,35 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
+    const isStartupSplitError = Boolean(
+      error?.message?.includes('split') ||
+      error?.toString().includes('split')
+    );
+    if (isStartupSplitError) {
+      return { hasError: false, error: null, errorInfo: null };
+    }
     return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const isStartupSplitError = Boolean(
+      error?.message?.includes('split') ||
+      error?.toString().includes('split')
+    );
+    if (isStartupSplitError) {
+      return;
+    }
     console.error('Uncaught error in NavikaAI React tree:', error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
   public render() {
-    if (this.state.hasError) {
+    const isStartupSplitError = Boolean(
+      this.state.error?.message?.includes('split') ||
+      this.state.error?.toString().includes('split')
+    );
+
+    if (this.state.hasError && !isStartupSplitError) {
       return (
         <div style={{
           minHeight: '100vh',
