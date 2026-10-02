@@ -1,14 +1,65 @@
 # Navika AI
 
-Autonomous Multi-Agent Marine Intelligence and Navigational Safety Platform for Coastal Fishermen and Maritime Authorities.
+Autonomous Multi-Agent Marine Intelligence and Navigational Safety Platform for Coastal Fishermen.
 
-[![ISRO Problem Statement 26176](https://img.shields.io/badge/ISRO%20PS-26176%20%C2%B7%20SIH%202026-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
+**Smart India Hackathon (SIH 2026) · Problem Statement SIH26176 / PS-26176 · Indian Space Research Organisation (ISRO)**
+
+[![ISRO Problem Statement SIH26176](https://img.shields.io/badge/ISRO%20PS-SIH26176%20%C2%B7%20SIH%202026-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
+[![Live Deployment](https://img.shields.io/badge/Live%20Demo-samudra--ai--xkdf.vercel.app-00c853?style=for-the-badge&logo=vercel)](https://samudra-ai-xkdf.vercel.app/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.110-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![React 19](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
 [![MapLibre GL](https://img.shields.io/badge/Maps-MapLibre%20GL%206-396afc?style=for-the-badge&logo=maplibre)](https://maplibre.org)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)](https://python.org)
-[![Live Deployment](https://img.shields.io/badge/Deployment-Vercel%20Live-black?style=for-the-badge&logo=vercel)](https://samudra-ai-xkdf.vercel.app/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](./LICENSE)
+
+---
+
+## 👥 Team
+
+| Member | Role | Domain & Focus Area |
+|---|---|---|
+| **Aayush Saroha** | AI Agent Engineer | Multi-Agent Orchestration, Task DAG & Verification Guardrails |
+| **Aditya Pareek** | Data Engineer | ISRO MOSDAC (EOS-06 / INSAT-3DR) Ingestion & Scientific NetCDF4/HDF5 Processing |
+| **Arjun Shandilya** | ML Engineer | Edge AI Inference, WebLLM / SmolLM2 WebGPU Integration & Kinematic Modeling |
+| **Arkin Raj** | GeoSpatial Engineer | GIS Geofencing (IMBL / MPAs), Bathymetry & MapLibre Vector Overlays |
+| **Aryan Dhiman** | Domain & Prompt Engineer | Maritime Domain Logic, Vernacular Prompting & Multilingual Bhashini Voice Pipeline |
+| **Kirti Sakuja** | Integration Lead | Full-Stack Systems Architecture, WebSocket Streaming & End-to-End Evaluation |
+
+---
+
+## ⚡ Quick Demo & Live Evaluation
+
+> **🌐 Live Production Deployment:** **[https://samudra-ai-xkdf.vercel.app/](https://samudra-ai-xkdf.vercel.app/)**  
+> **📖 Step-by-Step Evaluation Walkthrough:** See **[DEMO.md](DEMO.md)** for testing the 8 official ISRO evaluation scenarios locally or on the live web instance.
+
+### 8 Ready-to-Test Evaluation Scenarios (from [DEMO.md](DEMO.md))
+1. **PFZ Discovery**: *"Where is the nearest PFZ?"* - Ranks oceanographic fishing spots by distance, bearing, and chlorophyll density.
+2. **24-Hour Safety Verdict**: *"Is it safe to go fishing tomorrow morning?"* - Evaluates wave swell and wind vectors against the Douglas Sea Scale.
+3. **Hydrodynamic Telemetry**: *"What are the wave and wind conditions?"* - Reports Beaufort wind scale, sea surface temperature, and swell periods.
+4. **Oceansat-3 Biogeochemistry**: *"Show areas with high chlorophyll and favourable SST"* - Identifies thermal convergence fronts for pelagic shoals.
+5. **Safest Harvest Route**: *"Which PFZ is safest?"* - Re-ranks potential fishing spots by safety index rather than steaming distance.
+6. **A\* Safe Corridor Planning**: *"Find a safe route to the nearest PFZ"* - Generates hazard detours circumventing shallow shoals and boundary buffers.
+7. **Severe Marine Warnings**: *"Are there any cyclone or lightning alerts?"* - Ingests active coastal warnings and convective activity.
+8. **Maritime Geofence Alert**: *"Am I approaching a restricted area?"* - Evaluates proximity to the sovereign International Maritime Boundary Line (IMBL).
+
+---
+
+## 📸 Platform Showcase
+
+### 1. Interactive Marine Map & Coastal Telemetry
+High-resolution vector map rendered via MapLibre GL showing satellite hybrid bathymetry, oceanographic sensor buoys, major Indian harbors, AIS vessel positions, and real-time sea-state metrics.
+
+![Interactive Marine Map](docs/assets/navika_marine_map.png)
+
+### 2. Live Navigational Route Advisory & Corridor Verification
+A* obstacle-avoiding navigation corridor comparing direct rhumb lines against hazard-free tracks with turn-by-turn bearings, estimated steaming duration, diesel fuel burn, and nearest emergency shelter harbor.
+
+![Live Navigational Route Advisory](docs/assets/navika_live_advisory.png)
+
+### 3. Identified Thermal Fronts & Potential Fishing Zones (PFZs)
+Cluster detection of ocean thermal convergence zones with distance, bearing, expected surface temperature, chlorophyll concentration, and target pelagic fish species.
+
+![Identified Thermal Fronts](docs/assets/navika_fishing_spots.png)
 
 ---
 
@@ -16,7 +67,7 @@ Autonomous Multi-Agent Marine Intelligence and Navigational Safety Platform for 
 
 **Navika AI** is an operational, full-stack marine intelligence and decision-support platform designed to protect coastal fishermen, optimize marine harvesting, and ensure maritime safety across India's 7,516 km coastline.
 
-Built for the **ISRO Smart India Hackathon (SIH 2026) Problem Statement 26176**, Navika AI ingests satellite oceanography, hydro-meteorological observations, and statutory boundary datasets to solve critical operational problems at sea:
+Built for the **ISRO Smart India Hackathon (SIH 2026) Problem Statement SIH26176 / PS-26176**, Navika AI ingests satellite oceanography, hydro-meteorological observations, and statutory boundary datasets to solve critical operational problems at sea:
 
 * **What it is**: An integrated web platform combining interactive satellite ocean mapping, deterministic safety scoring, predictive vessel kinematics, and an 11-agent autonomous reasoning swarm.
 * **The problem it solves**: Eliminates blind, hazardous deep-sea voyages by synthesizing fragmented satellite telemetry into clear, localized navigation guidance.
@@ -217,39 +268,39 @@ $$\text{Safety Score} = 100 - \text{Composite Risk}$$
 
 ```mermaid
 flowchart TD
-    User(["👤 Coastal Fisherman / Vessel Skipper\n(Voice Input / Text / Map Interaction)"])
+    User["User: Coastal Fisherman / Skipper"]
 
-    subgraph Client ["Client Layer (React 19 + TypeScript + MapLibre GL)"]
-        UI["Modern Web / Mobile PWA Interface"]
-        VoiceHandler["Speech Engine\n(Web Speech API / Bhashini)"]
-        EdgeModel["On-Device WebLLM\n(SmolLM2 WebGPU)"]
-        LocalStore["Local Cache\n(IndexedDB / LocalStorage)"]
+    subgraph ClientLayer ["Client Layer: React 19 + MapLibre GL"]
+        UI["Web / Mobile PWA Interface"]
+        VoiceHandler["Speech Engine: Web Speech API / Bhashini"]
+        EdgeModel["On-Device WebLLM: SmolLM2 WebGPU"]
+        LocalStore["Local Cache: IndexedDB / LocalStorage"]
     end
 
-    subgraph Server ["Backend API Gateway (FastAPI 0.110+)"]
-        REST["REST API Endpoints\n(/api/chat, /api/ocean, /api/pfz, /api/risk)"]
-        WS["WebSocket Streaming\n(/ws/agent-stream)"]
+    subgraph ServerLayer ["Backend API Gateway: FastAPI 0.110+"]
+        REST["REST API Endpoints: /api/*"]
+        WS["WebSocket Stream: /ws/agent-stream"]
     end
 
-    subgraph MultiAgentSwarm ["Autonomous Multi-Agent DAG (Orchestrator)"]
-        Planner["1. Planner Agent\nIntent Classification"]
-        subgraph DataAgents ["Concurrent Data Ingestion Agents"]
+    subgraph SwarmLayer ["Autonomous Multi-Agent DAG Orchestrator"]
+        Planner["1. Planner Agent: Intent Classification"]
+        subgraph DataSwarm ["Concurrent Retrieval Agents"]
             WeatherAgent["Weather Agent"]
             OceanAgent["Ocean Agent"]
             GISAgent["Geospatial Agent"]
             AlertAgent["Alert Agent"]
             DiscoveryAgent["Discovery Agent"]
         end
-        KinematicsEngine["Kinematics Engine\n(Predictive Trajectory + PFZ Ranking)"]
-        PhysicsMatrix["Deterministic Safety Engine\n(7-Factor Formulation, 0-100 Score)"]
-        VerificationGuard["Verification Agent\n(Cross-Sensor Audit & Safety Veto)"]
-        SynthesisEngine["Explanation Agent\n(Gemini 2.5 Flash / Local Template)"]
+        KinematicsEngine["Kinematics Engine: Trajectory & PFZ"]
+        PhysicsMatrix["Deterministic Safety Engine: 7-Factor Physics"]
+        VerificationGuard["Verification Agent: Cross-Sensor Audit"]
+        SynthesisEngine["Explanation Agent: Gemini 2.5 / Local"]
     end
 
-    subgraph DataSources ["Data Feeds & Storage"]
-        DB[("SQLite Database\nConversations, Users, Voyages")]
-        SatelliteFeeds[("Satellite Data\nISRO MOSDAC EOS-06 & INSAT-3DR")]
-        GovtFeeds[("Maritime Services\nINCOIS OSF, IMD Weather, Coast Guard GIS")]
+    subgraph DataLayer ["Data Feeds & Storage"]
+        DB[("SQLite Database: Users, Voyages, Chats")]
+        SatelliteFeeds[("Satellite Data: ISRO MOSDAC EOS-06 & INSAT-3DR")]
+        GovtFeeds[("Maritime Services: INCOIS OSF, IMD Weather, Coast Guard GIS")]
     end
 
     User --> UI
@@ -260,9 +311,9 @@ flowchart TD
     UI <--> WS
 
     REST & WS --> Planner
-    Planner --> DataAgents
-    DataAgents <--> SatelliteFeeds & GovtFeeds
-    DataAgents --> KinematicsEngine
+    Planner --> DataSwarm
+    DataSwarm <--> SatelliteFeeds & GovtFeeds
+    DataSwarm --> KinematicsEngine
     KinematicsEngine --> PhysicsMatrix
     PhysicsMatrix --> VerificationGuard
     VerificationGuard --> SynthesisEngine
@@ -305,7 +356,6 @@ navika_ai/
 │   │   ├── routes/
 │   │   │   └── api.py              # FastAPI endpoints and WebSocket routes
 │   │   ├── schemas/                # Pydantic data validation schemas
-│   │   │   ├── alert.py, chat.py, marine.py, risk.py, route.py
 │   │   ├── services/
 │   │   │   └── bhashini.py         # Digital India NLTM Bhashini integration
 │   │   ├── config.py               # Pydantic environment configuration
@@ -348,12 +398,23 @@ navika_ai/
 │   │   └── main.tsx                # React DOM entrypoint
 │   ├── package.json                # Frontend Node.js dependencies
 │   └── vite.config.ts              # Vite configuration with Tailwind CSS v4
-├── docs/                           # Scientific documentation and formulas
+├── docs/                           # Documentation and media assets
+│   ├── assets/                     # Clean screenshots and vector diagrams
+│   │   ├── navika_marine_map.png
+│   │   ├── navika_live_advisory.png
+│   │   ├── navika_fishing_spots.png
+│   │   ├── navika_agent_dag.png
+│   │   ├── terminal_trace_exact.png
+│   │   ├── terminal_trace_exact.svg
+│   │   └── terminal_trace_isro_mosdac.png
 │   ├── architecture.md             # Multi-agent swarm architecture
 │   ├── data-pipeline.md            # MOSDAC HDF5/NetCDF ingestion details
 │   ├── offline-mode.md             # Edge caching and WebGPU documentation
 │   ├── safety-score.md             # 7-factor mathematical risk specification
 │   └── trajectory.md               # Kinematic leeway drift equations
+├── CONTRIBUTING.md                 # Contribution guidelines
+├── LICENSE                         # MIT License
+├── DEMO.md                         # ISRO Hackathon evaluation scenarios
 ├── dev.js                          # Concurrent runner for backend and frontend
 ├── Dockerfile                      # Multi-stage production container build
 ├── vercel.json                     # Vercel serverless deployment routing
@@ -496,23 +557,6 @@ Once Navika AI is launched in your browser:
 
 ---
 
-## Screenshots / Demo
-
-* **Live Interactive Platform**: [https://samudra-ai-xkdf.vercel.app/](https://samudra-ai-xkdf.vercel.app/)
-* **GitHub Repository**: [https://github.com/Aryan1980/navika_ai](https://github.com/Aryan1980/navika_ai)
-
-| Interactive Marine Map & Coastal Telemetry | Deterministic 7-Factor Risk Breakdown |
-|:---:|:---:|
-| ![Interactive Marine Map](terminal_trace_isro_mosdac.png) | ![Deterministic Safety Matrix](terminal_trace_exact.png) |
-| *Vector map with SST, PFZs, and bathymetry* | *Zero-hallucination mathematical safety scoring* |
-
-| Multi-Agent LangGraph DAG Architecture | Emergency SOS 1554 & VHF Coordinates |
-|:---:|:---:|
-| ![Agent DAG Flow](terminal_trace_exact.svg) | *(Emergency Distress & Coordinate HUD)* |
-| *Live multi-agent execution pipeline* | *Coast Guard MRCC & VHF Radio Channel 16 readouts* |
-
----
-
 ## Future Improvements
 
 1. **NavIC LoRa Hardware Gateway**: Direct serial integration with low-cost NavIC + LoRa transceivers to broadcast safety alerts and PFZ coordinates to vessels beyond cellular range (>12 nautical miles).
@@ -522,9 +566,9 @@ Once Navika AI is launched in your browser:
 
 ---
 
-## Team
+## Contributing
 
-* **Aryan Dhiman** - Lead Developer & Architect ([GitHub: @Aryan1980](https://github.com/Aryan1980))
+We welcome community contributions. Please refer to [CONTRIBUTING.md](CONTRIBUTING.md) for code style standards, local testing guidelines, and pull request procedures.
 
 ---
 
@@ -534,4 +578,4 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ---
 
-*Developed for the ISRO Smart India Hackathon (SIH 2026) · Problem Statement 26176.*
+*Developed for the ISRO Smart India Hackathon (SIH 2026) · Problem Statement SIH26176 / PS-26176.*
