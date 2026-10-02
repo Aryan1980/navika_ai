@@ -1,174 +1,537 @@
-# Navika AI - Autonomous Multi-Agent Marine Intelligence Platform
+# Navika AI
+
+Autonomous Multi-Agent Marine Intelligence and Navigational Safety Platform for Coastal Fishermen and Maritime Authorities.
 
 [![ISRO Problem Statement 26176](https://img.shields.io/badge/ISRO%20PS-26176%20%C2%B7%20SIH%202026-008080?style=for-the-badge&logo=satellite)](https://mosdac.gov.in)
-[![Multi-Agent DAG](https://img.shields.io/badge/Architecture-11--Agent%20Deterministic%20DAG-0284c7?style=for-the-badge)](./docs/architecture.md)
-[![Deterministic Safety Matrix](https://img.shields.io/badge/Safety-Zero%20LLM%20Hallucination-10b981?style=for-the-badge)](./docs/safety-score.md)
-[![Scientific Pipeline](https://img.shields.io/badge/Pipeline-xarray%20%2B%20HDF5%20%2B%20NetCDF4-purple?style=for-the-badge)](./docs/data-pipeline.md)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.110-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React 19](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
+[![MapLibre GL](https://img.shields.io/badge/Maps-MapLibre%20GL%206-396afc?style=for-the-badge&logo=maplibre)](https://maplibre.org)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)](https://python.org)
 [![Live Deployment](https://img.shields.io/badge/Deployment-Vercel%20Live-black?style=for-the-badge&logo=vercel)](https://samudra-ai-xkdf.vercel.app/)
-
-> **🛰️ ISRO Problem Statement 26176 · Smart India Hackathon (SIH) 2026**  
-> **Navika AI** is an operational, production-grade autonomous marine intelligence platform built for India's 4,000,000+ coastal fishermen, port authorities, and coast guard personnel across 7,516 km of coastline and 3,288 marine fishing villages.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🌊 Key Platform Impact Statistics
+## Overview
 
-| Metric | Impact | Technical Foundation |
-|---|---|---|
-| **4.2M+** | **Fishermen Protected** | Coverage across 9 coastal states & 2 union territories |
-| **30%** | **Direct Fuel Savings** | High-precision PFZ vectors & A* hazard-avoidance corridors |
-| **10** | **Coastal Languages** | English, Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Marathi, Gujarati, Odia |
-| **11** | **Specialized AI Agents** | Topological task decomposition DAG with sub-agent concurrency |
-| **0%** | **LLM Hallucination** | 100% deterministic hydro-meteorological physics scoring |
+**Navika AI** is an operational, full-stack marine intelligence and decision-support platform designed to protect coastal fishermen, optimize marine harvesting, and ensure maritime safety across India's 7,516 km coastline.
+
+Built for the **ISRO Smart India Hackathon (SIH 2026) Problem Statement 26176**, Navika AI ingests satellite oceanography, hydro-meteorological observations, and statutory boundary datasets to solve critical operational problems at sea:
+
+* **What it is**: An integrated web platform combining interactive satellite ocean mapping, deterministic safety scoring, predictive vessel kinematics, and an 11-agent autonomous reasoning swarm.
+* **The problem it solves**: Eliminates blind, hazardous deep-sea voyages by synthesizing fragmented satellite telemetry into clear, localized navigation guidance.
+* **Who it is designed for**: India's 4,000,000+ coastal fishermen, artisanal craft operators, mechanized trawler skippers, harbor masters, port authorities, and maritime search-and-rescue teams.
+* **Why it is useful**: Reduces voyage diesel fuel waste by up to 30% through direct Potential Fishing Zone (PFZ) vectors, prevents international boundary line (IMBL) breaches, alerts crews to sudden sea hazards, and works both online and offline.
+* **How AI is used**: Uses an 11-agent Directed Acyclic Graph (DAG) for intent classification and sub-task coordination, Google Gemini 2.5 Flash for natural language synthesis, on-device WebLLM (SmolLM2 on WebGPU) for deep-sea offline reasoning, and a 100% deterministic mathematical physics matrix for safety evaluation (guaranteeing zero LLM hallucinations where lives are at risk).
 
 ---
 
-## 🧠 11-Agent Autonomous DAG Architecture
+## Problem Statement
 
-Unlike naive wrapper chatbots, Navika AI operates as an **autonomous multi-agent directed acyclic graph (DAG)** where physical safety scores are computed strictly by deterministic physics equations, completely insulated from LLM hallucinations:
+India's marine fisheries support over 4 million coastal citizens across 3,288 fishing villages and 9 coastal states. Despite modern spaceborne remote sensing capabilities, traditional fishermen face severe daily challenges:
 
-```mermaid
-flowchart TD
-    UserQuery(["🗣️ User Voice / Text Query (10 Languages)"]) --> Planner["🎯 1. Planner Agent\nIntent Classification & Task Graph"]
-    
-    subgraph ConcurrentRetrieval ["Stage 02: Concurrent Spaceborne & In-Situ Retrieval"]
-        Planner --> Discovery["🛰️ 2. Data Discovery Agent\nCatalog & HDF5/NetCDF Swath Match"]
-        Planner --> Weather["🌤️ 3. Weather Intelligence Agent\nIMD Coastal AWS, Wind Vectors, Lightning"]
-        Planner --> Ocean["🌊 4. Ocean Analytics Agent\nINSAT-3DR TIR SST & EOS-06 Chlorophyll"]
-        Planner --> Alert["🚨 5. Marine Alert Agent\nCyclone Warnings & High Swell Surges"]
-        Planner --> GIS["🗺️ 6. Geospatial Reasoning Agent\nSovereign IMBL, 12nm Waters & MPAs"]
-    end
-    
-    subgraph Modeling ["Stage 03: Oceanographic Modeling & Kinematics"]
-        Weather & Ocean --> PFZ["🐟 7. PFZ Intelligence Agent\nThermal-Chlorophyll Frontal Extraction"]
-        Weather & GIS --> Traj["🧭 8. Trajectory Agent\n60-Min Dead Reckoning + Wind Leeway Drift"]
-    end
-    
-    subgraph SafetyAndRouting ["Stage 04: Deterministic Matrix & Verification Guardrail"]
-        Weather & Ocean & GIS & Traj & Alert --> Risk["🛡️ 9. Risk Assessment Agent\nDeterministic 7-Factor Physics Matrix (0-100)"]
-        PFZ & Risk & GIS --> Route["📐 10. Route Optimization Agent\nA* Waypoint Safe Corridor & Detour"]
-        Risk & Weather & Ocean & Traj --> Verif["🔍 11. Verification Agent\nCross-Sensor Physical Consensus Audit"]
-    end
-    
-    subgraph Synthesis ["Stage 05: Dynamic Overlays & Vernacular Output"]
-        Route & PFZ & Risk --> Viz["🗺️ 12. Visualization Agent\nDynamic Leaflet Vector Pipeline"]
-        Verif & Viz & Risk --> Expl["🗣️ 13. Explanation & Evidence Agent\nMultilingual Synthesis + SHA-256 Provenance"]
-    end
-    
-    Expl --> FinalAdvisory(["📋 Official Marine Advisory Bulletin (PDF / Audio / Map)"])
+1. **Fuel Waste & Blind Steaming**: Artisanal boats routinely burn over 150-180 liters of expensive diesel fuel steaming blindly across barren waters in search of pelagic fish shoals.
+2. **Data Fragmentation**: Raw satellite data (chlorophyll concentrations, sea surface temperatures, wave heights, wind vectors) exists in complex formats (`HDF5`, `NetCDF4`) across specialized scientific portals (ISRO MOSDAC, INCOIS, IMD) inaccessible to boat skippers.
+3. **Severe Maritime Hazards**: Sudden convective weather, monsoon squalls, extreme swell surges, and shallow reefs cause frequent vessel damage and loss of life.
+4. **Geopolitical Border Risks**: Unintentional crossings of the International Maritime Boundary Line (IMBL) into foreign waters (such as the Gulf of Mannar or Palk Strait) lead to vessel seizures and fisherman arrests.
+5. **The AI Hallucination Problem**: Generic generative AI chatbots cannot be trusted in life-or-death maritime environments, as probabilistic models hallucinate numbers, coordinates, and weather thresholds.
+
+---
+
+## Solution
+
+Navika AI addresses these challenges through a unified, physics-grounded workflow:
+
+1. **Unified Spaceborne Data Ingestion**: Systematically processes thermal radiometry from INSAT-3DR, ocean color and wind vectors from Oceansat-3 (EOS-06), and coastal weather models into normalized geospatial grids.
+2. **Potential Fishing Zone (PFZ) Extraction**: Detects thermal gradients and chlorophyll frontal boundaries where nutrient upwelling occurs, ranking nearby fishing spots by distance, bearing, and biological suitability.
+3. **Deterministic 7-Factor Safety Engine**: Evaluates safety through a mathematical formulation based on the Douglas Sea Scale, Beaufort Wind Scale, IMD advisories, and proximity to sovereign boundaries.
+4. **Predictive Kinematics & Leeway Modeling**: Calculates forward vessel trajectories over 60-minute horizons using dead reckoning adjusted for surface wind drift.
+5. **A\* Safe Corridor Planning**: Compares direct voyage lines against collision-free route corridors that detour around shallow shoals, marine protected areas (MPAs), and boundary buffers.
+6. **Vernacular Multilingual Communication**: Delivers actionable voice guidance in 10 coastal languages via speech recognition and speech synthesis, with one-tap emergency distress calling (SOS 1554).
+7. **Resilient Dual-Mode Execution**: Operates smoothly in cloud mode with live API streaming or in edge mode using calibrated offline fallbacks and on-device WebGPU models.
+
+---
+
+## Key Features
+
+### 1. Interactive Marine Intelligence Map
+* Powered by MapLibre GL with nautical dark basemaps.
+* Toggleable marine layers: Sea Surface Temperature (SST) thermal fronts, Chlorophyll plumes, ocean current vectors, satellite swath passes, AIS vessel traffic, offshore sensor buoys, major ports, and coordinate graticules.
+* Click-to-inspect coordinate telemetry with instant depth, bearing, and sea-state readouts.
+
+### 2. Ranked Potential Fishing Zones (PFZs)
+* Live clustering of oceanographic fishing spots based on biogeochemical upwelling indicators.
+* Displays distance in kilometers and nautical miles, compass bearings, surface temperature, and chlorophyll concentration.
+* Target species insights (e.g., Tuna, Mackerel, Sardine, Trevally) with fuel-saving route shortcuts.
+
+### 3. Deterministic 7-Factor Safety Breakdown
+* Transparent composite safety score calculated on a 0-100 scale (`Safety Score = 100 - Composite Risk`).
+* Real-time penalty breakdown across wave swell height, wind velocity, convective weather, boundary proximity, leeway drift, SST anomalies, and chlorophyll front stability.
+* Strict safety verdicts: `SAFE TO VENTURE`, `CAUTION ADVISED`, or `UNSAFE / AVOID`.
+
+### 4. Predictive Vessel Trajectory Engine
+* Mathematical forward projection of vessel movement over a 15 to 60-minute horizon.
+* Dead-reckoning kinematics factoring in boat speed (knots), compass heading, and a 2.5% wind leeway drag coefficient.
+* Proactive boundary collision warnings before a vessel enters restricted zones or foreign waters.
+
+### 5. A\* Hazard-Avoidance Route Planner
+* Side-by-side comparison of the direct navigation track vs. the computed safe detour route.
+* Visual waypoints steering clear of shallow banks, marine sanctuaries, and geopolitical buffer zones.
+* Calculated transit duration, distance savings, and nearest emergency shelter harbor.
+
+### 6. Multi-Agent Observability & Live Terminal Trace
+* Interactive LangGraph-style visual Directed Acyclic Graph (DAG) displaying agent task transitions.
+* Real-time WebSocket streaming (`/ws/agent-stream`) providing timestamped execution logs with sub-agent latency in milliseconds.
+* Simulation toggle for testing safety veto overrides and emergency condition responses.
+
+### 7. Multilingual Vernacular Voice Assistant
+* Full localization across 10 Indian coastal languages: English, Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Marathi, Gujarati, and Odia.
+* Hands-free voice input (Speech-to-Text) and natural voice readback (Text-to-Speech) using the Web Speech API and Digital India NLTM Bhashini integration.
+* Smart normalization for maritime units (knots, nautical miles, degrees Celsius, coordinates).
+
+### 8. On-Device Offline AI (WebLLM)
+* Client-side neural network inference powered by `@mlc-ai/web-llm` running `SmolLM2-360M` directly in the browser via WebGPU and WebAssembly.
+* Model weights cached in IndexedDB for zero-connectivity operation when vessels travel beyond cellular range (>12 nautical miles).
+
+### 9. Emergency Distress SOS 1554 & VHF Channel 16
+* One-tap calling to the Indian Coast Guard Maritime Rescue Coordination Centre (MRCC) hotline (`tel:1554`).
+* Automatic translation of coordinates into Degrees Minutes Seconds (DMS) format for standard VHF Channel 16 (`156.800 MHz`) broadcast.
+* Built-in 4-step SOLAS distress checklist.
+
+### 10. Digital Captain Profile & Voyage Log
+* Mobile phone authentication with persistent captain credentials.
+* Offline-first voyage logging recording departure port, catch species, weight in kg, duration, fuel consumption, and skipper notes.
+* Lifetime analytics tracking cumulative catch, sea time, and estimated diesel fuel saved.
+
+### 11. Official Marine Advisory Bulletin Export
+* Generates government-standard marine advisory bulletins (`NAVIKA-INCOIS-2026-XXXX`).
+* 24-hour validity horizon, cryptographic SHA-256 provenance stamp, and formatted `@media print` CSS for one-click A4 PDF export.
+
+---
+
+## How It Works
+
+The Navika AI platform processes user inputs and telemetry through a clear seven-stage pipeline:
+
+```
+User Query / Location Selection (Voice, Text, Map Click, or Preset)
+                              ↓
+              Stage 1: Intent & Task Decomposition
+  (Planner Agent classifies intent: conditions, PFZ, route, safety, or query)
+                              ↓
+              Stage 2: Concurrent Telemetry Retrieval
+(Weather Agent, Ocean Agent, GIS Agent, Alert Agent, Discovery Agent fetch data)
+                              ↓
+             Stage 3: Kinematic & Frontal Modeling
+  (Trajectory Engine projects drift vector; PFZ Agent extracts gradients)
+                              ↓
+           Stage 4: Deterministic 7-Factor Safety Engine
+(Mathematical physics matrix computes 0-100 score; zero LLM hallucination)
+                              ↓
+            Stage 5: Verification & Safety Guardrails
+(Verification Agent cross-audits sensor consistency and triggers vetoes if unsafe)
+                              ↓
+         Stage 6: Multimodal Synthesis & Vernacular Delivery
+(Gemini 2.5 Flash / WebLLM synthesizes advice; Bhashini / Web Speech reads aloud)
+                              ↓
+      Final Results Rendered on MapLibre Canvas, Panels & PDF Report
 ```
 
 ---
 
-## 🧮 Deterministic 7-Factor Risk Formulation
+## AI / Intelligence
 
-$$\text{Composite Risk} = \sum_{i=1}^{7} w_i \cdot S_i \quad \text{where} \quad \sum_{i=1}^7 w_i = 1.00$$
+Navika AI follows a strict separation between **deterministic safety computation** and **probabilistic language reasoning**:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Navika AI Reasoning Core                        │
+├───────────────────────────────────┬────────────────────────────────────┤
+│   Deterministic Physics Layer     │      Language & Speech Layer       │
+│      (Zero Hallucination)         │         (Natural & Local)          │
+├───────────────────────────────────┼────────────────────────────────────┤
+│ • 7-Factor Composite Risk Matrix  │ • Google Gemini 2.5 Flash (Cloud)  │
+│ • Dead Reckoning Leeway Drift     │ • WebLLM SmolLM2-360M (WebGPU/Edge)│
+│ • A* Corridor Waypoint Routing    │ • Ollama Llama 3.2 (Local Server)  │
+│ • Biogeochemical Gradient Ranking │ • Bhashini / Web Speech API (Voice)│
+└───────────────────────────────────┴────────────────────────────────────┘
+```
+
+### 1. Autonomous Multi-Agent Swarm (11 Agents)
+The backend implements an agentic workflow coordinated by `AgentOrchestrator`:
+* **Planner Agent (`planner.py`)**: Classifies query intent and extracts geospatial coordinates and temporal horizons.
+* **Data Discovery Agent (`discovery.py`)**: Identifies relevant satellite granule passes across EOS-06 and INSAT-3DR.
+* **Weather Intelligence Agent (`weather.py`)**: Ingests wind speed, gusts, barometric pressure, and visibility.
+* **Ocean Analytics Agent (`ocean.py`)**: Gathers Sea Surface Temperature (SST), chlorophyll-a, swell height, and wave period.
+* **Geospatial Reasoning Agent (`gis.py`)**: Computes boundary buffers for the 12nm territorial sea, 200nm EEZ, and sovereign IMBL.
+* **PFZ Intelligence Agent (`pfz.py`)**: Ranks potential fishing areas using thermal-chlorophyll gradient heuristics.
+* **Trajectory Kinematics Engine (`trajectory.py`)**: Projects 60-minute forward dead reckoning with wind vector drift.
+* **Risk Assessment Agent (`risk.py`)**: Applies deterministic mathematical weights to generate an immutable safety score.
+* **Route Optimization Agent (`route.py`)**: Computes A* safe detours around maritime hazards and geofenced zones.
+* **Verification Agent (`verification.py`)**: Audits cross-sensor physical consensus (e.g., verifying wind speed matches swell state).
+* **Explanation & Evidence Agent (`explanation.py`)**: Synthesizes verified facts into regional vernacular advice with SHA-256 provenance.
+
+### 2. Deterministic Safety Formulation
+$$\text{Composite Risk} = \sum_{i=1}^{7} w_i \cdot S_i \quad \text{where} \quad \sum_{i=1}^{7} w_i = 1.00$$
 
 $$\text{Safety Score} = 100 - \text{Composite Risk}$$
 
-| Factor ($i$) | Weight ($w_i$) | Physical Parameter | Calibration Standard |
+| Factor ($i$) | Weight ($w_i$) | Physical Parameter | Standard Applied |
 |---|---|---|---|
-| **Wave Swell Height** | **0.25 (25%)** | Significant Wave Height ($H_s$, m) | Douglas Sea Scale (State 0–9) |
+| **Wave Swell Height** | **0.25 (25%)** | Significant Wave Height ($H_s$, m) | Douglas Sea Scale (State 0-9) |
 | **Surface Wind Velocity** | **0.20 (20%)** | Sustained Wind & Gusts (km/h, knots) | Beaufort Wind Scale ($F_0 - F_{12}$) |
-| **Convective Weather** | **0.15 (15%)** | Convective Lightning & Cyclone State | IMD 4-Stage Warning Protocol |
-| **Sovereign Border** | **0.15 (15%)** | Distance to International Boundary (IMBL) | 10 km Warning Buffer / 5 km Critical |
-| **Predictive Trajectory** | **0.10 (10%)** | 60-min Kinematic Leeway Drift Vector | Dead Reckoning + 2.5% Wind Drag |
+| **Convective Weather** | **0.15 (15%)** | Lightning activity & cyclone alert | IMD 4-Stage Warning Protocol |
+| **Sovereign Border** | **0.15 (15%)** | Distance to International Boundary (IMBL) | 10 km Warning / 5 km Critical |
+| **Predictive Trajectory** | **0.10 (10%)** | 60-min Leeway Drift Vector | Dead Reckoning + 2.5% Wind Drag |
 | **SST Thermal Anomaly** | **0.05 (5%)** | Sea Surface Temperature ($^\circ\text{C}$) | Climatological Mean ($28.5^\circ\text{C} \pm 1.5^\circ\text{C}$) |
-| **Chlorophyll Front** | **0.05 (5%)** | Chlorophyll-a Concentration ($\text{mg/m}^3$) | Frontal Productivity Gradient ($\nabla\text{Chl}$) |
+| **Chlorophyll Front** | **0.05 (5%)** | Chlorophyll Concentration ($\text{mg/m}^3$) | Frontal Productivity Gradient ($\nabla\text{Chl}$) |
 
-> **Zero LLM Hallucination Guarantee:** The safety verdict (`SAFE TO VENTURE`, `PROCEED WITH CAUTION`, `STAY ASHORE`) is generated strictly from the mathematical composite score. Language models cannot alter the numeric score or verdict.
-
----
-
-## 🛰️ Spaceborne Data Provenance & Scientific Ingestion
-
-| Feed | Agency / Mission | Dataset Format | Processing Method | Parameters Extracted |
-|---|---|---|---|---|
-| **EOS-06 (Oceansat-3)** | ISRO SAC / MOSDAC | `E06OCM_L4_AC` (NetCDF4) | `xarray.open_dataset` nearest-neighbor | Analysed Chlorophyll-a ($\text{mg/m}^3$) |
-| **INSAT-3DR Imager** | ISRO SAC / MOSDAC | `3RIMG_L2B_SST` (HDF5) | `h5py` ($K - 273.15$) | Sea Surface Temperature ($^\circ\text{C}$) |
-| **EOS-06 SCAT-3** | ISRO SAC / MOSDAC | `E06SCT_L2B_WV12` (HDF5) | `h5py` dataset slicing | 12.5 km Ocean Surface Wind Vectors |
-| **PFZ Bulletins** | INCOIS | GeoJSON / Web API | Frontal line intersection | Potential Fishing Zone clusters & bearings |
-| **Coastal Weather** | IMD | REST API / AWS Feeds | Hydro-meteorological ingestion | 3-hr Wind, Gusts, Swell, Lightning |
-| **Maritime GIS** | Indian Coast Guard / Bhuvan | GeoJSON Polygon GIS | Ray-casting Point-in-Polygon | 12nm Territorial Waters, 200nm EEZ, IMBL |
+### 3. Models and Language Inference
+* **Cloud Inference**: Google Gemini (`gemini-2.5-flash`, `gemini-2.0-flash`) via the official `google-genai` SDK for contextual explanations.
+* **Edge On-Device Inference**: `@mlc-ai/web-llm` running `SmolLM2-360M-Instruct-q4f16_1-MLC` using client-side WebGPU when disconnected from the Internet.
+* **Local Backend Fallback**: Ollama (`llama3.2`) configured in `config.py` for fully offline self-hosted servers.
+* **Rule-Based Template Fallback**: Hardened multilingual templates in all 10 languages that execute with zero API keys or external dependencies.
 
 ---
 
-## 🎯 12 SIH 2026 Judge Scenario Presets
+## Technology Stack
 
-The platform includes 12 pre-configured, deterministic judge scenarios accessible via the top presets dock:
-
-1. **PFZ Discovery:** *"Where is the nearest PFZ?"* (Kochi offshore cluster ranking)
-2. **Safety Verdict:** *"Is it safe to go fishing tomorrow morning?"* (24h temporal wave & wind forecast)
-3. **Meteorology:** *"What are the wave and wind conditions?"* (Douglas Sea Scale & Beaufort wind kinematics)
-4. **Oceansat-3 Fronts:** *"Show areas with high chlorophyll and favourable SST"* (EOS-06 OCM-3 & INSAT-3DR)
-5. **Safest PFZ:** *"Which PFZ is safest?"* (Sort fishing spots by safety index rather than distance)
-6. **A\* Safe Routing:** *"Find a safe route to the nearest PFZ"* (Hazard detour avoiding shallow reefs & shoals)
-7. **Early Warning:** *"Are there any cyclone or lightning alerts?"* (IMD coastal alerts & convective sensors)
-8. **Maritime Geofence:** *"Am I approaching a restricted area?"* (Sovereign IMBL & MPA buffer inspection)
-9. **Vernacular Kannada:** *"ಮೀನುಗಾರಿಕೆ ಸುರಕ್ಷಿತವೇ?"* (Mangalore harbor safety assessment with Kannada readback)
-10. **MOSDAC HDF5 Anomaly:** *"Historical SST Anomaly Detection in Gulf of Mannar"* (10-year climatological ΔT analysis)
-11. **Species Biomass:** *"PFZ Multi-Species Comparison: Tuna vs Pelagics Catch Probability"* (Biomass probability & fuel efficiency)
-12. **Edge Cache Fallback:** *"Offline Cache Fallback Check: Verify Indexed Marine Telemetry"* (Zero-network operational mode)
-
----
-
-## 🆘 Emergency Distress SOS 1554
-
-- Dedicated floating **🆘 SOS 1554** button with pulse animation.
-- Instant modal providing the **Indian Coast Guard Maritime Rescue Coordination Centre (MRCC)** hotline.
-- Automatic vessel coordinate readout in **Degrees Minutes Seconds (DMS)** and decimal format for VHF Radio Channel 16 broadcast (`156.800 MHz`).
-- Mobile one-tap calling (`tel:1554`).
-- SOLAS standard 4-step coastal distress checklist.
+| Category | Technologies | Description |
+|---|---|---|
+| **Frontend Framework** | React 19, TypeScript 5.8, Vite 8 | High-performance reactive client with strict typing and rapid bundling |
+| **Styling & UI** | Tailwind CSS v4, Lucide React, Framer Motion | Modern dark nautical theme with accessible typography and fluid animations |
+| **Maps & Geospatial** | MapLibre GL v6, Leaflet, GeoJSON | Vector map engine rendering bathymetry, GIS boundaries, and telemetry layers |
+| **Backend Framework** | FastAPI 0.110+, Python 3.11+, Uvicorn | High-throughput asynchronous Python web framework |
+| **Data Validation** | Pydantic v2 | Strict schema serialization and validation across all API endpoints |
+| **Database & Cache** | SQLite, IndexedDB, localStorage | Serverless-resilient SQLite database with client-side offline storage |
+| **AI / Machine Learning** | Google Gemini (`google-genai`), WebLLM, Ollama, scikit-learn, NumPy | Multimodal cloud LLM, on-device WebGPU models, and numerical computing |
+| **Scientific Data Formats**| HDF5 (`h5py`), NetCDF4 (`xarray`) | Ingestion of ISRO satellite passes (`EOS-06`, `INSAT-3DR`) |
+| **Real-Time Communication**| WebSockets (`/ws/agent-stream`) | Bidirectional streaming of live agent execution traces |
+| **Voice & Speech Services**| Web Speech API, Digital India NLTM Bhashini | Client and server-side speech recognition and synthesis |
+| **Testing** | Pytest, Pytest-Asyncio | Automated scientific validation and endpoint regression tests |
+| **Deployment & Containers**| Vercel, Docker (multi-stage) | Production serverless hosting and containerized self-hosted builds |
 
 ---
 
-## 📥 Official Marine Advisory Bulletin (PDF Export)
+## System Architecture
 
-- Generates a government-standard marine advisory bulletin with unique reference code (`NAVIKA-INCOIS-2026-XXXX`).
-- Displays 24-hour validity horizon, operational safety status, spaceborne telemetry table, ranked PFZs with bearings, and IMBL buffer clearances.
-- Features cryptographic provenance stamp (`SHA-256`) and printable `@media print` layout for single-page A4 export.
+```mermaid
+flowchart TD
+    User(["👤 Coastal Fisherman / Vessel Skipper\n(Voice Input / Text / Map Interaction)"])
 
----
+    subgraph Client ["Client Layer (React 19 + TypeScript + MapLibre GL)"]
+        UI["Modern Web / Mobile PWA Interface"]
+        VoiceHandler["Speech Engine\n(Web Speech API / Bhashini)"]
+        EdgeModel["On-Device WebLLM\n(SmolLM2 WebGPU)"]
+        LocalStore["Local Cache\n(IndexedDB / LocalStorage)"]
+    end
 
-## 🛠️ Local Installation & Development
+    subgraph Server ["Backend API Gateway (FastAPI 0.110+)"]
+        REST["REST API Endpoints\n(/api/chat, /api/ocean, /api/pfz, /api/risk)"]
+        WS["WebSocket Streaming\n(/ws/agent-stream)"]
+    end
 
-### Backend (Python 3.11+)
-```bash
-# Clone the repository
-git clone https://github.com/Aryan1980/navika_ai.git
-cd navika_ai
+    subgraph MultiAgentSwarm ["Autonomous Multi-Agent DAG (Orchestrator)"]
+        Planner["1. Planner Agent\nIntent Classification"]
+        subgraph DataAgents ["Concurrent Data Ingestion Agents"]
+            WeatherAgent["Weather Agent"]
+            OceanAgent["Ocean Agent"]
+            GISAgent["Geospatial Agent"]
+            AlertAgent["Alert Agent"]
+            DiscoveryAgent["Discovery Agent"]
+        end
+        KinematicsEngine["Kinematics Engine\n(Predictive Trajectory + PFZ Ranking)"]
+        PhysicsMatrix["Deterministic Safety Engine\n(7-Factor Formulation, 0-100 Score)"]
+        VerificationGuard["Verification Agent\n(Cross-Sensor Audit & Safety Veto)"]
+        SynthesisEngine["Explanation Agent\n(Gemini 2.5 Flash / Local Template)"]
+    end
 
-# Install dependencies
-pip install -r backend/requirements.txt
-pip install pytest pytest-asyncio
+    subgraph DataSources ["Data Feeds & Storage"]
+        DB[("SQLite Database\nConversations, Users, Voyages")]
+        SatelliteFeeds[("Satellite Data\nISRO MOSDAC EOS-06 & INSAT-3DR")]
+        GovtFeeds[("Maritime Services\nINCOIS OSF, IMD Weather, Coast Guard GIS")]
+    end
 
-# Run 33+ automated unit & scientific tests
-python -m pytest backend/tests/ -v
+    User --> UI
+    UI <--> VoiceHandler
+    UI <--> EdgeModel
+    UI <--> LocalStore
+    UI --> REST
+    UI <--> WS
 
-# Start FastAPI server (includes WebSocket /ws/agent-stream)
-python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
+    REST & WS --> Planner
+    Planner --> DataAgents
+    DataAgents <--> SatelliteFeeds & GovtFeeds
+    DataAgents --> KinematicsEngine
+    KinematicsEngine --> PhysicsMatrix
+    PhysicsMatrix --> VerificationGuard
+    VerificationGuard --> SynthesisEngine
+    SynthesisEngine --> DB
+    SynthesisEngine --> REST & WS
+    REST & WS --> UI
 ```
 
-### Frontend (Node.js 18+ / Vite / React 19)
+---
+
+## Project Structure
+
+```
+navika_ai/
+├── backend/                        # Python FastAPI Backend
+│   ├── app/
+│   │   ├── agents/                 # 11 Autonomous Multi-Agent Implementations
+│   │   │   ├── alert.py            # Marine alert processing
+│   │   │   ├── discovery.py        # Satellite pass catalog discovery
+│   │   │   ├── explanation.py      # Multilingual explanation synthesis
+│   │   │   ├── gis.py              # Geospatial reasoning and geofences
+│   │   │   ├── ocean.py            # Hydrodynamic and biogeochemical extraction
+│   │   │   ├── orchestrator.py     # Central DAG coordination and trace streaming
+│   │   │   ├── pfz.py              # Potential Fishing Zone clustering
+│   │   │   ├── planner.py          # Intent classification and task decomposition
+│   │   │   ├── risk.py             # Deterministic 7-factor physics safety engine
+│   │   │   ├── route.py            # A* hazard-avoidance corridor routing
+│   │   │   ├── trajectory.py       # Forward dead-reckoning kinematics
+│   │   │   ├── verification.py     # Cross-sensor physical audit and veto
+│   │   │   ├── visualization.py    # Map vector layer generation
+│   │   │   └── weather.py          # IMD atmospheric observations
+│   │   ├── geo/                    # Spatial calculations and kinematics
+│   │   │   └── trajectory.py       # Leeway drift and ray-casting algorithms
+│   │   ├── providers/              # Satellite data ingestion layer
+│   │   │   ├── base.py             # Abstract provider interfaces
+│   │   │   ├── demo_provider.py    # Calibrated fallback provider
+│   │   │   ├── mosdac_client.py    # ISRO MOSDAC API integration
+│   │   │   ├── mosdac_processor.py # HDF5/NetCDF4 scientific raster parser
+│   │   │   └── mosdac_provider.py  # Composite spaceborne data pipeline
+│   │   ├── routes/
+│   │   │   └── api.py              # FastAPI endpoints and WebSocket routes
+│   │   ├── schemas/                # Pydantic data validation schemas
+│   │   │   ├── alert.py, chat.py, marine.py, risk.py, route.py
+│   │   ├── services/
+│   │   │   └── bhashini.py         # Digital India NLTM Bhashini integration
+│   │   ├── config.py               # Pydantic environment configuration
+│   │   ├── database.py             # Resilient SQLite database layer
+│   │   └── main.py                 # FastAPI application setup and middleware
+│   ├── tests/                      # Automated unit and scientific test suite
+│   │   ├── test_agent_orchestrator.py
+│   │   ├── test_api_endpoints.py
+│   │   ├── test_geospatial.py
+│   │   ├── test_mosdac_pipeline.py
+│   │   ├── test_multilingual.py
+│   │   ├── test_pfz_ranking.py
+│   │   ├── test_risk_engine.py
+│   │   └── test_safe_routing.py
+│   └── requirements.txt            # Backend Python dependencies
+├── frontend/                       # React 19 + TypeScript Frontend
+│   ├── public/                     # Static assets and PWA manifest
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Advisory/           # Official Marine Advisory PDF modal
+│   │   │   ├── Auth/               # Mobile phone sign-in modal
+│   │   │   ├── Chat/               # Conversational AI assistant and voice controls
+│   │   │   ├── Dashboard/          # Deterministic risk cards and fishing spot views
+│   │   │   ├── Emergency/          # Emergency SOS 1554 hotline modal
+│   │   │   ├── Map/                # MapLibre GL marine canvas and HUD controls
+│   │   │   ├── Navigation/         # A* route panel, sidebar rail, and mobile nav
+│   │   │   ├── Observability/      # LangGraph DAG flow diagram and live terminal
+│   │   │   ├── Onboarding/         # Harbor selection and feature walkthrough
+│   │   │   └── Profile/            # Captain profile and voyage history modal
+│   │   ├── context/
+│   │   │   └── AppContext.tsx      # Centralized state management
+│   │   ├── services/
+│   │   │   ├── api.ts              # Axios HTTP client
+│   │   │   ├── fallbackData.ts     # Offline maritime data fixtures
+│   │   │   ├── voice.ts            # Web Speech STT/TTS service
+│   │   │   └── webllm.ts           # On-device WebGPU WebLLM engine
+│   │   ├── types/                  # TypeScript interface definitions
+│   │   ├── utils/                  # 10-language translations and harbor dictionaries
+│   │   ├── App.tsx                 # Root application component
+│   │   └── main.tsx                # React DOM entrypoint
+│   ├── package.json                # Frontend Node.js dependencies
+│   └── vite.config.ts              # Vite configuration with Tailwind CSS v4
+├── docs/                           # Scientific documentation and formulas
+│   ├── architecture.md             # Multi-agent swarm architecture
+│   ├── data-pipeline.md            # MOSDAC HDF5/NetCDF ingestion details
+│   ├── offline-mode.md             # Edge caching and WebGPU documentation
+│   ├── safety-score.md             # 7-factor mathematical risk specification
+│   └── trajectory.md               # Kinematic leeway drift equations
+├── dev.js                          # Concurrent runner for backend and frontend
+├── Dockerfile                      # Multi-stage production container build
+├── vercel.json                     # Vercel serverless deployment routing
+└── package.json                    # Root project scripts
+```
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+* **Node.js**: v18.0.0 or higher
+* **Python**: v3.11 or higher
+* **Git**: Installed and available in your PATH
+
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/Aryan1980/navika_ai.git
+cd navika_ai
+```
+
+### Step 2: Install Backend Dependencies
+Set up a Python virtual environment:
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows (Command Prompt / PowerShell):
+.\venv\Scripts\activate
+# On macOS / Linux:
+source venv/bin/activate
+
+# Install required Python packages
+pip install -r backend/requirements.txt
+pip install pytest pytest-asyncio
+```
+
+### Step 3: Install Frontend Dependencies
 ```bash
 cd frontend
 npm install
+cd ..
+```
 
-# Verify TypeScript and build
-npm run build
+---
 
-# Start Vite development server
+## Environment Variables
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Configure your environment variables as needed:
+
+| Variable | Required / Optional | Purpose |
+|---|---|---|
+| `LLM_API_KEY` | Optional | Google Gemini API key for natural language explanation synthesis |
+| `GEMINI_API_KEY` | Optional | Alias for `LLM_API_KEY` |
+| `WEATHER_API_KEY` | Optional | India Meteorological Department (IMD) coastal weather API key |
+| `MAP_API_KEY` | Optional | Custom map tile provider key (defaults to free CARTO dark basemap) |
+| `SATELLITE_API_KEY`| Optional | ISRO MOSDAC Earth Observation / Oceansat-3 API key |
+| `OCEAN_API_KEY` | Optional | INCOIS Ocean State Forecast & PFZ web services key |
+| `PORT` | Optional | Backend server port (Default: `8000`) |
+| `FRONTEND_PORT` | Optional | Vite development server port (Default: `5173`) |
+
+> **Note on Zero-Config Mode:** You do **not** need any API keys to run the project. Navika AI includes calibrated scientific fallback models and offline datasets for all Indian coastal waters, allowing full evaluation out-of-the-box.
+
+---
+
+## Running the Project
+
+### Option A: Simultaneous Start (Recommended)
+You can launch both the FastAPI backend and Vite frontend concurrently with a single command from the project root:
+
+```bash
 npm run dev
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### Option B: Manual Start (Separate Terminals)
+
+**Terminal 1 - Backend Server:**
+```bash
+# Make sure your virtual environment is active
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
+```
+The FastAPI backend and interactive Swagger documentation will be available at:
+* API Server: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+* Interactive Swagger Docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+**Terminal 2 - Frontend Development Server:**
+```bash
+cd frontend
+npm run dev
+```
+The web application will open at:
+* Frontend Application: [http://localhost:5173](http://localhost:5173)
+
+### Option C: Run with Docker
+```bash
+docker build -t navika-ai .
+docker run -p 8000:8000 navika-ai
+```
+Visit [http://localhost:8000](http://localhost:8000) to access the application.
+
+### Running Automated Tests
+Run the comprehensive automated test suite covering all multi-agent pipelines, risk formulations, and API endpoints:
+
+```bash
+python -m pytest backend/tests/ -v
+```
+
+To verify frontend TypeScript compilation and build:
+```bash
+cd frontend
+npm run build
+```
 
 ---
 
-## 🚢 Live Deployment
+## Usage
 
-- **Production URL:** [https://samudra-ai-xkdf.vercel.app/](https://samudra-ai-xkdf.vercel.app/)
-- **Repository:** [https://github.com/Aryan1980/navika_ai](https://github.com/Aryan1980/navika_ai)
-- **CI/CD:** Automated GitHub Actions pipeline (`.github/workflows/ci.yml`) testing scientific Python suites and Vite frontend builds on every commit.
+Once Navika AI is launched in your browser:
+
+1. **Select a Coastal Harbor**: Choose an Indian coastal harbor preset (e.g., Fort Kochi, Sassoon Dock Mumbai, Royapuram Chennai, Visakhapatnam, Mangalore, Veraval) or click anywhere on the coastline.
+2. **Review Sea Conditions**: Check the top telemetry strip for real-time sea surface temperature, wave swell height, wind velocity, and tide stage.
+3. **Inspect Safety Status**: View the **Safety Score** badge. Click to expand the **Deterministic Mathematical Breakdown** to see exact weights and penalties.
+4. **Discover Fishing Grounds**: Navigate to the **Fishing Spots** tab to view ranked Potential Fishing Zones, bearing angles, target species, and distance.
+5. **Compute a Safe Route**: Click **Plan Route** on any fishing zone or port to generate an A* corridor that navigates around shallow hazards and international boundaries.
+6. **Interact with the AI Assistant**: Open the **AI Assistant** tab. Type a question or click the microphone button to speak in any supported language. Try built-in judge scenarios such as:
+   * *"Where is the nearest safe PFZ?"*
+   * *"Is it safe to go fishing tomorrow morning?"*
+   * *"Show areas with high chlorophyll and favourable SST."*
+7. **Inspect Multi-Agent Execution**: Switch to the **Observability** tab to inspect the interactive LangGraph DAG flow and watch real-time task transitions.
+8. **Emergency Distress SOS 1554**: Click the red **SOS 1554** button at any time to get immediate MRCC contact details, your current coordinates formatted in DMS for VHF radio broadcast, and emergency procedures.
+9. **Export Marine Advisory Bulletin**: Click **Advisory Bulletin** to review and print the official single-page A4 maritime forecast.
 
 ---
-*Developed for ISRO Smart India Hackathon (SIH) 2026 · Problem Statement 26176.*
+
+## Screenshots / Demo
+
+* **Live Interactive Platform**: [https://samudra-ai-xkdf.vercel.app/](https://samudra-ai-xkdf.vercel.app/)
+* **GitHub Repository**: [https://github.com/Aryan1980/navika_ai](https://github.com/Aryan1980/navika_ai)
+
+| Interactive Marine Map & Coastal Telemetry | Deterministic 7-Factor Risk Breakdown |
+|:---:|:---:|
+| ![Interactive Marine Map](terminal_trace_isro_mosdac.png) | ![Deterministic Safety Matrix](terminal_trace_exact.png) |
+| *Vector map with SST, PFZs, and bathymetry* | *Zero-hallucination mathematical safety scoring* |
+
+| Multi-Agent LangGraph DAG Architecture | Emergency SOS 1554 & VHF Coordinates |
+|:---:|:---:|
+| ![Agent DAG Flow](terminal_trace_exact.svg) | *(Emergency Distress & Coordinate HUD)* |
+| *Live multi-agent execution pipeline* | *Coast Guard MRCC & VHF Radio Channel 16 readouts* |
+
+---
+
+## Future Improvements
+
+1. **NavIC LoRa Hardware Gateway**: Direct serial integration with low-cost NavIC + LoRa transceivers to broadcast safety alerts and PFZ coordinates to vessels beyond cellular range (>12 nautical miles).
+2. **Automated Satellite Granule Ingestion**: Standing scheduler to automatically pull daily HDF5/NetCDF files from ISRO SAC/MOSDAC FTP servers as new orbital passes complete.
+3. **Predictive Biomass AI**: Training seasonal fish migration models on historical INCOIS catch datasets to estimate species biomass probability curves over monthly horizons.
+4. **Offline Mobile Application**: Packaging the PWA into a native Android APK with local SQLite synchronization and Bluetooth connectivity to vessel GPS sounders.
+
+---
+
+## Team
+
+* **Aryan Dhiman** - Lead Developer & Architect ([GitHub: @Aryan1980](https://github.com/Aryan1980))
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+*Developed for the ISRO Smart India Hackathon (SIH 2026) · Problem Statement 26176.*
